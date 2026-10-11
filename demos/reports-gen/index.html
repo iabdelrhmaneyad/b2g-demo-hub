@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iSchool | Student Reports Generator (DOCX Engine)</title>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- SheetJS for client-side Excel reading -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Application Stylesheet -->
+  <link rel="stylesheet" href="./css/style.css">
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      direction: ltr;
+      background-color: #F8FAFC;
+    }
+    .demo-top-bar {
+      background: #FFFFFF;
+      color: #0F172A;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #E2E8F0;
+      font-size: 0.88rem;
+    }
+    .demo-top-bar a.back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #056FEC;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      background: #EFF6FF;
+      transition: all 0.2s ease;
+    }
+    .demo-top-bar a.back-link:hover {
+      background: #056FEC;
+      color: #FFFFFF;
+    }
+    .dataset-preset-card {
+      background: #FFFFFF;
+      border: 1.5px solid #E2E8F0;
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 0.6rem;
+    }
+    .dataset-preset-card:hover, .dataset-preset-card.selected {
+      border-color: var(--ischool-blue);
+      background: #F0F7FF;
+      box-shadow: 0 4px 12px rgba(5, 111, 236, 0.08);
+    }
+    .dataset-preset-card.selected {
+      border-width: 2px;
+    }
+    .mockup-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.88rem;
+    }
+    .mockup-table th, .mockup-table td {
+      border: 1px solid #CBD5E1;
+      padding: 0.55rem 0.75rem;
+      text-align: left;
+    }
+    .mockup-table th {
+      background: #F1F5F9;
+      color: #0F172A;
+      font-weight: 700;
+    }
+    .mockup-badge-active {
+      background: #DCFCE7;
+      color: #166534;
+      border: 1px solid #86EFAC;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .mockup-badge-revoke {
+      background: #FEE2E2;
+      color: #991B1B;
+      border: 1px solid #FCA5A5;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Hub Navigation Bar -->
+  <div class="demo-top-bar">
+    <div style="display: flex; align-items: center; gap: 0.9rem;">
+      <a href="../../index.html" class="back-link">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Back to B2G Demo Hub</span>
+      </a>
+      <span style="color: #94A3B8;">|</span>
+      <span style="color: #475569; font-weight: 600;">Student Reports Generator Engine</span>
+    </div>
+    <div>
+      <span style="background: #E0F2FE; color: #0284C7; padding: 3px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700;">
+        <i class="fa-solid fa-circle-check"></i> Live Interactive Demo
+      </span>
+    </div>
+  </div>
+
+  <!-- Top App Navigation -->
+  <header class="app-header">
+    <div class="brand-section">
+      <img src="./img/iSchool Logo-colors.png" alt="iSchool" class="brand-logo" id="appLogo">
+      <div class="brand-title-box">
+        <h1>Student & Initiative Reports Generator</h1>
+        <p>iSchool Automated Reporting Engine • DOCX & Excel Database</p>
+      </div>
+    </div>
+    <div style="display: flex; gap: 0.6rem; align-items: center;">
+      <a href="./sample_report.docx" download="iSchool_Sample_Report.docx" class="btn-outline" style="font-size: 0.82rem; padding: 0.5rem 0.9rem;">
+        <i class="fa-solid fa-file-word"></i>
+        <span>Sample DOCX</span>
+      </a>
+      <a href="./sample_database.xlsx" download="iSchool_Sample_Database.xlsx" class="btn-outline" style="font-size: 0.82rem; padding: 0.5rem 0.9rem;">
+        <i class="fa-solid fa-file-excel"></i>
+        <span>Sample Excel</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main App Content -->
+  <main class="main-wrapper">
+
+    <!-- Stepper Navigation -->
+    <nav class="stepper-nav">
+      <div class="step-item active" data-step="1" id="stepNav1">
+        <div class="step-circle">1</div>
+        <div class="step-info">
+          <div class="step-num">Step 1</div>
+          <div class="step-title">Data & Template</div>
+        </div>
+      </div>
+      
+      <div class="step-item" data-step="2" id="stepNav2">
+        <div class="step-circle">2</div>
+        <div class="step-info">
+          <div class="step-num">Step 2</div>
+          <div class="step-title">Column Mapping</div>
+        </div>
+      </div>
+
+      <div class="step-item" data-step="3" id="stepNav3">
+        <div class="step-circle">3</div>
+        <div class="step-info">
+          <div class="step-num">Step 3</div>
+          <div class="step-title">Document Preview</div>
+        </div>
+      </div>
+
+      <div class="step-item" data-step="4" id="stepNav4">
+        <div class="step-circle">4</div>
+        <div class="step-info">
+          <div class="step-num">Step 4</div>
+          <div class="step-title">Generate & Export</div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- STEP 1: Data & Template Selection -->
+    <section class="step-pane active" id="stepPane1">
+      <div class="card-grid">
+        
+        <!-- Excel DB Source Card -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div class="card-title-group">
+              <div class="card-icon"><i class="fa-solid fa-file-excel"></i></div>
+              <div>
+                <h2>Student Database (Excel)</h2>
+                <span class="file-meta">Select a sample dataset or upload your own Excel file</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preset Datasets -->
+          <div class="file-list-group" id="excelFilesList">
+            <div class="dataset-preset-card selected" data-type="preset-deci">
+              <div style="display: flex; align-items: center; gap: 0.8rem;">
+                <i class="fa-solid fa-database" style="color: var(--ischool-blue); font-size: 1.2rem;"></i>
+                <div>
+                  <strong style="color: #0F172A; display: block; font-size: 0.95rem;">DECI Official Batch Sample DB</strong>
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">Real Sample • 11 Students • 123 Columns</span>
+                </div>
+              </div>
+              <span class="badge" style="background:#E0F2FE; color:#0284C7; font-weight:700; padding:2px 8px; border-radius:999px; font-size:0.75rem;">Default</span>
+            </div>
+
+            <div class="dataset-preset-card" data-type="preset-large">
+              <div style="display: flex; align-items: center; gap: 0.8rem;">
+                <i class="fa-solid fa-layer-group" style="color: #10B981; font-size: 1.2rem;"></i>
+                <div>
+                  <strong style="color: #0F172A; display: block; font-size: 0.95rem;">Large Multi-Gov DB Simulation</strong>
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">1,250 Student Records • 5 Governorates • 3 Items</span>
+                </div>
+              </div>
+              <span class="badge" style="background:#DCFCE7; color:#166534; font-weight:700; padding:2px 8px; border-radius:999px; font-size:0.75rem;">BigData</span>
+            </div>
+          </div>
+
+          <!-- Drag and Drop Dropzone -->
+          <div class="dropzone-box" id="excelDropzone">
+            <input type="file" id="excelFileInput" accept=".xlsx, .xls" style="display: none;">
+            <div class="dropzone-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+            <div class="dropzone-text">Or drag and drop your own Excel (.xlsx) file here</div>
+            <div class="dropzone-hint">Parsed 100% locally in your browser with complete privacy</div>
+          </div>
+
+          <!-- Dataset Summary Box -->
+          <div class="dataset-summary-box" id="excelSummaryBox" style="display: flex;">
+            <div class="stat-pill-row">
+              <div class="stat-pill">
+                <span class="stat-label">Estimated Records</span>
+                <span class="stat-val" id="excelRowCount">11 rows</span>
+              </div>
+              <div class="stat-pill">
+                <span class="stat-label">Total Columns</span>
+                <span class="stat-val" id="excelColCount">123 columns</span>
+              </div>
+              <div class="stat-pill">
+                <span class="stat-label">Worksheet</span>
+                <select id="sheetSelect" style="background:transparent; border:none; color:var(--ischool-blue); font-weight:700; font-size:0.95rem; outline:none; cursor:pointer;">
+                  <option value="Sheet1">Sheet1</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DOCX Template Card -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <div class="card-title-group">
+              <div class="card-icon orange"><i class="fa-solid fa-file-word"></i></div>
+              <div>
+                <h2>Official Report Template (DOCX)</h2>
+                <span class="file-meta">Choose the official Word template to populate</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preset Templates -->
+          <div class="file-list-group" id="templateFilesList">
+            <div class="dataset-preset-card selected" data-type="template-deci-3tables">
+              <div style="display: flex; align-items: center; gap: 0.8rem;">
+                <i class="fa-solid fa-file-word" style="color: var(--ischool-orange); font-size: 1.2rem;"></i>
+                <div>
+                  <strong style="color: #0F172A; display: block; font-size: 0.95rem;">G-5 Part-1 Cont. Students (3 Tables).docx</strong>
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">Standard 3-table format (Distribution, Active, Excluded)</span>
+                </div>
+              </div>
+              <span class="badge" style="background:#FFEDD5; color:#C2410C; font-weight:700; padding:2px 8px; border-radius:999px; font-size:0.75rem;">Selected</span>
+            </div>
+
+            <div class="dataset-preset-card" data-type="template-deci-sec8">
+              <div style="display: flex; align-items: center; gap: 0.8rem;">
+                <i class="fa-solid fa-file-lines" style="color: #7C3AED; font-size: 1.2rem;"></i>
+                <div>
+                  <strong style="color: #0F172A; display: block; font-size: 0.95rem;">DECI_Section_8_Template.docx</strong>
+                  <span style="font-size: 0.8rem; color: var(--text-muted);">Comprehensive Level Report Template</span>
+                </div>
+              </div>
+              <span class="badge" style="background:#EDE9FE; color:#6D28D9; font-weight:700; padding:2px 8px; border-radius:999px; font-size:0.75rem;">Secondary</span>
+            </div>
+          </div>
+
+          <div class="dropzone-box" id="templateDropzone">
+            <input type="file" id="templateFileInput" accept=".docx" style="display: none;">
+            <div class="dropzone-icon" style="color: var(--ischool-orange);"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+            <div class="dropzone-text">Drag and drop any custom Word (.docx) template</div>
+            <div class="dropzone-hint">Preserves 100% of formatting, tables, fonts, headers and footers</div>
+          </div>
+
+          <div class="dataset-summary-box" id="templateSummaryBox" style="display: flex;">
+            <div class="stat-pill-row">
+              <div class="stat-pill">
+                <span class="stat-label">Template Type</span>
+                <span class="stat-val" id="templateTypeLabel">3-Table Standard Layout</span>
+              </div>
+              <div class="stat-pill">
+                <span class="stat-label">Detected Tables</span>
+                <span class="stat-val" id="templateTablesCount">3 Tables</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="wizard-footer-nav">
+        <div></div>
+        <button class="btn-brand" id="btnGoToStep2">
+          <span>Continue to Column Mapping</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 2: Column Mapping & Rules -->
+    <section class="step-pane" id="stepPane2">
+      <div class="mapping-table-container">
+        <div class="dash-card-header">
+          <div class="card-title-group">
+            <div class="card-icon gold"><i class="fa-solid fa-arrows-split-up-and-left"></i></div>
+            <div>
+              <h2>Column Mapping & Rules</h2>
+              <span class="file-meta">Intelligent auto-detection mapped the key columns — review or adjust below</span>
+            </div>
+          </div>
+          <button class="btn-outline" id="btnAutoRemap" title="Auto detect mappings">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Smart Auto-Remap</span>
+          </button>
+        </div>
+
+        <div class="mapping-rows-grid" id="mappingFieldsGrid">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Criteria & Status Configuration -->
+        <div class="settings-panel" style="border-color: #CBD5E1;">
+          <div style="grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem; margin-bottom: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+              <i class="fa-solid fa-users-viewfinder" style="color: var(--success); font-size: 1.2rem;"></i>
+              <h3 style="font-size: 1.1rem; color: #0F172A; font-weight: 800; margin: 0;">Student Status Criteria (Active vs Revoke)</h3>
+            </div>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Defines which students are considered continuing vs excluded</span>
+          </div>
+
+          <div class="setting-input-group">
+            <label><i class="fa-solid fa-square-poll-vertical" style="color: var(--success);"></i> Status Column</label>
+            <select id="statusColumnSelect">
+              <option value="Activation Status">Activation Status</option>
+              <option value="MCIT Graduation Status">MCIT Graduation Status</option>
+            </select>
+          </div>
+
+          <div class="setting-input-group">
+            <label><i class="fa-solid fa-circle-check" style="color: var(--success);"></i> Active Values</label>
+            <input type="text" id="contCriteriaInput" value="Active, active, Yes, yes, continue">
+          </div>
+
+          <div class="setting-input-group">
+            <label><i class="fa-solid fa-circle-xmark" style="color: var(--danger);"></i> Revoke / Excluded Values</label>
+            <input type="text" id="exclCriteriaInput" value="Revoke, revoke, revoked, No, no">
+          </div>
+
+          <div class="setting-input-group">
+            <label><i class="fa-solid fa-comment-slash" style="color: #EA580C;"></i> Reason / Notes Column</label>
+            <select id="reasonColumnSelect">
+              <option value="Reason">Reason</option>
+              <option value="Notes">Notes</option>
+            </select>
+          </div>
+
+          <div class="setting-input-group">
+            <label><i class="fa-solid fa-layer-group" style="color: var(--ischool-blue);"></i> Grouping & Splitting Pattern</label>
+            <select id="groupingOptionSelect">
+              <option value="item_then_level" selected>By Tender Item then Level</option>
+              <option value="tender_item">By Tender Item only</option>
+              <option value="gov">By Governorate</option>
+              <option value="none">Continuous Single Table</option>
+            </select>
+          </div>
+
+          <!-- Dynamic Breakdown Box -->
+          <div style="grid-column: 1 / -1; margin-top: 0.8rem; background: #F8FAFC; border: 1.5px dashed #93C5FD; border-radius: var(--radius-sm); padding: 1.2rem;" id="itemLevelMatrixBox">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.8rem;">
+              <span style="font-weight: 800; color: #0284C7; font-size: 0.95rem;">
+                <i class="fa-solid fa-sitemap" style="margin-right: 0.4rem;"></i>
+                Item & Level Distribution Breakdown:
+              </span>
+              <span style="font-size: 0.82rem; color: var(--text-muted);" id="matrixTotalSummary">11 Students (10 Active, 1 Revoked)</span>
+            </div>
+            <div id="matrixChipsContainer" style="display: flex; flex-direction: column; gap: 0.6rem;"></div>
+          </div>
+        </div>
+
+        <!-- Custom Titles & Page Numbering -->
+        <div class="settings-panel" style="margin-top: 1.5rem; border-color: #CBD5E1;">
+          <div style="grid-column: 1 / -1; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem; margin-bottom: 0.5rem;">
+            <h3 style="font-size: 1.05rem; color: #0F172A; font-weight: 800; margin: 0;">Document Titles & Start Page</h3>
+          </div>
+
+          <div class="setting-input-group">
+            <label><i class="fa-solid fa-hashtag" style="color: var(--ischool-blue);"></i> Starting Page Number in Word</label>
+            <input type="number" id="startPageNumInput" value="1" min="1">
+          </div>
+
+          <div class="setting-input-group">
+            <label><i class="fa-solid fa-heading" style="color: var(--ischool-orange);"></i> Batch / Main Report Title</label>
+            <input type="text" id="customTitleBatch" value="DECI Batch 2 - Official Student Report">
+          </div>
+
+          <div class="setting-input-group">
+            <label><i class="fa-solid fa-stairs" style="color: var(--ischool-orange);"></i> Training Level</label>
+            <input type="text" id="customTitleLevel" value="Level 2">
+          </div>
+
+          <div class="setting-input-group">
+            <label><i class="fa-solid fa-graduation-cap" style="color: var(--ischool-orange);"></i> School Grade</label>
+            <input type="text" id="customTitleGrade" value="Grade 5">
+          </div>
+        </div>
+      </div>
+
+      <div class="wizard-footer-nav">
+        <button class="btn-outline" id="btnBackToStep1">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Back</span>
+        </button>
+        <button class="btn-brand" id="btnGoToStep3">
+          <span>Live Document Preview</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 3: Live Document Preview -->
+    <section class="step-pane" id="stepPane3">
+      <div class="doc-mockup-wrapper">
+        <div class="dash-card-header">
+          <div class="card-title-group">
+            <div class="card-icon"><i class="fa-solid fa-eye"></i></div>
+            <div>
+              <h2>Word Document Live Paper Preview</h2>
+              <span class="file-meta">High-fidelity paper rendering showing active & excluded student tables</span>
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.8rem; align-items: center;">
+            <span style="font-size: 0.85rem; color: var(--text-secondary);">Sample rows:</span>
+            <select id="previewLimitSelect" style="background:#FFFFFF; border:1px solid #CBD5E1; color:#0F172A; font-weight:600; padding:0.4rem 0.8rem; border-radius:var(--radius-sm); outline:none;">
+              <option value="5">5 rows</option>
+              <option value="10" selected>10 rows</option>
+              <option value="25">25 rows</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Realistic Document Paper Mockup -->
+        <div class="paper-sheet" id="paperMockupContainer">
+          <div class="paper-header">
+            <div class="paper-header-text">
+              <h3 id="mockupDocTitle">Official Student Report</h3>
+              <p>Ministry of Communications & Information Technology • DECI Initiative</p>
+            </div>
+            <img src="./img/iSchool Logo-colors.png" alt="iSchool" class="paper-header-logo">
+          </div>
+
+          <div id="mockupDynamicContent"></div>
+        </div>
+      </div>
+
+      <div class="wizard-footer-nav">
+        <button class="btn-outline" id="btnBackToStep2">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Back to Mapping</span>
+        </button>
+        <button class="btn-orange" id="btnStartGeneration">
+          <i class="fa-solid fa-gears"></i>
+          <span>Start Generation Now</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 4: Live Generation & Progress Bar -->
+    <section class="step-pane" id="stepPane4">
+      <div class="progress-container-card" id="progressRunningCard">
+        <div class="progress-mascot-box">
+          <img src="./img/ibot skins-01.png" alt="iBot" class="progress-mascot" id="mascotImg">
+        </div>
+
+        <h2 class="progress-title" id="progressStatusTitle">Processing & Generating Report...</h2>
+        <p class="progress-subtitle" id="progressMessage">Reading Excel database and populating official Word tables...</p>
+
+        <!-- Progress Bar -->
+        <div class="progress-track">
+          <div class="progress-bar-fill" id="progressBarFill" style="width: 0%;"></div>
+        </div>
+
+        <!-- Generation Metrics -->
+        <div class="progress-metrics-grid">
+          <div class="metric-box">
+            <span class="metric-label">Progress</span>
+            <span class="metric-val" id="metricPercent">0%</span>
+          </div>
+          <div class="metric-box">
+            <span class="metric-label">Processed Records</span>
+            <span class="metric-val" id="metricProcessed">0 / 0</span>
+          </div>
+          <div class="metric-box">
+            <span class="metric-label">Engine Speed</span>
+            <span class="metric-val" id="metricSpeed">0 rows/sec</span>
+          </div>
+          <div class="metric-box">
+            <span class="metric-label">Est. Time Left</span>
+            <span class="metric-val" id="metricRemaining">0s</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Generation Success Banner -->
+      <div class="success-banner" id="generationSuccessBanner" style="display: none;">
+        <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: #166534; margin-bottom: 0.6rem;">Report Generated Successfully!</h2>
+        <p style="color: #334155; font-size: 1.05rem; margin-bottom: 2rem;">
+          All student records have been populated while preserving 100% of the official formatting, fonts, and headers.
+        </p>
+        
+        <div style="display: flex; justify-content: center; gap: 1.2rem; flex-wrap: wrap;">
+          <a href="./sample_report.docx" download="iSchool_Student_Report_Generated.docx" class="btn-brand" style="font-size: 1.05rem; padding: 0.95rem 2rem;">
+            <i class="fa-solid fa-file-word"></i>
+            <span>Download Completed Word (.docx)</span>
+          </a>
+          <button class="btn-brand btn-pdf" id="btnDownloadPDF" style="font-size: 1.05rem; padding: 0.95rem 2rem; background: #DC2626;">
+            <i class="fa-solid fa-file-pdf"></i>
+            <span>Print / Save as PDF</span>
+          </button>
+          <button class="btn-outline" id="btnRestartWizard">
+            <i class="fa-solid fa-rotate-left"></i>
+            <span>Generate Another Report</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast Notification -->
+  <div class="toast-msg" id="toastMsg" style="display: none;">
+    <i class="fa-solid fa-circle-info" style="color: var(--ischool-blue);"></i>
+    <span id="toastText">Notification</span>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="./js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iSchool B2G Demo Hub</title>
+  <meta name="description" content="Interactive demo hub for iSchool B2G projects and automated systems.">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="./assets/img/iSchool Logo-colors.png">
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="./assets/css/hub.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="container header-content">
+      <a href="./index.html" class="brand">
+        <img src="./assets/img/iSchool Logo-colors.png" alt="iSchool" class="brand-logo">
+        <span class="brand-badge">B2G Demo Hub</span>
+      </a>
+
+      <a href="https://github.com/iabdelrhmaneyad/b2g-demo-hub" target="_blank" class="btn-github">
+        <i class="fa-brands fa-github"></i>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-pill">
+        <i class="fa-solid fa-sparkles"></i>
+        <span>Live Interactive Demos</span>
+      </div>
+
+      <h1 class="hero-title">
+        iSchool <span>B2G Systems</span> Hub
+      </h1>
+
+      <p class="hero-subtitle">
+        A unified showcase of live prototypes, operational tools, and automated report generators built for government initiatives.
+      </p>
+    </div>
+  </section>
+
+  <!-- Demos Grid Section -->
+  <main class="demos-section">
+    <div class="container">
+      <div class="grid">
+
+        <!-- 1. Reports Generator Tool -->
+        <div class="card">
+          <div class="card-top">
+            <div class="card-icon blue">
+              <i class="fa-solid fa-file-word"></i>
+            </div>
+            <span class="card-tag">Automated Engine</span>
+          </div>
+
+          <h2 class="card-title">Student Reports Generator</h2>
+          <p class="card-desc">
+            Intelligent wizard that parses Excel databases (70K+ rows) and automatically fills official Word (DOCX) templates with active and revoke student criteria.
+          </p>
+
+          <div class="card-meta">
+            <span class="badge">4-Step Wizard</span>
+            <span class="badge">Smart Column Mapping</span>
+            <span class="badge">DOCX & PDF</span>
+          </div>
+
+          <div class="card-actions">
+            <a href="./demos/reports-gen/index.html" target="_blank" class="btn btn-primary">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              <span>Open Demo</span>
+            </a>
+            <button class="btn btn-secondary btn-modal" data-url="./demos/reports-gen/index.html" data-title="Student Reports Generator">
+              <i class="fa-solid fa-eye"></i>
+              <span>Preview</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Sessions Bulk Actions - Groups -->
+        <div class="card">
+          <div class="card-top">
+            <div class="card-icon green">
+              <i class="fa-solid fa-users-gear"></i>
+            </div>
+            <span class="card-tag">Operations</span>
+          </div>
+
+          <h2 class="card-title">Sessions Bulk Actions – Groups</h2>
+          <p class="card-desc">
+            Operations management interface for batch-selecting training groups, updating session schedules, reallocating trainers, and applying bulk actions.
+          </p>
+
+          <div class="card-meta">
+            <span class="badge">Bulk Selection</span>
+            <span class="badge">Group Actions</span>
+            <span class="badge">Trainer Reallocation</span>
+          </div>
+
+          <div class="card-actions">
+            <a href="./demos/sessions-groups/index.html" target="_blank" class="btn btn-primary">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              <span>Open Demo</span>
+            </a>
+            <button class="btn btn-secondary btn-modal" data-url="./demos/sessions-groups/index.html" data-title="Sessions Bulk Actions – Groups">
+              <i class="fa-solid fa-eye"></i>
+              <span>Preview</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Sessions Conclusion Report -->
+        <div class="card">
+          <div class="card-top">
+            <div class="card-icon orange">
+              <i class="fa-solid fa-chart-pie"></i>
+            </div>
+            <span class="card-tag">Reporting & KPIs</span>
+          </div>
+
+          <h2 class="card-title">Sessions Conclusion Report</h2>
+          <p class="card-desc">
+            Executive weekly summary dashboard tracking student attendance rates, trainer feedback, completion metrics, and operational performance.
+          </p>
+
+          <div class="card-meta">
+            <span class="badge">Weekly Summary</span>
+            <span class="badge">Attendance Tracking</span>
+            <span class="badge">Executive KPIs</span>
+          </div>
+
+          <div class="card-actions">
+            <a href="./demos/sessions-conclusion/index.html" target="_blank" class="btn btn-primary">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              <span>Open Demo</span>
+            </a>
+            <button class="btn btn-secondary btn-modal" data-url="./demos/sessions-conclusion/index.html" data-title="Sessions Conclusion Report">
+              <i class="fa-solid fa-eye"></i>
+              <span>Preview</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. iSchool-Pedia Prototype -->
+        <div class="card">
+          <div class="card-top">
+            <div class="card-icon purple">
+              <i class="fa-solid fa-book-bookmark"></i>
+            </div>
+            <span class="card-tag">Prototype</span>
+          </div>
+
+          <h2 class="card-title">iSchool-Pedia Prototype</h2>
+          <p class="card-desc">
+            Interactive multi-screen prototype showcasing the centralized knowledge repository, curriculum guidelines, operational workflows, and bilingual docs.
+          </p>
+
+          <div class="card-meta">
+            <span class="badge">Multi-Screen</span>
+            <span class="badge">Bilingual AR/EN</span>
+            <span class="badge">Curriculum Hub</span>
+          </div>
+
+          <div class="card-actions">
+            <a href="./demos/ischool-pedia/index.html" target="_blank" class="btn btn-primary">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              <span>Open Demo</span>
+            </a>
+            <button class="btn btn-secondary btn-modal" data-url="./demos/ischool-pedia/index.html" data-title="iSchool-Pedia Prototype">
+              <i class="fa-solid fa-eye"></i>
+              <span>Preview</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Live Viewer Modal -->
+  <div class="modal" id="viewerModal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modalTitle">Project Demo</h3>
+      
+      <div class="modal-actions">
+        <a href="#" target="_blank" class="modal-btn" id="modalOpenExternal">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          <span>Open Full Tab</span>
+        </a>
+        <button class="modal-btn close" id="modalCloseBtn">
+          <i class="fa-solid fa-xmark"></i>
+          <span>Close</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <iframe src="about:blank" class="modal-frame" id="modalFrame" title="Demo Viewer"></iframe>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>iSchool B2G Systems • Hosted on GitHub Pages</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script src="./assets/js/hub.js"></script>
+</body>
+</html>
