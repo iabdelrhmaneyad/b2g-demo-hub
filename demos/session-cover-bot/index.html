@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iSchool Session Cover Bot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: white page, quiet header, compact intro + numbered flow, underline tabs, then a tabbed workspace — live bot simulator (chat + case panel), analytics, configuration, spec. Tokens mirror brand.ischooltech.com. */
+:root{
+  --blue-300:#0ab4fb; --blue-500:#046ded; --blue-700:#0346b0;
+  --yellow-400:#ffb81a; --yellow-500:#ffd900;
+  --orange-500:#ff8a1a;
+  --navy:#1f2a56;
+  --bg:#ffffff; --surface:#ffffff; --surface-2:#f5f8fc; --border:#e6ecf2;
+  --fg:#1f2a56; --fg-2:#5b7280; --fg-3:#8fa6b3;
+  --accent:var(--blue-500); --accent-soft:#e3f1fb; --accent-ink:#0461d6;
+  --hero:#046ded; --hero-ink:#ffffff; --hero-sub:#d6e8ff;
+  --good:#0f9e3a; --good-soft:#e9f9ee; --warn:#c77700; --warn-soft:#fff4dc; --bad:#d11f1f; --bad-soft:#fff0f0;
+  --bubble-bot:#eef5fb; --bubble-me:#046ded; --bubble-me-ink:#ffffff;
+  --shadow:0 1px 2px rgba(31,42,86,.04),0 4px 14px rgba(31,42,86,.05);
+  color-scheme:light;
+  --font:"Somar Rounded","Rubik",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --r:12px;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.5;margin:0}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--yellow-400);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:20px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:#fff;border-bottom:1px solid var(--border)}
+.top .wrap{display:flex;align-items:center;gap:12px;padding-block:12px;flex-wrap:wrap}
+.wordmark{font-weight:900;font-size:22px;letter-spacing:-.5px;display:flex;align-items:center;gap:2px;color:var(--blue-500)}
+.wordmark .i{position:relative;display:inline-block;width:18px;height:22px}
+.wordmark .i::before{content:"";position:absolute;left:1px;top:2px;width:15px;height:15px;border-radius:50%;border:3px solid var(--yellow-400);border-right-color:transparent;transform:rotate(-30deg)}
+.wordmark .i::after{content:"i";position:absolute;left:5px;top:-2px;font-weight:900}
+.ver{background:var(--orange-500);color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px}
+.prod{font-weight:600;color:var(--fg-2);padding-inline-start:12px;border-inline-start:1px solid var(--border)}
+.top .spacer{flex:1}
+.langsw{display:flex;background:var(--surface-2);border:1px solid var(--border);border-radius:999px;padding:3px}
+.langsw button{border:0;background:transparent;color:var(--fg-2);padding:4px 12px;border-radius:999px;cursor:pointer;font-weight:600;font-size:13px}
+.langsw button[aria-pressed="true"]{background:var(--blue-500);color:#fff}
+
+/* intro */
+.hero{background:#fff;padding-block:36px 8px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--accent-ink);font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+.eyebrow b{width:8px;height:8px;border-radius:50%;background:var(--yellow-400);display:inline-block}
+.hero h1{font-size:clamp(28px,4.2vw,44px);line-height:1.08;font-weight:900;text-transform:uppercase;letter-spacing:-.5px;margin:10px 0 10px;text-wrap:balance;color:var(--navy)}
+.hero h1 em{font-style:normal;color:var(--blue-500)}
+.hero p{max-width:68ch;color:var(--fg-2);margin:0;font-size:15.5px}
+.flowstrip{list-style:none;margin:24px 0 0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;counter-reset:f}
+@media (max-width:900px){.flowstrip{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:520px){.flowstrip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.flowstrip li{counter-increment:f;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;line-height:1.35;min-width:0}
+.flowstrip li::before{content:counter(f);display:block;font-family:var(--mono);font-size:11px;color:var(--fg-3);margin-bottom:4px;font-weight:500}
+.flowstrip li.y{background:#fff7e0;border-color:#ffe3a3}
+.flowstrip li.g{background:var(--good-soft);border-color:#c9eed5}
+
+/* tabs */
+.tabsbar{margin-top:28px;border-bottom:1px solid var(--border);background:#fff}
+.tabs{display:flex;gap:4px;overflow-x:auto}
+.tabs button{border:0;background:transparent;padding:12px 16px 10px;cursor:pointer;font-weight:600;color:var(--fg-2);white-space:nowrap;border-bottom:3px solid transparent;margin-bottom:-1px;text-align:start}
+.tabs button:hover{color:var(--fg)}
+.tabs button[aria-selected="true"]{color:var(--blue-500);border-bottom-color:var(--blue-500)}
+.tabs button small{display:block;font-weight:400;font-size:11.5px;color:var(--fg-3)}
+main{padding-block:28px 60px}
+.panel[hidden]{display:none!important}
+
+/* generic */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r)}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 12px}
+.sec-h h2{margin:0;font-size:20px;font-weight:800;text-wrap:balance}
+.sec-h p{margin:0;color:var(--fg-2);font-size:13.5px}
+.label{font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--fg-3);font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700;white-space:nowrap}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.p-idle{background:var(--surface-2);color:var(--fg-2)}
+.p-run{background:var(--accent-soft);color:var(--accent-ink)}
+.p-warn{background:var(--warn-soft);color:var(--warn)}
+.p-good{background:var(--good-soft);color:var(--good)}
+.p-bad{background:var(--bad-soft);color:var(--bad)}
+.btn{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:8px 14px;cursor:pointer;font-weight:600;font-size:13.5px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.sample{font-size:11.5px;color:var(--warn);background:var(--warn-soft);border-radius:6px;padding:2px 8px;font-weight:600}
+
+/* simulator */
+.sim{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:900px){.sim{grid-template-columns:1fr}.phone{position:static}}
+.phone{display:flex;flex-direction:column;height:660px;overflow:hidden;box-shadow:var(--shadow);position:sticky;top:76px}
+.phone-h{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border)}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--hero);display:grid;place-items:center;color:#fff;font-weight:900;font-size:15px;position:relative;flex:none}
+.avatar::after{content:"";position:absolute;right:-1px;bottom:-1px;width:10px;height:10px;border-radius:50%;background:var(--good);border:2px solid var(--surface)}
+.phone-h .t{font-weight:700;line-height:1.2}
+.phone-h .s{font-size:12px;color:var(--fg-2)}
+.phone-h .spacer{flex:1}
+.chat{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.msg{max-width:88%;padding:9px 13px;border-radius:16px;font-size:14px;line-height:1.55;animation:pop .22s ease-out}
+.msg.bot{background:var(--bubble-bot);border-bottom-left-radius:5px;align-self:flex-start}
+.msg.me{background:var(--bubble-me);color:var(--bubble-me-ink);border-bottom-right-radius:5px;align-self:flex-end}
+[dir="rtl"] .msg.bot{border-bottom-left-radius:16px;border-bottom-right-radius:5px}
+[dir="rtl"] .msg.me{border-bottom-right-radius:16px;border-bottom-left-radius:5px}
+.msg ol,.msg ul{margin:6px 0 2px;padding-inline-start:20px}
+.msg li{margin:3px 0}
+.msg code,.msg kbd{font-family:var(--mono);font-size:12px;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:0 5px;white-space:nowrap}
+.msg .src{display:block;margin-top:6px;font-size:11px;color:var(--fg-3)}
+.msg.sys{align-self:center;background:transparent;color:var(--fg-2);font-size:12px;text-align:center;padding:2px 8px}
+.msg.alert{align-self:stretch;max-width:none;background:var(--bad-soft);color:var(--bad);font-weight:600;border-radius:12px}
+.msg.ok{align-self:stretch;max-width:none;background:var(--good-soft);color:var(--good);font-weight:600;border-radius:12px}
+@keyframes pop{from{transform:translateY(6px);opacity:.3}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.msg{animation:none}.chat{scroll-behavior:auto}}
+.typing{align-self:flex-start;background:var(--bubble-bot);border-radius:16px;padding:10px 14px;display:flex;gap:4px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--fg-3);animation:blink 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
+.opts{padding:10px 12px 14px;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:8px;min-height:64px;align-content:flex-start}
+.opt{border:1.5px solid var(--accent);color:var(--accent-ink);background:var(--surface);border-radius:999px;padding:7px 14px;cursor:pointer;font-weight:600;font-size:13.5px}
+.opt:hover{background:var(--accent-soft)}
+.opt.neg{border-color:var(--border);color:var(--fg-2)}
+.opt.cover{border-color:var(--bad);color:var(--bad)}
+
+.timerbox{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:12px;background:var(--warn-soft);color:var(--warn);align-self:stretch;max-width:none}
+.ring{width:56px;height:56px;flex:none}
+.ring circle{fill:none;stroke-width:6}
+.ring .bgc{stroke:currentColor;opacity:.18}
+.ring .fgc{stroke:currentColor;stroke-linecap:round;transition:stroke-dashoffset .1s linear}
+.timerbox .big{font-size:22px;font-weight:800;line-height:1}
+.timerbox small{display:block;font-size:12px;font-weight:500;opacity:.9}
+
+.case{display:flex;flex-direction:column;gap:16px;min-width:0}
+.sim-intro{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.sim-intro h2{margin:0;font-size:20px;font-weight:800}
+.sim-intro p{margin:2px 0 0;color:var(--fg-2);font-size:13.5px}
+.case-top{padding:16px 18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px 18px}
+.case-top .v{font-weight:700;font-size:14.5px}
+.case-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--border)}
+.case-head h3{margin:0;font-size:16px;font-weight:800}
+.case-head .spacer{flex:1}
+.clock{font-family:var(--mono);font-size:13px;color:var(--fg-2)}
+.ff{font-size:11px;font-weight:700;color:var(--orange-500)}
+.cols2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:700px){.cols2{grid-template-columns:1fr}}
+.box{padding:0 16px 14px}
+.box h4{margin:0 -16px 12px;padding:12px 16px;font-size:13.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.path{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto}
+.path li{display:grid;grid-template-columns:58px 1fr;gap:8px;font-size:13px;align-items:start}
+.path li .ts{font-family:var(--mono);font-size:11.5px;color:var(--fg-3);padding-top:1px}
+.path li.k{font-weight:600}
+.path li.cv span:last-child{color:var(--bad);font-weight:700}
+.path li.gd span:last-child{color:var(--good);font-weight:700}
+.empty{color:var(--fg-3);font-size:13px}
+.pipe{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.pipe li{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start;padding:7px 0;font-size:13px;color:var(--fg-3)}
+.pipe li .dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:grid;place-items:center;font-size:11px;font-weight:700;font-family:var(--mono)}
+.pipe li.on{color:var(--fg)}
+.pipe li.on .dot{border-color:var(--accent);background:var(--accent);color:#fff}
+.pipe li.act .dot{border-color:var(--accent);color:var(--accent-ink);animation:blink 1s infinite}
+.pipe li b{display:block;font-size:13.5px}
+.pipe li small{color:var(--fg-2)}
+.cands{width:100%;border-collapse:collapse;font-size:12.5px}
+.cands th{text-align:start;font-weight:600;color:var(--fg-3);font-size:11px;text-transform:uppercase;letter-spacing:.6px;padding:4px 6px;border-bottom:1px solid var(--border)}
+.cands td{padding:6px;border-bottom:1px solid var(--border);vertical-align:top}
+.cands tr.sel td{background:var(--good-soft)}
+.cands tr.skip td{color:var(--fg-3)}
+.yes{color:var(--good);font-weight:700}.no{color:var(--bad);font-weight:700}
+.sms{background:var(--surface-2);border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.6;border:1px dashed var(--border)}
+.sms b{display:block}
+.sms .meta{font-size:11px;color:var(--fg-3);margin-bottom:4px;font-family:var(--mono)}
+.rec{font-family:var(--mono);font-size:11.5px;background:var(--surface-2);border-radius:10px;padding:10px 12px;overflow-x:auto;white-space:pre;margin:0;max-height:260px}
+.kb{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-size:13px;cursor:pointer}
+.toggle input{width:16px;height:16px;accent-color:var(--accent)}
+
+/* analytics */
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:end;padding:12px 14px;margin-bottom:16px}
+.filters label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--fg-3);font-weight:600;text-transform:uppercase;letter-spacing:.6px}
+.filters select{border:1px solid var(--border);background:var(--surface);border-radius:9px;padding:7px 10px;font-size:13.5px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--fg);min-width:140px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+.kpi{padding:14px 16px}
+.kpi .n{font-size:28px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums;margin-top:4px}
+.kpi .d{font-size:12px;color:var(--fg-2)}
+.kpi.hl{border-color:#bcd8fb;background:#f3f8ff}
+.kpi.hl .n{color:var(--blue-500)}
+
+.grid2{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+.chartcard{padding:16px}
+.chartcard h3{margin:0 0 2px;font-size:15px;font-weight:700}
+.chartcard .sub{font-size:12.5px;color:var(--fg-2);margin-bottom:10px}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.chart text{fill:var(--fg-2);font-family:var(--font);font-size:11px}
+.chart .grid line{stroke:var(--border)}
+.chart .bar{fill:var(--accent)}
+.chart .bar.hi{fill:var(--orange-500)}
+.chart .bar.lo{fill:var(--blue-300)}
+.chart .hit{fill:transparent;cursor:default}
+.chart .hit:hover + .bar, .chart g.b:hover .bar{opacity:.8}
+.hbars{display:flex;flex-direction:column;gap:9px}
+.hb{display:grid;grid-template-columns:120px 1fr 44px;gap:10px;align-items:center;font-size:13px}
+.hb .tr{background:var(--surface-2);border-radius:4px;height:12px;overflow:hidden}
+.hb .fl{height:100%;background:var(--accent);border-radius:0 4px 4px 0}
+.hb .num{text-align:end;font-variant-numeric:tabular-nums;font-weight:600}
+.tip{position:fixed;pointer-events:none;background:var(--navy);color:#fff;font-size:12px;padding:6px 9px;border-radius:8px;z-index:50;box-shadow:var(--shadow)}
+.tbl-wrap{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;font-size:13px}
+table.t th{text-align:start;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--fg-3);padding:6px 8px;border-bottom:1px solid var(--border);font-weight:600}
+table.t td{padding:8px;border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums}
+table.t td.n{text-align:end}
+.minibar{display:inline-block;height:8px;border-radius:0 3px 3px 0;background:var(--accent);vertical-align:middle;margin-inline-start:8px}
+
+/* config */
+.cfg{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.cfg .card{padding:16px}
+.cfg h3{margin:0 0 4px;font-size:15px}
+.cfg p.d{margin:0 0 12px;font-size:12.5px;color:var(--fg-2)}
+.field{display:grid;grid-template-columns:1fr 92px;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--border);font-size:13.5px}
+.field:first-of-type{border-top:0}
+.field input[type=number]{width:100%;border:1px solid var(--border);border-radius:8px;padding:6px 8px;background:var(--surface);text-align:end;font-family:var(--mono)}
+.field select{width:100%;border:1px solid var(--border);border-radius:8px;padding:6px 8px;background:var(--surface)}
+.field .u{font-size:11px;color:var(--fg-3);display:block}
+
+/* spec */
+.spec{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:860px){.spec{grid-template-columns:1fr}}
+.spec .card{padding:18px}
+.spec h3{margin:0 0 10px;font-size:16px}
+.spec ul{margin:0;padding-inline-start:18px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.lib{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.lib .card{padding:14px 16px}
+.lib h4{margin:0 0 6px;font-size:14px;display:flex;gap:8px;align-items:center;justify-content:space-between}
+.lib p{margin:0;font-size:12.5px;color:var(--fg-2)}
+.tag{font-size:10.5px;font-weight:700;border-radius:6px;padding:2px 7px;background:var(--accent-soft);color:var(--accent-ink);text-transform:uppercase;letter-spacing:.5px}
+.tag.r{background:var(--warn-soft);color:var(--warn)}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px 16px;font-size:13px;margin:0;padding:0;list-style:none}
+.fields li{padding:6px 0;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px}
+footer{padding-block:24px;color:var(--fg-3);font-size:12px;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+
+<header class="top">
+  <div class="wrap">
+    <div class="wordmark" aria-label="iSchool"><span class="i" aria-hidden="true"></span>School</div>
+    <span class="ver">V 1.0</span>
+    <span class="prod">Moderation · Session Cover Bot</span>
+    <a href="../../index.html" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; color:#046ded; font-weight:700; font-size:13px; background:#e3f1fb; padding:5px 12px; border-radius:999px; margin-inline-start:8px;">← Back to B2G Hub</a>
+    <span class="spacer"></span>
+    <div class="langsw" role="group" aria-label="Bot language">
+      <button id="lang-ar" aria-pressed="true">عربي</button>
+      <button id="lang-en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><b></b>Feature prototype · Operations</span>
+    <h1>Automated <em>session cover</em></h1>
+    <p>Tutors report a live-session problem to a bot instead of the moderation chat. The bot walks them through the fix from the Moderation Help Center, gives one timed recovery attempt, and assigns an eligible cover tutor automatically when the session can't continue.</p>
+    <ol class="flowstrip" aria-label="Simplified flow">
+      <li>Tutor reports the issue to the bot</li><li>Bot identifies the issue type</li><li>Quick fix + one timed recovery attempt</li><li class="g">Solved: session continues</li><li class="y">Not solved: cover required</li><li>Eligible tutor assigned, SMS + mentor notified, case logged</li>
+    </ol>
+  </div>
+</section>
+
+<div class="wrap tabsbar">
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab-sim" aria-selected="true" aria-controls="p-sim">Bot simulator<small>Try a live case</small></button>
+    <button role="tab" id="tab-ana" aria-selected="false" aria-controls="p-ana">Analytics<small>Cover dashboard</small></button>
+    <button role="tab" id="tab-cfg" aria-selected="false" aria-controls="p-cfg">Configuration<small>Timers &amp; rules</small></button>
+    <button role="tab" id="tab-spec" aria-selected="false" aria-controls="p-spec">Script library<small>Issues &amp; safeguards</small></button>
+  </div>
+</div>
+
+<main class="wrap">
+
+<!-- SIMULATOR -->
+<section class="panel" id="p-sim" role="tabpanel" aria-labelledby="tab-sim">
+  <div class="sim-intro"><div><h2>Bot simulator</h2><p>Report a problem as the tutor. The case panel shows each decision and the automatic cover steps.</p></div><span class="sample">Example session and tutors</span></div>
+  <div class="sim">
+    <div class="card phone">
+      <div class="phone-h">
+        <div class="avatar" aria-hidden="true">i</div>
+        <div><div class="t">iSchool Cover Bot</div><div class="s" id="bot-sub">Usually replies instantly</div></div>
+        <span class="spacer"></span>
+        <button class="btn" id="restart" title="Start a new case">New case</button>
+      </div>
+      <div class="chat" id="chat" aria-live="polite"></div>
+      <div class="opts" id="opts"></div>
+    </div>
+
+    <div class="case">
+      <div class="card">
+        <div class="case-head">
+          <h3>Live case</h3>
+          <span class="pill p-idle" id="status">Waiting for report</span>
+          <span class="spacer"></span>
+          <span class="ff" id="ff" hidden>FAST-FORWARD ×60</span>
+          <span class="clock" id="clock">18:07:00</span>
+        </div>
+        <div class="case-top" id="sessioncard"></div>
+      </div>
+
+      <div class="cols2">
+        <div class="card box">
+          <h4>Decision path <span class="label">audit log</span></h4>
+          <ul class="path" id="path"><li class="empty">Every bot question, answer and decision is timestamped here.</li></ul>
+        </div>
+        <div class="card box">
+          <h4>Automatic cover <span class="label">7 steps</span></h4>
+          <ol class="pipe" id="pipe"></ol>
+        </div>
+      </div>
+
+      <div class="card box" id="assignbox" hidden>
+        <h4>Cover tutor search <span class="label">eligibility check</span></h4>
+        <div class="tbl-wrap"><table class="cands" id="cands"></table></div>
+      </div>
+
+      <div class="cols2" id="notifs" hidden>
+        <div class="card box"><h4>SMS to cover tutor <span class="label">sent</span></h4><div class="sms" id="sms-tutor"></div></div>
+        <div class="card box"><h4>Mentor notification <span class="label">sent</span></h4><div class="sms" id="sms-mentor"></div></div>
+      </div>
+
+      <div class="card box" id="recordbox" hidden>
+        <h4>Saved cover case <span class="label">for reporting</span></h4>
+        <pre class="rec" id="record"></pre>
+      </div>
+
+      <div class="card box" style="padding-top:14px">
+        <div class="kb">
+          <span class="label">Demo controls</span>
+          <label class="toggle"><input type="checkbox" id="noanswer"> First cover tutor doesn't accept</label>
+          <label class="toggle"><input type="checkbox" id="fastff" checked> Fast-forward recovery timers</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ANALYTICS -->
+<section class="panel" id="p-ana" role="tabpanel" aria-labelledby="tab-ana" hidden>
+  <div class="sec-h"><h2>Cover analytics</h2><span class="sample">Sample data — wire to the cover-case log</span></div>
+  <div class="card filters">
+    <label for="f-range">Date range<select id="f-range"><option value="14">Last 14 days</option><option value="7">Last 7 days</option><option value="28">Last 28 days</option></select></label>
+    <label for="f-grade">Grade<select id="f-grade"><option value="all">All grades</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option><option>Grade 9</option></select></label>
+    <label for="f-issue">Issue type<select id="f-issue"><option value="all">All issues</option></select></label>
+    <label for="f-out">Outcome<select id="f-out"><option value="all">All outcomes</option><option value="cov">Covered</option><option value="rec">Recovered without cover</option></select></label>
+  </div>
+  <div class="kpis" id="kpis"></div>
+  <div class="grid2">
+    <div class="card chartcard"><h3>Covered sessions by day</h3><div class="sub" id="bydaysub"></div><div class="chart" id="byday"></div></div>
+    <div class="card chartcard"><h3>Cover reason</h3><div class="sub">Share of covered sessions</div><div class="hbars" id="reasons"></div></div>
+  </div>
+  <div class="grid2" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+    <div class="card chartcard"><h3>Covers by tutor</h3><div class="sub">Sessions each tutor took over</div><div class="tbl-wrap"><table class="t" id="bytutor"></table></div></div>
+    <div class="card chartcard"><h3>Original tutors requiring cover</h3><div class="sub">Cover incidents by the tutor who dropped</div><div class="tbl-wrap"><table class="t" id="byorig"></table></div></div>
+  </div>
+  <div class="card chartcard"><h3>Repeated issues</h3><div class="sub">Tutors with interruptions in more than one session in a day — flagged for moderation review</div><div class="tbl-wrap"><table class="t" id="repeat"></table></div></div>
+</section>
+
+<!-- CONFIG -->
+<section class="panel" id="p-cfg" role="tabpanel" aria-labelledby="tab-cfg" hidden>
+  <div class="sec-h"><h2>Configuration</h2><p>Open implementation decisions, kept configurable. Changes apply to the simulator immediately.</p></div>
+  <div class="cfg">
+    <div class="card"><h3>Recovery windows</h3><p class="d">Maximum time a tutor gets to recover, per issue type.</p><div id="cfg-rec"></div></div>
+    <div class="card"><h3>Cover timing</h3><p class="d">How long the system waits before forcing cover or moving to the next tutor.</p><div id="cfg-time"></div></div>
+    <div class="card"><h3>Rules</h3><p class="d">Eligibility, repeats and escalation.</p><div id="cfg-rules"></div></div>
+  </div>
+</section>
+
+<!-- SPEC -->
+<section class="panel" id="p-spec" role="tabpanel" aria-labelledby="tab-spec" hidden>
+  <div class="sec-h"><h2>Script library</h2><p>The fixes the bot walks tutors through, from the <a href="https://sites.google.com/view/ischool-moderation/home" style="color:var(--accent-ink)">Moderation Help Center</a>.</p></div>
+  <div class="lib" id="lib"></div>
+  <div style="height:20px"></div>
+  <div class="spec">
+    <div class="card"><h3>Business rules &amp; safeguards</h3><ul>
+      <li>Only tutors who match the session's grade eligibility are considered.</li>
+      <li>A tutor with an overlapping session is never selected.</li>
+      <li>One cover request is reserved for one tutor at a time; no duplicate assignment.</li>
+      <li>Every bot question, answer and decision is timestamped for audit.</li>
+      <li>If the cover tutor doesn't accept or join within the timeout, the next eligible tutor is tried.</li>
+      <li>One recovery attempt per session. A second issue in the same session goes straight to cover.</li>
+      <li>Repeated issues across sessions in one day are flagged for review or proactive reassignment.</li>
+      <li>Human moderation stays as the exception path for cases the bot can't classify.</li>
+    </ul></div>
+    <div class="card"><h3>Expected impact</h3><ul>
+      <li>Fewer moderation employees needed to run cover cases by hand.</li>
+      <li>Faster response when a tutor can't continue.</li>
+      <li>One consistent decision process instead of individual chat handling.</li>
+      <li>Less student waiting time and session disruption.</li>
+      <li>Clear data on why sessions get interrupted and where cover demand peaks.</li>
+      <li>Visibility into peak cover days, repeat tutors and staffing needs.</li>
+    </ul></div>
+    <div class="card" style="grid-column:1/-1"><h3>Data stored for each cover case</h3><ul class="fields">
+      <li>session_id</li><li>session_datetime</li><li>grade</li><li>session_title</li><li>original_tutor</li><li>mentor</li><li>issue_type</li><li>decision_path[]</li><li>issue_reported_at</li><li>recovery_started_at / ended_at</li><li>cover_decision_at</li><li>cover_tutor</li><li>cover_notified_at</li><li>cover_joined_at</li><li>final_status</li><li>resolved_without_cover</li><li>repeat_issue</li>
+    </ul></div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap">Prototype of the Automated Session Cover feature · Fix scripts adapted from the iSchool Moderation Help Center · Colours and type follow brand.ischooltech.com</div></footer>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- config ---------- */
+const CFG={
+  rec_elec:10, rec_net:5, rec_zoom:5, rec_device:5, grace:5,
+  accept_timeout:3, repeat_threshold:2, rejoin:'no', escalate:'unclassified', prioritize:'least-covers'
+};
+const CFG_UI={
+  'cfg-rec':[['rec_elec','Electricity outage','min'],['rec_net','Internet issue','min'],['rec_zoom','Zoom issue','min'],['rec_device','Device / graphics','min']],
+  'cfg-time':[['grace','Extra delay before cover is mandatory','min'],['accept_timeout','Cover tutor accept / join timeout','min']],
+  'cfg-rules':[['repeat_threshold','Issues in one day before reassigning later sessions','sessions'],['rejoin','Original tutor can rejoin after cover',null,[['no','No'],['yes','Yes, as co-host']]],['prioritize','Cover tutor priority',null,[['least-covers','Fewest covers this week'],['rating','Highest rating'],['nearest-grade','Same grade first']]],['escalate','Send to a human moderator',null,[['unclassified','Only unclassified cases'],['emergency','Unclassified + emergencies']]]]
+};
+for(const [box,fields] of Object.entries(CFG_UI)){
+  $('#'+box).innerHTML=fields.map(([k,l,u,opts])=>`<div class="field"><label for="c-${k}">${l}${u?`<span class="u">${u}</span>`:''}</label>${opts?`<select id="c-${k}">${opts.map(([v,t])=>`<option value="${v}"${CFG[k]===v?' selected':''}>${t}</option>`).join('')}</select>`:`<input type="number" min="1" max="60" id="c-${k}" value="${CFG[k]}">`}</div>`).join('');
+  fields.forEach(([k])=>$('#c-'+k).addEventListener('change',e=>{const v=e.target.value;CFG[k]=isNaN(+v)?v:Math.max(1,+v);}));
+}
+
+/* ---------- i18n ---------- */
+let LANG='ar';
+const L=(o)=>typeof o==='string'?o:(o[LANG]||o.en);
+
+/* ---------- sample session ---------- */
+const SESSION={id:'SES-240611-0387',grade:'Grade 7',title:'Python Basics · L12 Loops',start:'18:00',end:'19:00',tutor:'T-8366 · Mariam Adel',mentor:'Omar Khaled',link:'zoom.us/j/53xxxxx812',students:6};
+const TUTORS=[
+  {id:'T-7720',name:'Youssef Hany',grades:'4–6',busy:false,elig:false,why:'Grade not eligible'},
+  {id:'T-8102',name:'Nour Samir',grades:'6–8',busy:true,elig:true,why:'Overlapping session 18:00'},
+  {id:'T-8455',name:'Karim Fathy',grades:'7–9',busy:false,elig:true,why:'Eligible · 1 cover this week'},
+  {id:'T-9013',name:'Salma Reda',grades:'5–8',busy:false,elig:true,why:'Eligible · 3 covers this week'},
+  {id:'T-9310',name:'Hana Mostafa',grades:'7–9',busy:false,elig:true,why:'Eligible · 4 covers this week'}
+];
+
+/* ---------- bot script tree ---------- */
+const B=(en,ar)=>({en,ar});
+const SRC=B('Source: Moderation Help Center','المصدر: Moderation Help Center');
+const fixedOpts=(next)=>[{l:B('Fixed, continuing','اتحلت، هكمل'),go:'@continue'},{l:B('Still not working','لسه مش شغالة'),go:next,neg:1}];
+const N={
+ start:{say:B("Hi Mariam 👋 I'm the iSchool cover bot. What's the problem in your current session?","أهلاً يا مريم 👋 أنا بوت الـ Cover بتاع iSchool. إيه المشكلة اللي عندك في الـ Session دلوقتي؟"),
+  opts:[
+   {l:B('Electricity outage','الكهربا قطعت'),go:'e1',type:'Electricity'},
+   {l:B('Internet issue','مشكلة في النت'),go:'i1',type:'Internet'},
+   {l:B('Zoom issue','مشكلة في Zoom'),go:'z0',type:'Zoom'},
+   {l:B('Device / browser issue','مشكلة في الجهاز أو المتصفح'),go:'r0',type:'Device'},
+   {l:B('Personal or medical emergency','ظرف طارئ'),go:'em',type:'Emergency'},
+   {l:B('Something else','حاجة تانية'),go:'other',type:'Other'}]},
+ /* electricity */
+ e1:{say:B('Is your laptop charged enough to continue until the end of the session (19:00)?','اللاب توب مشحون كفاية تكمل لحد آخر الـ Session (الساعة 7)؟'),
+  opts:[{l:B('Yes','أيوه'),go:'e1y'},{l:B('No','لأ'),go:'e2',neg:1}]},
+ e1y:{say:B('Great. Turn on your mobile hotspot if the router is off, then continue the session. I\'ll keep this case open.','تمام. شغّل الـ Hotspot من الموبايل لو الراوتر فصل، وكمّل الـ Session عادي. هسيب الحالة مفتوحة.'),opts:[{l:B('Connected, continuing','اتصلت، هكمل'),go:'@continue'},{l:B('Hotspot not working','الـ Hotspot مش شغال'),go:'e2',neg:1}]},
+ e2:{say:()=>B(`Can you reach a nearby place with electricity and reconnect within ${CFG.rec_elec} minutes?`,`تقدر توصل لمكان قريب فيه كهربا وترجع تدخل خلال ${CFG.rec_elec} دقايق؟`),
+  opts:[{l:B('Yes, moving now','أيوه، هتحرك دلوقتي'),go:'e3'},{l:B('No','لأ'),go:'@cover:Can\'t reach power within window',cov:1}]},
+ e3:{timer:'rec_elec',say:B('Go ahead. Students are told the tutor is reconnecting. Tap below once you\'re back.','اتفضل. الطلاب هيتبلغوا إنك بترجع. دوس تحت أول ما تدخل تاني.')},
+ /* internet */
+ i1:{say:B('Can you switch from home Wi-Fi to a mobile hotspot?','تقدر تحوّل من الـ Wi-Fi للـ Hotspot من الموبايل؟'),opts:[{l:B('Yes, switched','أيوه، حوّلت'),go:'i2'},{l:B('No','لأ'),go:'i3',neg:1}]},
+ i2:{say:B('Turn off your camera and test audio with the students. Is the connection stable now?','اقفل الكاميرا وجرّب الصوت مع الطلاب. النت ثابت دلوقتي؟'),opts:[{l:B('Stable','ثابت'),go:'@continue'},{l:B('Still weak','لسه ضعيف'),go:'i3',neg:1}]},
+ i3:{timer:'rec_net',say:B('Restart the router or move closer to it. You have one recovery attempt.','اعمل Restart للراوتر أو قرّب منه. عندك محاولة واحدة للرجوع.')},
+ /* zoom */
+ z0:{say:B('Which Zoom problem?','إيه مشكلة الـ Zoom بالظبط؟'),opts:[
+   {l:B('Stuck on "Waiting for host"','واقف على Waiting for host'),go:'zl',sub:'Zoom login'},
+   {l:B('Students can\'t join (locked)','الطلاب مش عارفين يدخلوا'),go:'zk',sub:'Locked meeting'},
+   {l:B('Zoom not responding','Zoom مهنّج'),go:'zn1',sub:'Zoom not responding'},
+   {l:B('Camera not working','الكاميرا مش شغالة'),go:'zc1',sub:'Camera'},
+   {l:B('Microphone not working','المايك مش شغال'),go:'zm1',sub:'Microphone'},
+   {l:B('Students drawing on my screen','الطلاب بيشخبطوا على الشاشة'),go:'za',sub:'Annotation'}]},
+ zl:{say:B('Zoom isn\'t signed in to your iSchool account.<ol><li>Click <b>Host Sign in</b> under "Waiting for the host".</li><li>Enter your iSchool Zoom email (<code>T-8366@ischoolteams.com</code>) and password.</li></ol>Note: the email is also the password, and the <b>T</b> is a capital letter.','الـ Zoom مش مسجل دخول بحساب iSchool بتاعك.<ol><li>دوس على <b>Host Sign in</b> تحت Waiting for the host.</li><li>اكتب الـ Email بتاع Zoom (<code>T-8366@ischoolteams.com</code>) والـ Password.</li></ol>ملحوظة: الـ Email هو هو الـ Password، والـ <b>T</b> اللي في الأول Capital.'),src:1,opts:fixedOpts('zt')},
+ zk:{say:B('"Lock Meeting" was turned on, so students see "Host has locked this meeting".<ol><li>Click <b>Security</b> in the Zoom toolbar.</li><li>Untick <b>Lock Meeting</b> (first option).</li></ol>','اختيار Lock Meeting متفعل بالغلط، فالطلاب بيظهرلهم Host has locked this meeting.<ol><li>دوس على <b>Security</b> في شريط Zoom.</li><li>الغي تحديد أول اختيار <b>Lock Meeting</b>.</li></ol>'),src:1,opts:[{l:B('Students joined','الطلاب دخلوا'),go:'@continue'},{l:B('Still locked','لسه مقفول'),go:'@human:Lock persists after fix',neg:1}]},
+ zn1:{say:B('Fix 1 · Force close Zoom<ol><li>Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Esc</kbd> to open Task Manager.</li><li>Find Zoom, right-click, choose <b>End Task</b>.</li><li>Open Zoom again and rejoin.</li></ol>','الحل 1 · اقفل Zoom إجباري<ol><li>اضغط <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Esc</kbd> عشان تفتح Task Manager.</li><li>دوّر على Zoom، كليك يمين واختار <b>End Task</b>.</li><li>افتح Zoom تاني وادخل.</li></ol>'),src:1,opts:fixedOpts('zn2')},
+ zn2:{say:B('Fix 2 · Free up RAM and CPU. Close heavy apps running in the background (other browsers, games, VPN, antivirus scans), then reopen Zoom.','الحل 2 · اقفل البرامج اللي بتاخد من الرام والبروسيسور. اقفل أي حاجة تقيلة شغالة في الخلفية (متصفحات تانية، VPN، فحص Antivirus) وافتح Zoom تاني.'),src:1,opts:fixedOpts('zn3')},
+ zn3:{say:B('Fix 3 · Clear Zoom cache<ol><li>Press <kbd>Win</kbd>+<kbd>R</kbd>, type <code>%appdata%</code>, press Enter.</li><li>Delete the <b>Zoom</b> folder.</li><li>Restart the laptop and open Zoom.</li></ol>Updating or reinstalling Zoom is for after the session.','الحل 3 · امسح الملفات المؤقتة لـ Zoom<ol><li>اضغط <kbd>Win</kbd>+<kbd>R</kbd> واكتب <code>%appdata%</code> واضغط Enter.</li><li>امسح فولدر <b>Zoom</b>.</li><li>اعمل Restart للجهاز وافتح Zoom.</li></ol>تحديث أو إعادة تثبيت Zoom بعد الـ Session.'),src:1,timer:'rec_zoom'},
+ zc1:{say:B('Step 1 · In Zoom<ol><li>Click your profile picture → <b>Settings</b>.</li><li>Open <b>Video</b> and pick your camera (built-in or USB).</li></ol>','خطوة 1 · من Zoom<ol><li>دوس على صورة الـ Profile ← <b>Settings</b>.</li><li>ادخل على <b>Video</b> واختار الكاميرا (المدمجة أو USB).</li></ol>'),src:1,opts:fixedOpts('zc2')},
+ zc2:{say:B('Step 2 · In Windows<ol><li>Search <b>Camera</b> → "Choose which apps can access your camera".</li><li>Click <b>Change</b> and make sure it\'s <b>On</b>.</li><li>Turn on "Allow desktop apps to access your camera" and check Zoom is listed.</li></ol>','خطوة 2 · من Windows<ol><li>اكتب <b>Camera</b> في البحث ← Choose which apps can access your camera.</li><li>دوس <b>Change</b> واتأكد إنها <b>On</b>.</li><li>فعّل Allow desktop apps واتأكد إن Zoom ظاهر.</li></ol>'),src:1,timer:'rec_device'},
+ zm1:{say:B('Step 1 · In Zoom<ol><li>Profile picture → <b>Settings</b> → <b>Audio</b>.</li><li>Pick your microphone and raise input volume to the top.</li></ol>','خطوة 1 · من Zoom<ol><li>صورة الـ Profile ← <b>Settings</b> ← <b>Audio</b>.</li><li>اختار المايك وعلّي الصوت لآخره.</li></ol>'),src:1,opts:fixedOpts('zm2')},
+ zm2:{say:B('Step 2 · In Windows<ol><li>Search <b>Microphone</b> → "Microphone privacy settings".</li><li>Click <b>Change</b> → <b>On</b>, and allow desktop apps (Zoom listed).</li></ol>','خطوة 2 · من Windows<ol><li>اكتب <b>Microphone</b> في البحث ← Microphone privacy settings.</li><li>دوس <b>Change</b> ← <b>On</b>، وفعّل Allow desktop apps (Zoom ظاهر).</li></ol>'),src:1,timer:'rec_device'},
+ za:{say:B('Students are using Zoom Annotation while you share.<ol><li>Click <b>More</b> in the screen-share toolbar.</li><li>Choose <b>Disable annotation for others</b>.</li></ol>','الطلاب بيستخدموا Annotation وانت عامل Share.<ol><li>دوس <b>More</b> في شريط مشاركة الشاشة.</li><li>اختار <b>Disable annotation for others</b>.</li></ol>'),src:1,opts:[{l:B('Done','تمام'),go:'@continue'}]},
+ zt:{timer:'rec_zoom',say:B('Last try: sign out of Zoom, sign in again with your iSchool account, and restart the meeting.','آخر محاولة: اعمل Sign out من Zoom وادخل تاني بحساب iSchool وابدأ الميتنج من جديد.')},
+ /* random */
+ r0:{say:B('What\'s happening?','إيه اللي بيحصل؟'),opts:[
+   {l:B('Screen freezes / black share','الشاشة بتقف أو الشير أسود'),go:'g1',sub:'Graphics card'},
+   {l:B('"Join Now" doesn\'t open the session','Join Now مش بيفتح الحصة'),go:'j1',sub:'Can\'t open session'},
+   {l:B('Laptop crashed / forced update','الجهاز وقع أو Update إجباري'),go:'d1',sub:'Device failure'}]},
+ g1:{say:B('Graphics card fix 1 · Restart the driver without restarting Windows: press <kbd>Win</kbd>+<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd> in order. You\'ll hear a beep and the screen flashes.','حل كارت الشاشة 1 · اعمل إعادة تشغيل للكارت من غير Restart: اضغط بالترتيب <kbd>Win</kbd>+<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>. هتسمع صفارة والشاشة هتعمل فلاش.'),src:1,opts:fixedOpts('g2')},
+ g2:{say:B('Fix 2 · Run Zoom on the dedicated GPU<ol><li>Right-click the Zoom icon → <b>Run with graphics processor</b>.</li><li>Pick <b>High-performance NVIDIA</b> or AMD.</li></ol>Or: Settings → System → Display → <b>Graphics settings</b> → add Zoom → High performance.','الحل 2 · شغّل Zoom على الكارت المنفصل<ol><li>كليك يمين على أيقونة Zoom ← <b>Run with graphics processor</b>.</li><li>اختار <b>High-performance NVIDIA</b> أو AMD.</li></ol>أو: Settings ← System ← Display ← <b>Graphics settings</b> ← ضيف Zoom ← High performance.'),src:1,timer:'rec_device'},
+ j1:{say:B('You see "Session join time logged successfully. Opening meeting…" but nothing opens? That\'s usually an <b>Adblocker</b> in Chrome. Turn it off for the iSchool site and press Join Now again.','بيظهرلك Session join time logged successfully وبعدها الحصة مش بتفتح؟ ده غالباً بسبب الـ <b>Adblocker</b> في Chrome. اقفله لموقع iSchool ودوس Join Now تاني.'),src:1,opts:fixedOpts('j2')},
+ j2:{timer:'rec_zoom',say:B('Open the Zoom link directly from the session page, or try another browser.','افتح لينك Zoom مباشرة من صفحة الحصة، أو جرّب متصفح تاني.')},
+ d1:{timer:'rec_device',say:B('Restart and rejoin from the same laptop or a phone. If a Windows update is running, it can\'t be stopped, so tell me if it won\'t finish in time.','اعمل Restart وادخل تاني من نفس الجهاز أو من الموبايل. لو فيه Update ويندوز شغال مش هينفع يتوقف، فقولي لو مش هيخلص في الوقت.')},
+ em:{say:B('Sorry to hear that. Please take care of yourself. I\'m assigning a cover tutor now; you don\'t need to do anything else.','سلامتك. خلي بالك من نفسك، أنا هعيّن Tutor بديل دلوقتي ومش محتاج تعمل أي حاجة تانية.'),auto:'@cover:Emergency, immediate cover'},
+ other:{say:B('I couldn\'t match this to a supported issue, so I\'m handing it to a moderator. They\'ll reply in this chat.','مقدرتش أصنّف المشكلة دي، فهحوّلها لحد من فريق الـ Moderation وهيرد عليك هنا.'),auto:'@human:Unclassified issue'}
+};
+
+/* ---------- state ---------- */
+let st,clockSec=18*3600+7*60,timerInt=null,ffOn=false;
+const fmt=s=>{s=Math.floor(s);return [Math.floor(s/3600)%24,Math.floor(s/60)%60,s%60].map(n=>String(n).padStart(2,'0')).join(':')};
+const hm=s=>fmt(s).slice(0,5);
+setInterval(()=>{clockSec+= ffOn&&$('#fastff').checked?6:0.1; $('#clock').textContent=fmt(clockSec)},100);
+
+const PIPE=[['Mark session','Status → Cover Required'],['Find tutor','Eligible grade, no schedule conflict'],['Assign cover','Reserve session, block duplicates'],['Notify cover tutor','SMS: link, grade, session, time'],['Notify mentor','Original + replacement tutor'],['Update session','Replacement shown as active tutor'],['Log action','Reason, path, timestamps, outcome']];
+function drawPipe(on=-1,act=-1,notes={}){
+  $('#pipe').innerHTML=PIPE.map(([t,s],i)=>`<li class="${i<=on?'on':''} ${i===act?'act':''}"><span class="dot">${i<=on?'✓':i+1}</span><span><b>${t}</b><small>${esc(notes[i]||s)}</small></span></li>`).join('');
+}
+function setStatus(t,c){const el=$('#status');el.textContent=t;el.className='pill '+c}
+function sessCard(){
+  const rows=[['Session',SESSION.title],['Grade',SESSION.grade],['Time',SESSION.start+'–'+SESSION.end],['Active tutor',st.activeTutor],['Mentor',SESSION.mentor],['Issue',st.type?(st.type+(st.sub?' · '+st.sub:'')):'—'],['Recovery attempts',st.attempts+' / 1']];
+  $('#sessioncard').innerHTML=rows.map(([k,v])=>`<div><div class="label">${k}</div><div class="v">${esc(v)}</div></div>`).join('');
+}
+function log(text,cls=''){
+  const p=$('#path'); if(p.querySelector('.empty')) p.innerHTML='';
+  p.insertAdjacentHTML('beforeend',`<li class="${cls}"><span class="ts">${fmt(clockSec)}</span><span>${esc(text)}</span></li>`);
+  p.scrollTop=p.scrollHeight; st.path.push({at:fmt(clockSec),step:text});
+}
+function addMsg(html,cls='bot',src){
+  const c=$('#chat');const d=document.createElement('div');d.className='msg '+cls;d.innerHTML=html+(src?`<span class="src">${L(SRC)}</span>`:'');c.appendChild(d);c.scrollTop=c.scrollHeight;return d;
+}
+function typing(cb,ms=650){
+  const c=$('#chat');const t=document.createElement('div');t.className='typing';t.innerHTML='<i></i><i></i><i></i>';c.appendChild(t);c.scrollTop=c.scrollHeight;
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  setTimeout(()=>{t.remove();cb()},reduce?50:ms);
+}
+function setOpts(list){
+  const o=$('#opts');o.innerHTML='';
+  list.forEach(op=>{const b=document.createElement('button');b.className='opt'+(op.neg?' neg':'')+(op.cov?' cover':'');b.textContent=L(op.l);b.onclick=()=>choose(op);o.appendChild(b)});
+}
+
+function reset(keepSession){
+  clearInterval(timerInt);ffOn=false;$('#ff').hidden=true;
+  const prev=st;
+  st={node:null,type:null,sub:null,attempts:0,path:[],done:false,activeTutor:SESSION.tutor,reportedAt:null,recStart:null,recEnd:null,prevContinued:keepSession&&prev?prev.continued:false};
+  $('#chat').innerHTML='';$('#path').innerHTML='<li class="empty">Every bot question, answer and decision is timestamped here.</li>';
+  ['#assignbox','#notifs','#recordbox'].forEach(s=>$(s).hidden=true);
+  drawPipe();setStatus('Waiting for report','p-idle');sessCard();
+  addMsg(LANG==='ar'?`الـ Session الحالية: <b>${SESSION.grade} · ${SESSION.title}</b> (${SESSION.start}–${SESSION.end})`:`Current session: <b>${SESSION.grade} · ${SESSION.title}</b> (${SESSION.start}–${SESSION.end})`,'sys');
+  if(st.prevContinued){
+    st.reportedAt=clockSec;
+    addMsg(L(B('Reporting another problem in this session.','عندي مشكلة تانية في نفس الـ Session.')),'me');
+    log('Tutor reported a second issue in the same session','k');
+    typing(()=>{addMsg(L(B('You already used the one recovery attempt for this session, so I\'m moving straight to cover. Thanks for flagging it quickly.','انت استخدمت محاولة الرجوع الوحيدة في الـ Session دي، فهحوّل على Cover على طول. شكراً إنك بلّغت بسرعة.')));
+      st.type='Repeat issue';st.attempts=1;sessCard();cover('Repeat issue in same session')});
+    return;
+  }
+  go('start');
+}
+function go(id){
+  const n=N[id];st.node=id;
+  const say=typeof n.say==='function'?n.say():n.say;
+  typing(()=>{
+    addMsg(L(say),'bot',n.src);
+    if(id==='start'){log('Bot asked for issue type');}
+    if(n.auto){const [k,why]=n.auto.split(':');setOpts([]);setTimeout(()=>k==='@cover'?cover(why):human(why),600);return}
+    if(n.timer){startTimer(n.timer);return}
+    setOpts(n.opts||[]);
+  });
+}
+function choose(op){
+  setOpts([]);addMsg(esc(L(op.l)),'me');
+  if(st.node==='start'){st.reportedAt=clockSec;st.type=op.type;setStatus('Diagnosing','p-run');log('Tutor reported: '+op.type,'k');}
+  else if(op.sub){st.sub=op.sub;log('Issue detail: '+op.sub);}
+  else log('Answer: '+L({en:op.l.en,ar:op.l.en}));
+  sessCard();
+  if(op.go==='@continue') return resolved();
+  if(op.go.startsWith('@cover')) return typing(()=>cover(op.go.split(':')[1]));
+  if(op.go.startsWith('@human')) return typing(()=>human(op.go.split(':')[1]));
+  go(op.go);
+}
+function startTimer(key){
+  st.attempts=1;sessCard();st.recStart=clockSec;
+  const mins=CFG[key]+(key==='rec_elec'?CFG.grace:0);
+  const total=mins*60;const start=clockSec;
+  log(`Recovery window started: ${CFG[key]} min`+(key==='rec_elec'?` + ${CFG.grace} min grace`:''),'k');
+  setStatus('Recovery window','p-warn');ffOn=true;$('#ff').hidden=!$('#fastff').checked;
+  const box=addMsg('','timerbox');box.className='timerbox';
+  const C=2*Math.PI*24;
+  box.innerHTML=`<svg class="ring" viewBox="0 0 56 56" aria-hidden="true"><circle class="bgc" cx="28" cy="28" r="24"/><circle class="fgc" cx="28" cy="28" r="24" stroke-dasharray="${C}" stroke-dashoffset="0" transform="rotate(-90 28 28)"/></svg><div><div class="big mono" id="tleft">${mins}:00</div><small>${L(B('Recovery time left. Cover starts automatically when it runs out.','الوقت المتبقي للرجوع. الـ Cover هيبدأ تلقائي لما يخلص.'))}</small></div>`;
+  setOpts([{l:B("I'm back, continuing",'رجعت، هكمل'),go:'@continue'},{l:B("I can't continue",'مش هقدر أكمل'),go:'@cover:Tutor confirmed can\'t continue',cov:1}]);
+  timerInt=setInterval(()=>{
+    const left=Math.max(0,total-(clockSec-start));
+    const t=box.querySelector('#tleft');if(t)t.textContent=`${Math.floor(left/60)}:${String(Math.floor(left%60)).padStart(2,'0')}`;
+    box.querySelector('.fgc').setAttribute('stroke-dashoffset',C*(1-left/total));
+    $('#ff').hidden=!$('#fastff').checked;
+    if(left<=0){clearInterval(timerInt);ffOn=false;$('#ff').hidden=true;setOpts([]);
+      addMsg(L(B('The recovery window has ended.','وقت الرجوع خلص.')),'sys');
+      cover('Recovery window exceeded');}
+  },100);
+}
+function endRecovery(){clearInterval(timerInt);if(ffOn){st.recEnd=clockSec}ffOn=false;$('#ff').hidden=true;}
+function resolved(){
+  endRecovery();st.done=true;st.continued=true;
+  log('Session continues; resolved without cover','gd');setStatus('Resolved · no cover','p-good');
+  typing(()=>{addMsg(L(B('Great, glad it\'s working. The case is logged as resolved without cover. If anything else breaks in this session, report it here and I\'ll assign cover right away.','تمام، كويس إنها اتحلت. الحالة اتسجلت إنها اتحلت من غير Cover. لو حصلت أي مشكلة تانية في الـ Session دي بلّغني هنا وهعيّن Cover على طول.')),'ok');
+    setOpts([{l:B('Report another issue in this session','عندي مشكلة تانية في نفس الـ Session'),go:'@again',cov:1},{l:B('Start a new case','حالة جديدة'),go:'@new',neg:1}]);
+    $('#opts').querySelectorAll('.opt').forEach((b,i)=>b.onclick=()=>reset(i===0));
+  });
+}
+function human(why){
+  endRecovery();setStatus('Escalated to moderator','p-warn');log('Escalated to human moderator: '+why,'k');
+  addMsg(L(B('A moderator has been notified and will join this chat.','تم تبليغ حد من فريق الـ Moderation وهينضم للشات.')),'sys');
+  setOpts([{l:B('Start a new case','حالة جديدة'),go:'@new',neg:1}]);$('#opts .opt').onclick=()=>reset(false);
+}
+
+/* ---------- cover pipeline ---------- */
+const wait=ms=>new Promise(r=>setTimeout(r,matchMedia('(prefers-reduced-motion: reduce)').matches?80:ms));
+async function cover(reason){
+  endRecovery();st.done=true;st.reason=reason;st.coverAt=clockSec;
+  setStatus('Cover required','p-bad');log('Decision: COVER REQUIRED ('+reason+')','cv');
+  addMsg(L(B('Cover required. I\'m assigning an eligible tutor now. Please stay in the meeting if you can until they join.','الـ Session محتاجة Cover. بعيّن Tutor مؤهل دلوقتي، ولو تقدر خليك في الميتنج لحد ما يدخل.')),'alert');
+  setOpts([]);
+  drawPipe(-1,0);await wait(700);drawPipe(0,1);log('Session status → Cover Required');
+  $('#assignbox').hidden=false;
+  const rows=TUTORS.map(t=>({...t,state:''}));
+  const render=()=>$('#cands').innerHTML=`<tr><th>Tutor</th><th>Grades</th><th>Grade match</th><th>Free at ${SESSION.start}</th><th>Result</th></tr>`+rows.map(t=>`<tr class="${t.state}"><td><b>${t.id}</b> ${esc(t.name)}</td><td class="mono">${t.grades}</td><td class="${t.elig?'yes':'no'}">${t.elig?'Yes':'No'}</td><td class="${t.busy?'no':'yes'}">${t.busy?'No':'Yes'}</td><td>${esc(t.res||'…')}</td></tr>`).join('');
+  render();
+  for(const t of rows){await wait(320);if(!t.elig||t.busy){t.state='skip';t.res=t.why}else t.res=t.why;render();}
+  const pool=rows.filter(t=>t.elig&&!t.busy);
+  let pick=pool[0];
+  log(`Eligible tutors found: ${pool.length}`);
+  drawPipe(1,2);await wait(600);
+  if($('#noanswer').checked){
+    pick.state='skip';pick.res=`Reserved, no accept in ${CFG.accept_timeout} min`;render();
+    log(`Offered to ${pick.id}; no response in ${CFG.accept_timeout} min, released`);
+    clockSec+=CFG.accept_timeout*60;await wait(700);pick=pool[1];
+  }
+  pick.state='sel';pick.res='Assigned ✓';render();
+  st.coverTutor=pick.id+' · '+pick.name;log('Reserved session for '+st.coverTutor,'k');
+  drawPipe(2,3);await wait(600);
+  $('#notifs').hidden=false;
+  $('#sms-tutor').innerHTML=`<div class="meta">SMS → ${pick.id} · ${fmt(clockSec)}</div><b>Cover Session Request</b>You have been assigned to cover a session.<br>Grade: ${SESSION.grade}<br>Session: ${esc(SESSION.title)}<br>Start Time: ${SESSION.start} (in progress)<br>Join Link: <span class="mono">${SESSION.link}</span><br>Please join as soon as possible.`;
+  st.notifiedAt=clockSec;log('SMS sent to cover tutor');
+  drawPipe(3,4);await wait(600);
+  $('#sms-mentor').innerHTML=`<div class="meta">Notification → ${SESSION.mentor} · ${fmt(clockSec)}</div><b>Cover confirmed</b>${SESSION.grade} · ${esc(SESSION.title)}<br>Original tutor: ${esc(SESSION.tutor)}<br>Replacement: ${esc(st.coverTutor)}<br>Reason: ${esc(st.type||'')}${st.sub?' · '+esc(st.sub):''} — ${esc(reason)}`;
+  log('Mentor notified');
+  drawPipe(4,5);await wait(600);
+  st.activeTutor=st.coverTutor+' (cover)';sessCard();log('Active tutor updated to replacement');
+  drawPipe(5,6);await wait(600);
+  clockSec+=4*60+10;st.joinedAt=clockSec;
+  log(pick.id+' joined the session','gd');
+  drawPipe(6,-1,{6:'Saved to cover log · dashboard updated'});
+  setStatus('Covered','p-good');
+  addMsg(L(B(`${pick.name} has joined and taken over the session. Thanks, Mariam. Feel better soon.`,`${pick.name} دخل واستلم الـ Session. شكراً يا مريم.`)),'ok');
+  const rec={session_id:SESSION.id,session_datetime:'2026-10-06 '+SESSION.start,grade:SESSION.grade,session_title:SESSION.title,original_tutor:SESSION.tutor,mentor:SESSION.mentor,issue_type:st.type+(st.sub?' / '+st.sub:''),decision_path:st.path.map(p=>p.at+' '+p.step),issue_reported_at:st.reportedAt?fmt(st.reportedAt):null,recovery_started_at:st.recStart?fmt(st.recStart):null,recovery_ended_at:st.recStart?fmt(st.coverAt):null,cover_decision_at:fmt(st.coverAt),cover_tutor:st.coverTutor,cover_notified_at:fmt(st.notifiedAt),cover_joined_at:fmt(st.joinedAt),final_status:'COVERED',resolved_without_cover:false,repeat_issue:st.type==='Repeat issue'};
+  $('#recordbox').hidden=false;$('#record').textContent=JSON.stringify(rec,null,2);
+  todayExtra++;renderAna();
+  setOpts([{l:B('Start a new case','حالة جديدة'),go:'@new'}]);$('#opts .opt').onclick=()=>reset(false);
+}
+
+$('#restart').onclick=()=>reset(false);
+function setLang(l){LANG=l;$('#lang-ar').setAttribute('aria-pressed',l==='ar');$('#lang-en').setAttribute('aria-pressed',l==='en');
+  $('#chat').dir=$('#opts').dir=l==='ar'?'rtl':'ltr';$('#bot-sub').textContent=l==='ar'?'بيرد فوراً':'Usually replies instantly';reset(false);}
+$('#lang-ar').onclick=()=>setLang('ar');$('#lang-en').onclick=()=>setLang('en');
+
+/* ---------- tabs ---------- */
+const tabs=[...document.querySelectorAll('[role=tab]')];
+function showTab(id){tabs.forEach(t=>{const on=t.id===id;t.setAttribute('aria-selected',on);$('#'+t.getAttribute('aria-controls')).hidden=!on});}
+tabs.forEach(t=>t.onclick=()=>{showTab(t.id);try{localStorage.setItem('scb-tab',t.id)}catch(e){}});
+try{const s=localStorage.getItem('scb-tab');if(s&&$('#'+s))showTab(s)}catch(e){}
+const hashMap={simulator:'tab-sim',analytics:'tab-ana',configuration:'tab-cfg',library:'tab-spec'};
+if(hashMap[location.hash.slice(1)])showTab(hashMap[location.hash.slice(1)]);
+
+/* ---------- script library ---------- */
+const LIB=[
+ ['Zoom login','Zoom','Stuck on "Waiting for host": sign in via Host Sign in with the iSchool Zoom email; capital T.'],
+ ['Locked meeting','Zoom','Students see "Host has locked this meeting": Security → untick Lock Meeting.'],
+ ['Zoom not responding','Zoom','Force close (Ctrl+Shift+Esc → End Task), close heavy apps, clear %appdata%\\Zoom, update or reinstall.'],
+ ['Camera activation','Zoom','Settings → Video → pick camera; Windows "Choose which apps can access your camera" → On.'],
+ ['Microphone activation','Zoom','Settings → Audio → pick mic, max volume; Windows Microphone privacy → On.'],
+ ['Students drawing on screen','Zoom','More → Disable annotation for others while sharing.'],
+ ['Graphics card','Random','Win+Ctrl+Shift+B to restart driver; run Zoom on high-performance GPU; reinstall driver with DDU after session.'],
+ ['Session won\'t open','Random','"Session join time logged… Opening meeting" then nothing: disable the Chrome Adblocker.'],
+ ['Electricity outage','Bot flow','Battery check → hotspot → move to a powered place within the recovery window, else cover.'],
+ ['Internet issue','Bot flow','Switch to hotspot → camera off, test audio → recovery window, else cover.']
+];
+$('#lib').innerHTML=LIB.map(([t,g,d])=>`<div class="card"><h4>${esc(t)} <span class="tag ${g==='Random'?'r':''}">${g}</span></h4><p>${esc(d)}</p></div>`).join('');
+
+/* ---------- analytics (sample) ---------- */
+let todayExtra=0;
+const ISSUES=['Internet','Electricity','Zoom not responding','Device / graphics','Camera / mic','Emergency','Other'];
+$('#f-issue').innerHTML+=ISSUES.map(i=>`<option>${i}</option>`).join('');
+function rng(seed){let s=seed%2147483647;if(s<=0)s+=2147483646;return()=>(s=s*16807%2147483647)/2147483647}
+const hash=str=>[...str].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
+const tip=$('#tip');
+function showTip(e,html){tip.innerHTML=html;tip.hidden=false;tip.style.left=Math.min(innerWidth-160,e.clientX+12)+'px';tip.style.top=(e.clientY-36)+'px'}
+function renderAna(){
+  const days=+$('#f-range').value,g=$('#f-grade').value,iss=$('#f-issue').value,out=$('#f-out').value;
+  const r=rng(hash(g+iss+out)+days);
+  const scale=(g==='all'?1:0.22)*(iss==='all'?1:0.2)*(out==='rec'?1.6:1);
+  const today=new Date(2026,9,6);
+  const data=[];for(let i=days-1;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);const wk=d.getDay();const base=(wk===5?6:wk===6||wk===4?16:12);let v=Math.max(0,Math.round((base+r()*9-3)*scale));if(i===0)v+=todayExtra;data.push({d,v,label:d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}),wd:d.toLocaleDateString('en-GB',{weekday:'short'})})}
+  const total=data.reduce((a,b)=>a+b.v,0);
+  const hi=data.reduce((a,b)=>b.v>a.v?b:a),lo=data.reduce((a,b)=>b.v<a.v?b:a);
+  const sessions=Math.round(410*(g==='all'?1:.22));
+  const todayV=data[data.length-1].v;
+  const k=[
+    ['Covered sessions today',todayV,`of ${sessions} sessions today`,1],
+    ['Cover rate',(todayV/sessions*100).toFixed(1)+'%','covered ÷ total sessions'],
+    ['Recovered without cover',Math.round(58+r()*10)+'%','issues the bot solved'],
+    ['Avg cover assignment',`1m ${String(30+Math.round(r()*25)).padStart(2,'0')}s`,'decision → tutor assigned'],
+    ['Avg cover join time',`4m ${String(Math.round(r()*50)).padStart(2,'0')}s`,'assigned → tutor joined'],
+    ['Highest cover day',hi.v,`${hi.wd} ${hi.label}`],
+    ['Lowest cover day',lo.v,`${lo.wd} ${lo.label}`]
+  ];
+  $('#kpis').innerHTML=k.map(([l,n,d,h])=>`<div class="card kpi${h?' hl':''}"><div class="label">${l}</div><div class="n">${n}</div><div class="d">${d}</div></div>`).join('');
+  $('#bydaysub').textContent=`${total} covered sessions in the last ${days} days · highest and lowest days marked`;
+  // bar chart
+  const W=640,H=230,pl=30,pb=26,pt=10,max=Math.max(4,Math.ceil(hi.v/5)*5);
+  const bw=(W-pl)/data.length;const y=v=>pt+(H-pt-pb)*(1-v/max);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Covered sessions by day"><g class="grid">`;
+  for(let t=0;t<=max;t+=max/5){s+=`<line x1="${pl}" x2="${W}" y1="${y(t)}" y2="${y(t)}"/><text x="${pl-6}" y="${y(t)+4}" text-anchor="end">${t}</text>`}
+  s+='</g>';
+  const every=Math.ceil(data.length/10);
+  data.forEach((p,i)=>{const x=pl+i*bw+bw*.18,w=Math.max(2,bw*.64),h=Math.max(0,H-pb-y(p.v));const cls=p===hi?'hi':p===lo?'lo':'';
+    const r4=Math.min(4,w/2,h);
+    s+=`<g class="b" data-i="${i}"><rect class="hit" x="${pl+i*bw}" y="${pt}" width="${bw}" height="${H-pt-pb}" fill="transparent"/><path class="bar ${cls}" d="M${x},${H-pb} V${y(p.v)+r4} Q${x},${y(p.v)} ${x+r4},${y(p.v)} H${x+w-r4} Q${x+w},${y(p.v)} ${x+w},${y(p.v)+r4} V${H-pb} Z"/></g>`;
+    if(i%every===0||i===data.length-1)s+=`<text x="${x+w/2}" y="${H-8}" text-anchor="middle">${p.label}</text>`;
+    if(p===hi)s+=`<text x="${x+w/2}" y="${y(p.v)-5}" text-anchor="middle" style="font-weight:700;fill:var(--fg)">${p.v}</text>`;
+  });
+  s+='</svg>';$('#byday').innerHTML=s;
+  $('#byday').querySelectorAll('g.b').forEach(gg=>{const p=data[+gg.dataset.i];gg.onmousemove=e=>showTip(e,`<b>${p.wd} ${p.label}</b><br>${p.v} covered${p===hi?' · highest':p===lo?' · lowest':''}`);gg.onmouseleave=()=>tip.hidden=true});
+  // reasons
+  const wts=[34,22,15,11,8,6,4].map(w=>w+r()*4);const tot=wts.reduce((a,b)=>a+b,0);
+  const reasons=ISSUES.map((n,i)=>({n,v:iss==='all'||iss===n?wts[i]/tot*100:0})).filter(x=>x.v>0);
+  const rt=reasons.reduce((a,b)=>a+b.v,0);
+  $('#reasons').innerHTML=reasons.map(x=>{const pct=x.v/rt*100;return `<div class="hb"><span>${x.n}</span><span class="tr"><span class="fl" style="width:${pct}%"></span></span><span class="num">${Math.round(pct)}%</span></div>`}).join('');
+  // tutors
+  const names=['T-8455 Karim Fathy','T-9013 Salma Reda','T-9310 Hana Mostafa','T-7811 Ali Hassan','T-8890 Dina Wael','T-7342 Mohamed Tarek'];
+  const cv=names.map(n=>({n,v:Math.max(1,Math.round((4+r()*14)*scale*(days/14)))})).sort((a,b)=>b.v-a.v);const mx=cv[0].v;
+  $('#bytutor').innerHTML='<tr><th>Cover tutor</th><th style="text-align:end">Covers</th></tr>'+cv.map(x=>`<tr><td>${x.n}</td><td class="n">${x.v}<span class="minibar" style="width:${x.v/mx*70}px"></span></td></tr>`).join('');
+  const orig=['T-8366 Mariam Adel','T-8021 Ahmed Samy','T-9120 Rana Ehab','T-7655 Hossam Ali','T-8704 Laila Nabil'];
+  const ov=orig.map(n=>({n,v:Math.max(1,Math.round((2+r()*8)*scale*(days/14))),top:ISSUES[Math.floor(r()*4)]})).sort((a,b)=>b.v-a.v);const mo=ov[0].v;
+  $('#byorig').innerHTML='<tr><th>Original tutor</th><th>Top reason</th><th style="text-align:end">Incidents</th></tr>'+ov.map(x=>`<tr><td>${x.n}</td><td>${x.top}</td><td class="n">${x.v}<span class="minibar" style="width:${x.v/mo*60}px;background:var(--orange-500)"></span></td></tr>`).join('');
+  const rep=[['T-8021 Ahmed Samy','Today','3 sessions','Internet','Later sessions reassigned','p-bad'],['T-9120 Rana Ehab','Today','2 sessions','Electricity','Flagged for review','p-warn'],['T-7655 Hossam Ali','Yesterday','2 sessions','Zoom not responding','Reviewed · device check','p-good']];
+  $('#repeat').innerHTML='<tr><th>Tutor</th><th>Day</th><th>Interrupted</th><th>Issue</th><th>Action</th></tr>'+rep.map(x=>`<tr><td>${x[0]}</td><td>${x[1]}</td><td>${x[2]}</td><td>${x[3]}</td><td><span class="pill ${x[5]}">${x[4]}</span></td></tr>`).join('');
+}
+['#f-range','#f-grade','#f-issue','#f-out'].forEach(s=>$(s).addEventListener('change',renderAna));
+renderAna();
+$('#chat').dir=$('#opts').dir='rtl';
+reset(false);
+})();
+</script>
+
+</body>
+</html>
