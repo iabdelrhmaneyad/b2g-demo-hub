@@ -1,54 +1,48 @@
-# منصة عروض ونماذج آي سكول الحكومية (iSchool B2G Demo Hub) 🚀
-> البوابة الموحدة لعروض وأنظمة مشاريع القطاع الحكومي والمبادرات القومية
+# iSchool B2G Demo Hub 🚀
+
+> A unified portal for live interactive demos of iSchool government initiatives (B2G), automated tools, and operational systems.
 
 ---
 
-## 🌟 نظرة عامة
+## 🌟 Overview
 
-منصة موحدة وبسيطة تجمع العروض التفاعلية والنماذج الحية لمشاريع وأنظمة قطاع الأعمال الحكومي (**B2G**) والمبادرات القومية التابعة لوزارة الاتصالات وتكنولوجيا المعلومات (**براعم ورواد مصر الرقمية DECI & DEBI**) من تطوير شركة **iSchool**.
+The **iSchool B2G Demo Hub** is a lightweight, clean, and interactive showcase of digital systems and operational prototypes built for government initiatives (including the Digital Egypt Cubs and Youth Initiatives — **DECI** & **DEBI**).
 
-تم بناء المنصة بالكامل بتصميم أبيض خفيف وسريع يعمل 100% داخل المتصفح (Client-Side) بدون الحاجة إلى أي خوادم أو إعدادات مسبقة، ومستضافة مباشرة عبر **GitHub Pages**.
+Built with a **100% client-side architecture**, all demos run directly in the browser with zero server setup or dependencies, hosted live via **GitHub Pages**.
 
-🔗 **رابط المنصة المباشر:** [https://iabdelrhmaneyad.github.io/b2g-demo-hub/](https://iabdelrhmaneyad.github.io/b2g-demo-hub/)
-
----
-
-## 📂 الأنظمة والمشاريع المتضمنة (5 مشاريع)
-
-| # | اسم المشروع | المسار | الوصف |
-|---|-------------|--------|-------|
-| 1 | **مولد تقارير الطلاب الذكي (Student Reports Generator)** | `demos/reports-gen/` | معالج تفاعلي ذكي لقراءة قواعد بيانات الإكسيل الضخمة (أكثر من 70 ألف صف) وتعبئة قوالب الوورد الرسمية (DOCX) مع تصفية الطلاب المستمرين والمستبعدين ومعاينة حية للمستند. |
-| 2 | **إجراءات الجلسات الجماعية – المجموعات (Sessions Bulk Actions – Groups)** | `demos/sessions-groups/` | واجهة تشغيلية متطورة لتحديد مجموعات التدريب وتنفيذ الإجراءات الجماعية: تغيير المواعيد، تبديل المدربين، وإدارة الحالات بنقرة واحدة. |
-| 3 | **تقرير ختام الجلسات والملخص الأسبوعي (Sessions Conclusion Report)** | `demos/sessions-conclusion/` | لوحة مؤشرات وتحليلات أسبوعية تنفيذية لمتابعة نسب حضور وغياب الطلاب، ملاحظات المدربين، ومؤشرات الأداء التشغيلي. |
-| 4 | **منصة آي سكول بيديا التفاعلية (iSchool-Pedia Prototype)** | `demos/ischool-pedia/` | نموذج تفاعلي متعدد الشاشات للموسوعة المعرفية، أدلة المناهج التعليمية، والبروتوكولات التشغيلية بدعم اللغتين العربية والإنجليزية. |
-| 5 | **بوت تغطية الجلسات الذكي (Session Cover Bot)** | `demos/session-cover-bot/` | محاكي بوت ذكي لإدارة وتنسيق طلبات تغطية الجلسات الطارئة للمدربين، تشخيص الأعطال، وتعيين البديل المناسب تلقائياً مع لوحة تحليلات وإشعارات. |
+🔗 **Live Portal:** [https://iabdelrhmaneyad.github.io/b2g-demo-hub/](https://iabdelrhmaneyad.github.io/b2g-demo-hub/)
 
 ---
 
-## 🛠️ البنية التقنية ومميزات المنصة
+## 📂 Included Systems & Demos (5 Projects)
 
-- **واجهة بسيطة وتصميم أبيض مريح (Clean White Theme)**: تصميم عصري وبسيط يركز على سهولة الوصول والتجربة المباشرة.
-- **تشغيل محلي بالكامل (100% Client-Side)**: أمان كامل وخصوصية تامة لبيانات الطلاب بدون إرسال أي بيانات لخوادم خارجية.
-- **معاينة مدمجة وفتح مباشر**: إمكانية استعراض أي نظام داخل نافذة معاينة سريعة أو فتحه في تبويبة مستقلة.
-- **نشر تلقائي عبر GitHub Actions**: تحديث فوري للموقع على GitHub Pages مع كل تحديث جديد.
+| # | Project | Directory | Description | Live Demo |
+|---|---------|-----------|-------------|-----------|
+| 1 | **Student Reports Generator** | `demos/reports-gen/` | Automated engine parsing large Excel databases (70K+ rows) into official Word (DOCX) reports with active/revoke student filtering and live document preview. | [Launch Demo](https://iabdelrhmaneyad.github.io/b2g-demo-hub/demos/reports-gen/index.html) |
+| 2 | **Sessions Bulk Actions – Groups** | `demos/sessions-groups/` | Operations management interface for batch-selecting training groups, updating session schedules, reallocating trainers, and applying bulk actions. | [Launch Demo](https://iabdelrhmaneyad.github.io/b2g-demo-hub/demos/sessions-groups/index.html) |
+| 3 | **Sessions Conclusion Report** | `demos/sessions-conclusion/` | Executive weekly summary dashboard tracking student attendance rates, trainer feedback, completion metrics, and operational performance. | [Launch Demo](https://iabdelrhmaneyad.github.io/b2g-demo-hub/demos/sessions-conclusion/index.html) |
+| 4 | **iSchool-Pedia Prototype** | `demos/ischool-pedia/` | Interactive multi-screen prototype showcasing the centralized knowledge repository, curriculum guidelines, and bilingual documentation. | [Launch Demo](https://iabdelrhmaneyad.github.io/b2g-demo-hub/demos/ischool-pedia/index.html) |
+| 5 | **Session Cover Bot** | `demos/session-cover-bot/` | Automated session cover simulator handling tutor issue triage, timed recovery attempts, eligible tutor replacement, and case escalation workflows. | [Launch Demo](https://iabdelrhmaneyad.github.io/b2g-demo-hub/demos/session-cover-bot/index.html) |
 
 ---
 
-## 🚀 طريقة التشغيل والنشر
+## 🛠️ Key Highlights
 
-### التشغيل المحلي:
-يمكن فتح ملف `index.html` مباشرة في أي متصفح، أو تشغيل خادم محلي خفيف:
+- **Clean & Minimalist Design**: Modern white theme built with Plus Jakarta Sans typography.
+- **100% Client-Side Privacy**: All student data processing and Excel parsing occurs locally in the browser with no external server transmission.
+- **Embedded Live Preview**: Test and explore any demo within the integrated modal or open directly in a new window.
+- **Continuous Deployment**: Automated GitHub Actions workflow deploys updates directly to GitHub Pages on every push.
+
+---
+
+## 🚀 Running Locally
+
+You can open `index.html` directly in any web browser, or serve it locally with:
+
 ```bash
 npx serve .
 ```
 
-### النشر والتحديث على GitHub Pages:
-```bash
-git add .
-git commit -m "Update B2G Demo Hub"
-git push origin main
-```
-
 ---
 
-© 2026 iSchool B2G Systems Division. جميع الحقوق محفوظة.
+© 2026 iSchool B2G Systems Division. All rights reserved.
