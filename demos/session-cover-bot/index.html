@@ -27,8 +27,9 @@
   --r:12px;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.5;margin:0}
-button,input,select{font:inherit;color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:3px solid var(--yellow-400);outline-offset:2px}
 .wrap{max-width:1240px;margin:0 auto;padding-inline:20px}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
@@ -239,6 +240,197 @@ table.t td.n{text-align:end}
 .tag.r{background:var(--warn-soft);color:var(--warn)}
 .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px 16px;font-size:13px;margin:0;padding:0;list-style:none}
 .fields li{padding:6px 0;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px}
+/* flow editor — canvas + inspector */
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.danger{color:var(--bad);border-color:#f3c4c4}
+.btn.sm{padding:5px 10px;font-size:12.5px}
+.fe-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.fe-top h2{margin:0;font-size:20px;font-weight:800}
+.fe-top p{margin:2px 0 0;color:var(--fg-2);font-size:13.5px;max-width:62ch}
+.fe-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.menu{position:relative}
+.menu summary{list-style:none;cursor:pointer}
+.menu summary::-webkit-details-marker{display:none}
+.menu-pop{position:absolute;inset-inline-end:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:6px;min-width:200px;z-index:30;display:flex;flex-direction:column}
+.menu-pop button{border:0;background:none;text-align:start;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13.5px;color:var(--fg)}
+.menu-pop button:hover{background:var(--surface-2)}
+.menu-pop button.d{color:var(--bad)}
+.fe-health{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:600;border:0;cursor:pointer}
+.fe-health.ok{background:var(--good-soft);color:var(--good);cursor:default}
+.fe-health.bad{background:var(--warn-soft);color:var(--warn)}
+.fe-issues{margin:0 0 12px;padding:10px 14px 10px 32px;background:var(--warn-soft);border-radius:12px;font-size:13px;color:var(--fg)}
+.fe-issues li{margin:3px 0}
+.fe-issues button{border:0;background:none;color:var(--warn);text-decoration:underline;cursor:pointer;font:inherit;font-weight:700;padding:0}
+.fe-confirm{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border:1px solid #f3c4c4;background:var(--bad-soft);border-radius:12px;margin-bottom:12px;font-size:13.5px}
+.fe-confirm span{flex:1;min-width:200px}
+.fe-import{padding:14px;margin-bottom:12px}
+.fe-import textarea{width:100%;min-height:140px;font-family:var(--mono);font-size:12px;border:1px solid var(--border);border-radius:10px;padding:10px;resize:vertical}
+.fe-import .row{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.fe-import .err{color:var(--bad);font-size:12.5px}
+.fe2{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;align-items:stretch}
+@media (max-width:1000px){.fe2{grid-template-columns:1fr}}
+.fc-card{display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.fc-tools{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.fc-chips{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;flex:1;min-width:0;scrollbar-width:thin;padding-bottom:2px}
+.fc-chip{border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--fg-2);white-space:nowrap}
+.fc-chip:hover{border-color:var(--accent);color:var(--fg)}
+.fc-chip[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+.fc-jump{border:1px solid var(--border);border-radius:9px;padding:6px 8px;font-size:12.5px;background:var(--surface);max-width:200px}
+.fc-stage{position:relative}
+.fc-zoom{position:absolute;right:12px;bottom:12px;z-index:5;display:inline-flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);background:#fff}
+.fc-zoom button{border:0;background:var(--surface);padding:6px 10px;cursor:pointer;font-weight:700;font-size:13px;color:var(--fg-2)}
+.fc-zoom button:hover{background:var(--surface-2)}
+.fc-zoom span{padding:6px 8px;font-family:var(--mono);font-size:11.5px;color:var(--fg-2);border-inline:1px solid var(--border);min-width:48px;text-align:center}
+.fc-view{position:relative;height:640px;overflow:auto;background-color:#fbfcfe;background-image:radial-gradient(#dfe7f1 1px,transparent 1px);background-size:20px 20px;cursor:grab}
+.fc-view.drag{cursor:grabbing;user-select:none}
+.fc-scale{position:relative}
+.fc-inner{position:absolute;left:0;top:0;transform-origin:0 0}
+.fc-inner svg{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+.fc-edge{fill:none;stroke:#b7c5d6;stroke-width:1.6}
+.fc-edge.cov{stroke:#e9a3a3}
+.fc-arrow{fill:#b7c5d6}
+.fc-node{position:absolute;box-sizing:border-box;border-radius:12px;background:#fff;border:1.5px solid #d5e0ec;padding:9px 12px 10px;cursor:pointer;box-shadow:0 1px 2px rgba(31,42,86,.05);transition:box-shadow .15s,border-color .15s}
+.fc-node:hover{border-color:var(--blue-300);box-shadow:0 4px 14px rgba(31,42,86,.08)}
+.fc-node.sel{border-color:var(--blue-500);box-shadow:0 0 0 4px rgba(4,109,237,.15)}
+.fc-node.timer{border-style:dashed;border-color:#f0c873;background:#fffbf1}
+.fc-node.end{background:#fff6f6;border-color:#f1c4c4}
+.fc-node.start{background:var(--navy);border-color:var(--navy);color:#fff;border-radius:46px;text-align:center;padding-inline:22px}
+.fc-node.start .fc-k,.fc-node.start .fc-s{color:#c9d6f2;justify-content:center}
+.fc-node.start .fc-t{color:#fff}
+.fc-k{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--fg-3)}
+.fc-k .g{margin-inline-start:auto;font-weight:600;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px}
+.fc-k{white-space:nowrap}
+.fc-ic{display:inline-grid;place-items:center;width:16px;height:16px}
+.fc-ic svg{width:14px;height:14px}
+.fc-t{font-weight:700;font-size:13.5px;line-height:1.25;margin-top:3px;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fc-s{font-size:11.5px;color:var(--fg-2);line-height:1.35;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.fc-dot{position:absolute;top:-5px;inset-inline-end:-5px;width:12px;height:12px;border-radius:50%;background:var(--orange-500);border:2px solid #fff}
+.fc-btn{position:absolute;width:24px;height:24px;border-radius:50%;border:1.5px solid #d5e0ec;background:#fff;display:grid;place-items:center;cursor:pointer;font-weight:800;font-size:14px;line-height:1;color:var(--fg-2);opacity:0;transition:opacity .15s;padding:0}
+.fc-node:hover .fc-btn,.fc-node.sel .fc-btn{opacity:1}
+.fc-btn:hover{border-color:var(--blue-500);color:var(--blue-500)}
+.fc-btn.add{left:50%;bottom:-13px;transform:translateX(-50%);background:var(--blue-500);border-color:var(--blue-500);color:#fff}
+.fc-btn.col{top:-12px;inset-inline-start:-12px;font-size:12px}
+.fc-more{position:absolute;border:1px dashed #b7c5d6;background:#fff;border-radius:999px;font-size:11.5px;font-weight:600;color:var(--fg-2);padding:4px 10px;cursor:pointer;transform:translateX(-50%);white-space:nowrap}
+.fc-more:hover{border-color:var(--blue-500);color:var(--blue-500)}
+.fc-lab{position:absolute;box-sizing:border-box;border:1px solid #cfe0f5;background:#f1f7ff;color:var(--accent-ink);border-radius:999px;font-size:11.5px;font-weight:600;padding:3px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;cursor:pointer;line-height:1.4}
+.fc-lab.neg{background:#f4f6f9;border-color:#e1e7ee;color:var(--fg-2)}
+.fc-lab.cov{background:#fff2f2;border-color:#f3cccc;color:var(--bad)}
+.fc-lab:hover{border-color:var(--blue-500)}
+.fc-out{position:absolute;box-sizing:border-box;border-radius:999px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer}
+.fc-out::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.fc-out.continue{background:var(--good-soft);color:var(--good);border:1.5px solid #bfe8cd}
+.fc-out.cover{background:var(--bad-soft);color:var(--bad);border:1.5px solid #f3cccc}
+.fc-out.human{background:var(--warn-soft);color:var(--warn);border:1.5px solid #f6dca5}
+.fc-link{position:absolute;box-sizing:border-box;border:1.5px dashed #b7c5d6;background:#fff;border-radius:10px;font-size:11.5px;font-weight:600;color:var(--fg-2);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 10px}
+.fc-link:hover{border-color:var(--blue-500);color:var(--blue-500)}
+.fc-legend{display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding:9px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--fg-2)}
+.fc-legend i{display:inline-block;width:14px;height:10px;border-radius:3px;margin-inline-end:6px;vertical-align:-1px;border:1.5px solid #d5e0ec;background:#fff}
+.fc-legend i.t{border-style:dashed;border-color:#f0c873;background:#fffbf1}
+.fc-legend i.e{border-color:#f1c4c4;background:#fff6f6}
+.fc-legend i.s{background:var(--navy);border-color:var(--navy);border-radius:6px}
+.fc-legend .tip2{margin-inline-start:auto;color:var(--fg-3)}
+.fc-orph{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 14px;border-top:1px solid var(--border);background:var(--warn-soft);font-size:12.5px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:999px;padding:4px 10px;font-size:12.5px;background:var(--surface);cursor:pointer;color:var(--fg)}
+.chip:hover{border-color:var(--accent)}
+.chip i{font-style:normal;color:var(--fg-3)}
+/* inspector */
+.fi{display:flex;flex-direction:column;max-height:760px;overflow:hidden;position:sticky;top:76px}
+@media (max-width:1000px){.fi{max-height:none}}
+.fi-head{padding:14px 16px 12px;border-bottom:1px solid var(--border)}
+.fi-kicker{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--fg-3)}
+.fi-kicker code{font-family:var(--mono);text-transform:none;letter-spacing:0;font-weight:500;background:var(--surface-2);border-radius:5px;padding:1px 6px}
+.fi-kicker .sp{flex:1}
+.fi-name{width:100%;font-size:18px;font-weight:800;border:1px solid transparent;border-radius:8px;padding:4px 8px;margin:6px 0 0 -8px;background:transparent;color:var(--fg)}
+.fi-name:hover,.fi-name:focus{border-color:var(--border);background:var(--surface-2)}
+.fi-body{overflow-y:auto;flex:1}
+.fi-sec{padding:14px 16px;border-bottom:1px solid var(--border)}
+.fi-sec:last-child{border-bottom:0}
+.fi-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.fi-h h5{margin:0;font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--fg-3);font-weight:700}
+.fi-h small{font-size:11.5px;color:var(--fg-3)}
+.fi-types{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--surface-2);border-radius:10px;padding:4px}
+.fi-types button{border:0;background:transparent;border-radius:7px;padding:7px 4px;font-size:12.5px;font-weight:600;color:var(--fg-2);cursor:pointer}
+.fi-types button[aria-pressed="true"]{background:#fff;color:var(--blue-500);box-shadow:0 1px 2px rgba(31,42,86,.12)}
+.fi-types button:disabled{opacity:.4;cursor:not-allowed}
+.fi-help{font-size:12px;color:var(--fg-2);margin:8px 0 0}
+.fi-f{display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:600;color:var(--fg-2);min-width:0}
+.fi-f+.fi-f{margin-top:10px}
+.fi-f textarea,.fi-f input,.fi-f select,.fi-in{border:1px solid var(--border);border-radius:8px;padding:7px 9px;font-size:13px;background:var(--surface);color:var(--fg);font-weight:400;width:100%;min-width:0}
+.fi-f textarea{min-height:84px;resize:vertical;line-height:1.5}
+.fi-f textarea:focus,.fi-f input:focus,.fi-f select:focus,.fi-in:focus{border-color:var(--blue-500);outline:none;box-shadow:0 0 0 3px rgba(4,109,237,.12)}
+.fi-ans{border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;display:flex;flex-direction:column;gap:6px;background:#fff}
+.fi-ans.open{border-color:var(--blue-500);box-shadow:0 0 0 3px rgba(4,109,237,.1)}
+.fi-ans-top{display:flex;gap:6px;align-items:center}
+.fi-n{width:22px;height:22px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;font-size:11px;font-weight:700;font-family:var(--mono);color:var(--fg-2);flex:none}
+.fi-to{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--fg-3)}
+.fi-to select{flex:1}
+.fi-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ib{width:26px;height:26px;border:1px solid var(--border);background:var(--surface);border-radius:7px;cursor:pointer;font-size:12px;color:var(--fg-2);display:grid;place-items:center;flex:none;padding:0}
+.ib:hover{border-color:var(--accent);color:var(--accent-ink)}
+.ib.x:hover{border-color:var(--bad);color:var(--bad)}
+.ib:disabled{opacity:.35;cursor:not-allowed}
+.fi-more{border:0;background:none;color:var(--fg-3);font-size:11.5px;cursor:pointer;padding:0;text-align:start;font-weight:600}
+.fi-more:hover{color:var(--accent-ink)}
+.fi-add{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.fi-add .btn{font-size:12.5px;padding:7px 8px}
+.fi-note{padding:10px 12px;border-radius:10px;background:var(--surface-2);font-size:12.5px;color:var(--fg-2);line-height:1.6;margin-top:10px}
+.fi-foot{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border);background:var(--surface-2)}
+.fi-foot .btn{flex:1}
+/* new-case wizard */
+.fc-chip.new{border-style:dashed;color:var(--blue-500);border-color:#9cc3f5}
+.fc-chip.new:hover{background:#f3f8ff}
+.fc-del{border:0;background:none;color:var(--bad);font-size:12.5px;font-weight:600;cursor:pointer;padding:5px 8px;white-space:nowrap}
+.wz-back{position:fixed;inset:0;background:rgba(31,42,86,.38);z-index:100;display:grid;place-items:center;padding:16px}
+.wz{background:#fff;border-radius:16px;width:min(800px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(31,42,86,.25);overflow:hidden}
+.wz-h{padding:18px 22px 0;display:flex;align-items:flex-start;gap:12px}
+.wz-h h3{margin:0;font-size:19px;font-weight:800}
+.wz-h p{margin:2px 0 0;font-size:13px;color:var(--fg-2)}
+.wz-h .x{margin-inline-start:auto;width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:14px;color:var(--fg-2);flex:none}
+.wz-steps{display:flex;gap:6px;padding:16px 22px;border-bottom:1px solid var(--border);list-style:none;margin:0}
+.wz-steps li{flex:1;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--fg-3)}
+.wz-steps li span{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:grid;place-items:center;font-size:12px;font-family:var(--mono);flex:none}
+.wz-steps li.on{color:var(--fg)}
+.wz-steps li.on span{border-color:var(--blue-500);background:var(--blue-500);color:#fff}
+.wz-steps li.done span{border-color:var(--good);background:var(--good);color:#fff}
+.wz-steps li::after{content:"";flex:1;height:2px;background:var(--border);border-radius:2px}
+.wz-steps li:last-child::after{display:none}
+.wz-b{padding:18px 22px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:16px}
+.wz-b>*{flex-shrink:0}
+.wz-f{border-top:1px solid var(--border);padding:14px 22px;display:flex;gap:8px;align-items:center;background:var(--surface-2)}
+.wz-f .sp{flex:1}
+.wz-f .err{color:var(--bad);font-size:12.5px;font-weight:600}
+.wz-group{display:flex;flex-direction:column;gap:10px}
+.wz-group>h4{margin:0;font-size:12px;letter-spacing:.7px;text-transform:uppercase;color:var(--fg-3)}
+.wz-hint{font-size:12.5px;color:var(--fg-2);margin:-4px 0 0}
+.wz-from{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.wz-from button{border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;background:#fff;cursor:pointer;text-align:start;font-size:13px;font-weight:600;color:var(--fg)}
+.wz-from button small{display:block;font-weight:400;color:var(--fg-2);font-size:12px;margin-top:2px}
+.wz-from button[aria-pressed="true"]{border-color:var(--blue-500);background:#f3f8ff}
+.wz-sc{border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.wz-sc-h{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface-2);border-bottom:1px solid var(--border);font-weight:700;font-size:13.5px}
+.wz-sc-h .n{width:24px;height:24px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:12px;font-family:var(--mono)}
+.wz-sc-h .sp{flex:1}
+.wz-sc-b{padding:14px;display:flex;flex-direction:column;gap:12px}
+.wz-mode{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--surface-2);border-radius:10px;padding:4px}
+@media (max-width:560px){.wz-mode{grid-template-columns:1fr}}
+.wz-mode button{border:0;background:transparent;border-radius:7px;padding:8px 6px;font-size:12.5px;font-weight:600;color:var(--fg-2);cursor:pointer}
+.wz-mode button[aria-pressed="true"]{background:#fff;color:var(--blue-500);box-shadow:0 1px 2px rgba(31,42,86,.12)}
+.wz-fix{display:grid;grid-template-columns:28px minmax(0,1fr) 28px;gap:10px;align-items:start;padding:10px;border:1px dashed var(--border);border-radius:10px}
+.wz-fix .k{font-family:var(--mono);font-size:11px;color:var(--fg-3);font-weight:700;padding-top:22px}
+.wz-fix textarea{min-height:64px}
+.wz-after{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;padding:10px 12px;border-radius:10px;background:var(--surface-2)}
+@media (max-width:560px){.wz-after{grid-template-columns:1fr}}
+.wz-rev{display:flex;flex-direction:column;gap:10px}
+.wz-path{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12.5px;padding:10px 12px;border:1px solid var(--border);border-radius:10px}
+.wz-path b{font-size:13px;margin-inline-end:4px}
+.wz-path .s{border:1px solid #d5e0ec;border-radius:7px;padding:3px 8px;background:#fff}
+.wz-path .s.t{border-style:dashed;border-color:#f0c873;background:#fffbf1}
+.wz-path .a{color:var(--fg-3)}
+.wz-sum{display:flex;gap:10px;flex-wrap:wrap}
+.wz-sum div{flex:1;min-width:140px;border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.wz-sum b{display:block;font-size:22px;font-weight:800;color:var(--blue-500)}
+.wz-sum span{font-size:12px;color:var(--fg-2)}
+.wz .fi-f textarea{min-height:64px}
 footer{padding-block:24px;color:var(--fg-3);font-size:12px;border-top:1px solid var(--border)}
 </style>
 </head>
@@ -250,7 +442,6 @@ footer{padding-block:24px;color:var(--fg-3);font-size:12px;border-top:1px solid 
     <div class="wordmark" aria-label="iSchool"><span class="i" aria-hidden="true"></span>School</div>
     <span class="ver">V 1.0</span>
     <span class="prod">Moderation · Session Cover Bot</span>
-    <a href="../../index.html" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; color:#046ded; font-weight:700; font-size:13px; background:#e3f1fb; padding:5px 12px; border-radius:999px; margin-inline-start:8px;">← Back to B2G Hub</a>
     <span class="spacer"></span>
     <div class="langsw" role="group" aria-label="Bot language">
       <button id="lang-ar" aria-pressed="true">عربي</button>
@@ -274,6 +465,7 @@ footer{padding-block:24px;color:var(--fg-3);font-size:12px;border-top:1px solid 
   <div class="tabs" role="tablist">
     <button role="tab" id="tab-sim" aria-selected="true" aria-controls="p-sim">Bot simulator<small>Try a live case</small></button>
     <button role="tab" id="tab-ana" aria-selected="false" aria-controls="p-ana">Analytics<small>Cover dashboard</small></button>
+    <button role="tab" id="tab-flow" aria-selected="false" aria-controls="p-flow">Flow editor<small>Admin · edit the bot</small></button>
     <button role="tab" id="tab-cfg" aria-selected="false" aria-controls="p-cfg">Configuration<small>Timers &amp; rules</small></button>
     <button role="tab" id="tab-spec" aria-selected="false" aria-controls="p-spec">Script library<small>Issues &amp; safeguards</small></button>
   </div>
@@ -366,6 +558,44 @@ footer{padding-block:24px;color:var(--fg-3);font-size:12px;border-top:1px solid 
   <div class="card chartcard"><h3>Repeated issues</h3><div class="sub">Tutors with interruptions in more than one session in a day — flagged for moderation review</div><div class="tbl-wrap"><table class="t" id="repeat"></table></div></div>
 </section>
 
+<!-- FLOW EDITOR -->
+<section class="panel" id="p-flow" role="tabpanel" aria-labelledby="tab-flow" hidden>
+  <div class="fe-top">
+    <div><h2>Flow editor</h2><p>Click a box to edit it on the right. Use <b>+</b> under a question to add an answer with a new step, or <b>+ New case</b> to add a whole issue type with its scenarios. The simulator uses your changes right away.</p></div>
+    <div class="fe-actions">
+      <button class="fe-health ok" id="fe-health" type="button">✓ Flow is complete</button>
+      <button class="btn" id="fe-undo" disabled>Undo</button>
+      <details class="menu" id="fe-menu"><summary class="btn">More ▾</summary>
+        <div class="menu-pop"><button id="fe-newcase2">Add a new case…</button><button id="fe-copy">Copy flow as JSON</button><button id="fe-imp">Import flow from JSON</button><button id="fe-reset" class="d">Reset to default flow</button></div>
+      </details>
+      <button class="btn" id="fe-newcase" style="border-color:var(--blue-500);color:var(--blue-500)">+ New case</button>
+      <button class="btn primary" id="fe-test">Test in simulator</button>
+    </div>
+  </div>
+  <ul class="fe-issues" id="fe-issues" hidden></ul>
+  <div id="fe-confirm" class="fe-confirm" hidden></div>
+  <div id="fe-importbox" class="card fe-import" hidden>
+    <label class="fi-f" for="fe-json">Paste a flow copied with "Copy flow as JSON"<textarea id="fe-json" spellcheck="false"></textarea></label>
+    <div class="row"><button class="btn primary sm" id="fe-json-apply">Replace flow</button><button class="btn sm" id="fe-json-cancel">Cancel</button><span class="err" id="fe-json-err"></span></div>
+  </div>
+  <div class="fe2">
+    <div class="card fc-card">
+      <div class="fc-tools">
+        <div class="fc-chips" id="fc-chips" role="group" aria-label="Show branch"></div>
+        <button class="fc-del" id="fc-delcase" hidden>Delete case</button>
+        <select class="fc-jump" id="fc-jump" aria-label="Find a step"></select>
+      </div>
+      <div class="fc-stage">
+        <div class="fc-view" id="fc-view"><div class="fc-scale" id="fc-scale"><div class="fc-inner" id="fc-inner"></div></div></div>
+        <div class="fc-zoom"><button id="fc-zo" title="Zoom out">−</button><span id="fc-zl">100%</span><button id="fc-zi" title="Zoom in">+</button><button id="fc-fit" title="Fit to screen" style="border-inline-start:1px solid var(--border);font-size:12px">Fit</button></div>
+      </div>
+      <div class="fc-orph" id="fc-orph" hidden></div>
+      <div class="fc-legend"><span><i class="s"></i>Start</span><span><i></i>Question</span><span><i class="t"></i>Recovery timer</span><span><i class="e"></i>End case</span><span class="tip2">Drag to move · Ctrl + scroll to zoom</span></div>
+    </div>
+    <aside class="card fi" id="fi" aria-label="Step editor"></aside>
+  </div>
+</section>
+
 <!-- CONFIG -->
 <section class="panel" id="p-cfg" role="tabpanel" aria-labelledby="tab-cfg" hidden>
   <div class="sec-h"><h2>Configuration</h2><p>Open implementation decisions, kept configurable. Changes apply to the simulator immediately.</p></div>
@@ -448,7 +678,7 @@ const TUTORS=[
 const B=(en,ar)=>({en,ar});
 const SRC=B('Source: Moderation Help Center','المصدر: Moderation Help Center');
 const fixedOpts=(next)=>[{l:B('Fixed, continuing','اتحلت، هكمل'),go:'@continue'},{l:B('Still not working','لسه مش شغالة'),go:next,neg:1}];
-const N={
+const RAW={
  start:{say:B("Hi Mariam 👋 I'm the iSchool cover bot. What's the problem in your current session?","أهلاً يا مريم 👋 أنا بوت الـ Cover بتاع iSchool. إيه المشكلة اللي عندك في الـ Session دلوقتي؟"),
   opts:[
    {l:B('Electricity outage','الكهربا قطعت'),go:'e1',type:'Electricity'},
@@ -461,7 +691,7 @@ const N={
  e1:{say:B('Is your laptop charged enough to continue until the end of the session (19:00)?','اللاب توب مشحون كفاية تكمل لحد آخر الـ Session (الساعة 7)؟'),
   opts:[{l:B('Yes','أيوه'),go:'e1y'},{l:B('No','لأ'),go:'e2',neg:1}]},
  e1y:{say:B('Great. Turn on your mobile hotspot if the router is off, then continue the session. I\'ll keep this case open.','تمام. شغّل الـ Hotspot من الموبايل لو الراوتر فصل، وكمّل الـ Session عادي. هسيب الحالة مفتوحة.'),opts:[{l:B('Connected, continuing','اتصلت، هكمل'),go:'@continue'},{l:B('Hotspot not working','الـ Hotspot مش شغال'),go:'e2',neg:1}]},
- e2:{say:()=>B(`Can you reach a nearby place with electricity and reconnect within ${CFG.rec_elec} minutes?`,`تقدر توصل لمكان قريب فيه كهربا وترجع تدخل خلال ${CFG.rec_elec} دقايق؟`),
+ e2:{say:B('Can you reach a nearby place with electricity and reconnect within {rec_elec} minutes?','تقدر توصل لمكان قريب فيه كهربا وترجع تدخل خلال {rec_elec} دقايق؟'),
   opts:[{l:B('Yes, moving now','أيوه، هتحرك دلوقتي'),go:'e3'},{l:B('No','لأ'),go:'@cover:Can\'t reach power within window',cov:1}]},
  e3:{timer:'rec_elec',say:B('Go ahead. Students are told the tutor is reconnecting. Tap below once you\'re back.','اتفضل. الطلاب هيتبلغوا إنك بترجع. دوس تحت أول ما تدخل تاني.')},
  /* internet */
@@ -500,6 +730,22 @@ const N={
  em:{say:B('Sorry to hear that. Please take care of yourself. I\'m assigning a cover tutor now; you don\'t need to do anything else.','سلامتك. خلي بالك من نفسك، أنا هعيّن Tutor بديل دلوقتي ومش محتاج تعمل أي حاجة تانية.'),auto:'@cover:Emergency, immediate cover'},
  other:{say:B('I couldn\'t match this to a supported issue, so I\'m handing it to a moderator. They\'ll reply in this chat.','مقدرتش أصنّف المشكلة دي، فهحوّلها لحد من فريق الـ Moderation وهيرد عليك هنا.'),auto:'@human:Unclassified issue'}
 };
+const META={start:['Start · ask issue type','Start'],e1:['Battery check','Electricity'],e1y:['Switch to hotspot','Electricity'],e2:['Can reach power in time?','Electricity'],e3:['Recovery window · move location','Electricity'],
+ i1:['Hotspot available?','Internet'],i2:['Camera off, test audio','Internet'],i3:['Recovery window · router','Internet'],
+ z0:['Which Zoom problem?','Zoom'],zl:['Login · Host Sign in','Zoom'],zk:['Locked meeting','Zoom'],zn1:['Not responding · force close','Zoom'],zn2:['Not responding · free RAM','Zoom'],zn3:['Not responding · clear cache','Zoom'],zc1:['Camera · Zoom settings','Zoom'],zc2:['Camera · Windows privacy','Zoom'],zm1:['Microphone · Zoom settings','Zoom'],zm2:['Microphone · Windows privacy','Zoom'],za:['Students drawing on screen','Zoom'],zt:['Login · last try','Zoom'],
+ r0:['What is happening?','Device'],g1:['Graphics · restart driver','Device'],g2:['Graphics · high-performance GPU','Device'],j1:['Join Now · Adblocker','Device'],j2:['Join Now · open link directly','Device'],d1:['Crash / forced update','Device'],
+ em:['Emergency · immediate cover','Emergency'],other:['Unclassified · to moderator','Other']};
+function normalize(raw){const out={};for(const [id,n] of Object.entries(raw)){const m=META[id]||[id,'Other'];
+  const o={name:m[0],group:m[1],say:{en:n.say.en,ar:n.say.ar},src:!!n.src};
+  if(n.auto){const [k,...r]=n.auto.split(':');o.type='end';o.outcome=k==='@cover'?'cover':'human';o.reason=r.join(':');}
+  else if(n.timer){o.type='timer';o.timer=n.timer}
+  else{o.type='question';o.opts=(n.opts||[]).map(x=>({l:{en:x.l.en,ar:x.l.ar},go:x.go,neg:!!x.neg,cov:!!x.cov,tag:x.type||x.sub||''}))}
+  out[id]=o}return out}
+const DEFAULT_FLOW=normalize(RAW);
+const clone=o=>JSON.parse(JSON.stringify(o));
+let N=(()=>{try{const v=JSON.parse(localStorage.getItem('scb-flow-v1'));if(v&&v.start)return v}catch(e){}return clone(DEFAULT_FLOW)})();
+const fill=t=>t.replace(/\{(\w+)\}/g,(m,k)=>k in CFG?CFG[k]:m);
+const safe=h=>fill(esc(h).replace(/&lt;(\/?)(b|i|strong|em|ol|ul|li|code|kbd|br)\s*\/?&gt;/gi,'<$1$2>'));
 
 /* ---------- state ---------- */
 let st,clockSec=18*3600+7*60,timerInt=null,ffOn=false;
@@ -553,25 +799,26 @@ function reset(keepSession){
   go('start');
 }
 function go(id){
-  const n=N[id];st.node=id;
-  const say=typeof n.say==='function'?n.say():n.say;
+  const n=N[id];
+  if(!n){typing(()=>human('Step "'+id+'" no longer exists'));return}
+  st.node=id;
   typing(()=>{
-    addMsg(L(say),'bot',n.src);
-    if(id==='start'){log('Bot asked for issue type');}
-    if(n.auto){const [k,why]=n.auto.split(':');setOpts([]);setTimeout(()=>k==='@cover'?cover(why):human(why),600);return}
-    if(n.timer){startTimer(n.timer);return}
+    addMsg(safe(L(n.say)),'bot',n.src);
+    if(id==='start')log('Bot asked for issue type');
+    if(n.type==='end'){setOpts([]);setTimeout(()=>n.outcome==='cover'?cover(n.reason||'Cover required'):n.outcome==='continue'?resolved():human(n.reason||'Escalated'),600);return}
+    if(n.type==='timer'){startTimer(n.timer);return}
     setOpts(n.opts||[]);
   });
 }
 function choose(op){
   setOpts([]);addMsg(esc(L(op.l)),'me');
-  if(st.node==='start'){st.reportedAt=clockSec;st.type=op.type;setStatus('Diagnosing','p-run');log('Tutor reported: '+op.type,'k');}
-  else if(op.sub){st.sub=op.sub;log('Issue detail: '+op.sub);}
-  else log('Answer: '+L({en:op.l.en,ar:op.l.en}));
+  if(!st.type){st.reportedAt=clockSec;st.type=op.tag||op.l.en;setStatus('Diagnosing','p-run');log('Tutor reported: '+st.type,'k');}
+  else if(op.tag){st.sub=op.tag;log('Issue detail: '+op.tag);}
+  else log('Answer: '+op.l.en);
   sessCard();
   if(op.go==='@continue') return resolved();
-  if(op.go.startsWith('@cover')) return typing(()=>cover(op.go.split(':')[1]));
-  if(op.go.startsWith('@human')) return typing(()=>human(op.go.split(':')[1]));
+  if(op.go.startsWith('@cover')) return typing(()=>cover(op.go.split(':').slice(1).join(':')||'Cover required'));
+  if(op.go.startsWith('@human')) return typing(()=>human(op.go.split(':').slice(1).join(':')||'Escalated'));
   go(op.go);
 }
 function startTimer(key){
@@ -656,15 +903,15 @@ async function cover(reason){
 
 $('#restart').onclick=()=>reset(false);
 function setLang(l){LANG=l;$('#lang-ar').setAttribute('aria-pressed',l==='ar');$('#lang-en').setAttribute('aria-pressed',l==='en');
-  $('#chat').dir=$('#opts').dir=l==='ar'?'rtl':'ltr';$('#bot-sub').textContent=l==='ar'?'بيرد فوراً':'Usually replies instantly';reset(false);}
+  $('#chat').dir=$('#opts').dir=l==='ar'?'rtl':'ltr';$('#bot-sub').textContent=l==='ar'?'بيرد فوراً':'Usually replies instantly';reset(false);if(typeof feSetView==='function'&&!$('#p-flow').hidden){feCanvas();feInspector()}}
 $('#lang-ar').onclick=()=>setLang('ar');$('#lang-en').onclick=()=>setLang('en');
 
 /* ---------- tabs ---------- */
 const tabs=[...document.querySelectorAll('[role=tab]')];
 function showTab(id){tabs.forEach(t=>{const on=t.id===id;t.setAttribute('aria-selected',on);$('#'+t.getAttribute('aria-controls')).hidden=!on});}
-tabs.forEach(t=>t.onclick=()=>{showTab(t.id);try{localStorage.setItem('scb-tab',t.id)}catch(e){}});
+tabs.forEach(t=>t.onclick=()=>{showTab(t.id);if(t.id==='tab-flow'&&typeof feSetView==='function')feSetView();try{localStorage.setItem('scb-tab',t.id)}catch(e){}});
 try{const s=localStorage.getItem('scb-tab');if(s&&$('#'+s))showTab(s)}catch(e){}
-const hashMap={simulator:'tab-sim',analytics:'tab-ana',configuration:'tab-cfg',library:'tab-spec'};
+const hashMap={editor:'tab-flow',simulator:'tab-sim',analytics:'tab-ana',configuration:'tab-cfg',library:'tab-spec'};
 if(hashMap[location.hash.slice(1)])showTab(hashMap[location.hash.slice(1)]);
 
 /* ---------- script library ---------- */
@@ -742,6 +989,356 @@ function renderAna(){
   $('#repeat').innerHTML='<tr><th>Tutor</th><th>Day</th><th>Interrupted</th><th>Issue</th><th>Action</th></tr>'+rep.map(x=>`<tr><td>${x[0]}</td><td>${x[1]}</td><td>${x[2]}</td><td>${x[3]}</td><td><span class="pill ${x[5]}">${x[4]}</span></td></tr>`).join('');
 }
 ['#f-range','#f-grade','#f-issue','#f-out'].forEach(s=>$(s).addEventListener('change',renderAna));
+/* ---------- new case wizard ---------- */
+const MSG_COVER=B("Thanks for letting me know. I'm assigning a cover tutor now; you don't need to do anything else.",'شكراً إنك بلّغت. هعيّن Tutor بديل دلوقتي ومش محتاج تعمل أي حاجة تانية.');
+const MSG_HUMAN=B("I'm handing this to a moderator. They'll reply in this chat.",'هحوّل الحالة لحد من فريق الـ Moderation وهيرد عليك هنا.');
+const MSG_TIMER=B('Last try: you have {rec_device} minutes to get back. Tap below when you are back.','آخر محاولة: عندك {rec_device} دقايق ترجع. دوس تحت أول ما ترجع.');
+const caseRoots=()=>N.start.opts.filter(o=>!o.go.startsWith('@')&&N[o.go]);
+const newScen=()=>({en:'',ar:'',mode:'fix',fixes:[{en:'',ar:''}],after:'timer',timer:'rec_device',msgEn:'',msgAr:''});
+let wz=null;
+function wzOpen(){wz={step:0,from:'blank',nameEn:'',nameAr:'',tag:'',qEn:'What is happening?',qAr:'إيه اللي بيحصل؟',scen:[newScen()],err:''};wzRender();document.body.style.overflow='hidden'}
+function wzClose(){const b=$('#wz-back');if(b)b.remove();wz=null;document.body.style.overflow=''}
+function reach(root,stopAt=new Set(['start'])){const s=new Set();const w=x=>{if(s.has(x)||!N[x]||stopAt.has(x))return;s.add(x);if(N[x].type==='question')N[x].opts.forEach(o=>w(o.go))};w(root);return s}
+const fld=(label,path,val,opt={})=>`<label class="fi-f">${label}${opt.area?`<textarea data-p="${path}"${opt.rtl?' dir="rtl"':''} placeholder="${opt.ph||''}">${esc(val)}</textarea>`:`<input data-p="${path}" value="${esc(val)}"${opt.rtl?' dir="rtl"':''} placeholder="${opt.ph||''}">`}</label>`;
+function wzBody(){
+  if(wz.step===0){
+    return `<div class="wz-group"><h4>Start from</h4><div class="wz-from">
+      <button data-from="blank" aria-pressed="${wz.from==='blank'}">Blank case<small>Build scenarios step by step</small></button>
+      ${caseRoots().map(o=>`<button data-from="${o.go}" aria-pressed="${wz.from===o.go}">Copy “${esc(o.l.en)}”<small>${reach(o.go).size} steps, edit after</small></button>`).join('')}</div></div>
+    <div class="wz-group"><h4>Case name</h4><p class="wz-hint">Shown to tutors as a button on the first question, “What's the problem in your current session?”.</p>
+      <div class="fe-2col">${fld('English','nameEn',wz.nameEn,{ph:'e.g. Student behaviour issue'})}${fld('العربية','nameAr',wz.nameAr,{rtl:1,ph:'مثال: مشكلة في سلوك الطلاب'})}</div>
+      ${fld('Log tag (issue type in reports and analytics)','tag',wz.tag,{ph:'Defaults to the English name'})}</div>`;
+  }
+  if(wz.step===1){
+    const multi=wz.scen.length>1;
+    let h=multi?`<div class="wz-group"><h4>Question that separates the scenarios</h4><div class="fe-2col">${fld('English','qEn',wz.qEn,{})}${fld('العربية','qAr',wz.qAr,{rtl:1})}</div></div>`:
+      `<p class="wz-hint" style="margin:0">With one scenario the bot goes straight to its steps. Add a second scenario and the bot will first ask which one applies.</p>`;
+    h+=wz.scen.map((s,i)=>`<div class="wz-sc"><div class="wz-sc-h"><span class="n">${i+1}</span>Scenario ${i+1}<span class="sp"></span>${wz.scen.length>1?`<button class="btn sm danger" data-rm-sc="${i}">Remove</button>`:''}</div><div class="wz-sc-b">
+      ${multi?`<div class="fe-2col">${fld('Tutor answer (English)',`scen.${i}.en`,s.en,{ph:'e.g. Student is disruptive'})}${fld('إجابة الـ Tutor',`scen.${i}.ar`,s.ar,{rtl:1})}</div>`:''}
+      <div><div class="fi-f" style="margin-bottom:6px">What should the bot do?</div><div class="wz-mode">
+        <button data-mode="${i}:fix" aria-pressed="${s.mode==='fix'}">Guide the tutor through a fix</button><button data-mode="${i}:cover" aria-pressed="${s.mode==='cover'}">Assign cover immediately</button><button data-mode="${i}:human" aria-pressed="${s.mode==='human'}">Send to a moderator</button></div></div>
+      ${s.mode==='fix'?`${s.fixes.map((f,j)=>`<div class="wz-fix"><span class="k">#${j+1}</span><div class="fe-2col">${fld(`Fix ${j+1} · bot message (English)`,`scen.${i}.fixes.${j}.en`,f.en,{area:1,ph:'Tell the tutor exactly what to try'})}${fld('الرسالة بالعربي',`scen.${i}.fixes.${j}.ar`,f.ar,{area:1,rtl:1})}</div>${s.fixes.length>1?`<button class="ib x" data-rm-fix="${i}:${j}" title="Remove fix" style="margin-top:20px">✕</button>`:'<span></span>'}</div>`).join('')}
+        <div><button class="btn sm" data-add-fix="${i}">+ Add another fix</button></div>
+        <p class="wz-hint" style="margin:0">After each fix the tutor answers <b>Fixed, continuing</b> (session continues) or <b>Still not working</b> (next fix).</p>
+        <div class="wz-after"><label class="fi-f">If the last fix doesn't work<select data-p="scen.${i}.after"><option value="timer"${s.after==='timer'?' selected':''}>Give one recovery window</option><option value="cover"${s.after==='cover'?' selected':''}>Assign cover immediately</option><option value="human"${s.after==='human'?' selected':''}>Send to a moderator</option></select></label>
+        ${s.after==='timer'?`<label class="fi-f">Recovery window<select data-p="scen.${i}.timer">${CFG_UI['cfg-rec'].map(([k,l])=>`<option value="${k}"${s.timer===k?' selected':''}>${l} · ${CFG[k]} min</option>`).join('')}</select></label>`:'<span></span>'}</div>`
+      :`<div class="fe-2col">${fld('Bot message (English)',`scen.${i}.msgEn`,s.msgEn||L({en:(s.mode==='cover'?MSG_COVER:MSG_HUMAN).en}),{area:1})}${fld('الرسالة بالعربي',`scen.${i}.msgAr`,s.msgAr||(s.mode==='cover'?MSG_COVER:MSG_HUMAN).ar,{area:1,rtl:1})}</div>`}
+    </div></div>`).join('');
+    return h+`<div><button class="btn" id="wz-add-sc">+ Add scenario</button></div>`;
+  }
+  // review
+  const p=wzPlan();
+  return `<div class="wz-sum"><div><b>${p.count}</b><span>steps will be created</span></div><div><b>${wz.from==='blank'?wz.scen.length:caseRoots().find(o=>o.go===wz.from).l.en}</b><span>${wz.from==='blank'?'scenarios':'copied case'}</span></div><div><b>${esc(wz.tag||wz.nameEn)}</b><span>log tag</span></div></div>
+    <div class="wz-group"><h4>How the bot will handle it</h4><div class="wz-rev">${wz.from==='blank'?wz.scen.map((s,i)=>`<div class="wz-path"><b>${esc(wz.nameEn)}${wz.scen.length>1?' → '+esc(s.en):''}</b><span class="a">→</span>${s.mode==='fix'?s.fixes.map((f,j)=>`<span class="s">Fix ${j+1}</span><span class="a">→</span>`).join('')+(s.after==='timer'?`<span class="s t">Recovery ${CFG[s.timer]} min</span><span class="a">→</span><span class="pill p-bad">Cover required</span>`:s.after==='cover'?'<span class="pill p-bad">Cover required</span>':'<span class="pill p-warn">Human moderator</span>'):s.mode==='cover'?'<span class="pill p-bad">Cover required</span>':'<span class="pill p-warn">Human moderator</span>'}</div>`).join(''):`<div class="wz-path">All steps of “${esc(caseRoots().find(o=>o.go===wz.from).l.en)}” are copied into a new group called <b>${esc(wz.nameEn)}</b>. You can edit them in the flowchart after.</div>`}</div></div>
+    <p class="wz-hint" style="margin:0">The case is added as a button on the first question, above “Something else”. Every fix also offers <b>Fixed, continuing</b> to keep the session going.</p>`;
+}
+function wzPlan(){if(wz.from!=='blank')return{count:reach(wz.from).size};
+  let c=wz.scen.length>1?1:0;wz.scen.forEach(s=>{c+=s.mode==='fix'?s.fixes.length+(s.after==='timer'?1:0):1});return{count:c}}
+function wzRender(){
+  let b=$('#wz-back');if(!b){b=document.createElement('div');b.id='wz-back';b.className='wz-back';document.body.appendChild(b);wzBind(b)}
+  const labels=['Case details','Scenarios','Review'];const skip=wz.from!=='blank';
+  b.innerHTML=`<div class="wz" role="dialog" aria-modal="true" aria-labelledby="wz-t"><div class="wz-h"><div><h3 id="wz-t">Add a new case</h3><p>A new issue type tutors can report, with every scenario and how the bot handles it.</p></div><button class="x" id="wz-x" aria-label="Close">✕</button></div>
+    <ol class="wz-steps">${labels.map((l,i)=>`<li class="${i===wz.step?'on':i<wz.step?'done':''}" ${skip&&i===1?'style="opacity:.4"':''}><span>${i<wz.step?'✓':i+1}</span>${l}</li>`).join('')}</ol>
+    <div class="wz-b">${wzBody()}</div>
+    <div class="wz-f">${wz.step>0?'<button class="btn" id="wz-prev">Back</button>':'<button class="btn" id="wz-cancel">Cancel</button>'}<span class="err">${esc(wz.err)}</span><span class="sp"></span>${wz.step<2?'<button class="btn primary" id="wz-next">Next</button>':'<button class="btn primary" id="wz-create">Create case</button>'}</div></div>`;
+  const first=b.querySelector('.wz-b input,.wz-b textarea');if(first&&wz.step!==2&&!wz._noFocus)first.focus();wz._noFocus=false;
+}
+function setPath(path,v){const k=path.split('.');let o=wz;for(let i=0;i<k.length-1;i++)o=o[k[i]];o[k[k.length-1]]=v}
+function wzCheck(){
+  if(wz.step===0){if(!wz.nameEn.trim()||!wz.nameAr.trim())return'Enter the case name in English and Arabic.';
+    if(N.start.opts.some(o=>o.l.en.trim().toLowerCase()===wz.nameEn.trim().toLowerCase()))return'A case with this name already exists.'}
+  if(wz.step===1){const multi=wz.scen.length>1;if(multi&&(!wz.qEn.trim()||!wz.qAr.trim()))return'Enter the question in both languages.';
+    for(const [i,s] of wz.scen.entries()){if(multi&&(!s.en.trim()||!s.ar.trim()))return`Scenario ${i+1} needs the tutor answer in both languages.`;
+      if(s.mode==='fix')for(const [j,f] of s.fixes.entries())if(!f.en.trim()||!f.ar.trim())return`Scenario ${i+1}, fix ${j+1} needs the message in both languages.`}}
+  return''}
+function wzBind(b){
+  b.addEventListener('input',e=>{const p=e.target.dataset.p;if(p)setPath(p,e.target.value)});
+  b.addEventListener('change',e=>{const p=e.target.dataset.p;if(p&&e.target.tagName==='SELECT'){setPath(p,e.target.value);wz._noFocus=true;wzRender()}});
+  b.addEventListener('keydown',e=>{if(e.key==='Escape')wzClose()});
+  b.addEventListener('mousedown',e=>{if(e.target===b)wzClose()});
+  b.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;wz._noFocus=true;
+    if(t.id==='wz-x'||t.id==='wz-cancel')return wzClose();
+    if(t.dataset.from){wz.from=t.dataset.from;if(wz.from!=='blank'&&!wz.nameEn){}return wzRender()}
+    if(t.dataset.mode){const [i,m]=t.dataset.mode.split(':');wz.scen[+i].mode=m;return wzRender()}
+    if(t.dataset.addFix){wz.scen[+t.dataset.addFix].fixes.push({en:'',ar:''});return wzRender()}
+    if(t.dataset.rmFix){const [i,j]=t.dataset.rmFix.split(':').map(Number);wz.scen[i].fixes.splice(j,1);return wzRender()}
+    if(t.dataset.rmSc){wz.scen.splice(+t.dataset.rmSc,1);return wzRender()}
+    if(t.id==='wz-add-sc'){wz.scen.push(newScen());wzRender();const s=b.querySelectorAll('.wz-sc');s[s.length-1].scrollIntoView({block:'nearest'});return}
+    if(t.id==='wz-prev'){wz.err='';wz.step=wz.step===2&&wz.from!=='blank'?0:wz.step-1;return wzRender()}
+    if(t.id==='wz-next'){wz.err=wzCheck();if(!wz.err)wz.step=wz.step===0&&wz.from!=='blank'?2:wz.step+1;return wzRender()}
+    if(t.id==='wz-create')return wzCreate();
+  });
+}
+function wzCreate(){
+  snap();const group=wz.nameEn.trim().slice(0,28),cname=wz.nameEn.trim();let root;
+  const add=o=>{const id=newId();N[id]=Object.assign({group,src:false},o);return id};
+  if(wz.from!=='blank'){
+    const ids=[...reach(wz.from)];const map={};ids.forEach(id=>{map[id]=newId();N[map[id]]={}});
+    ids.forEach(id=>{const c=clone(N[id]);c.group=group;if(c.type==='question')c.opts.forEach(o=>{if(map[o.go])o.go=map[o.go]});N[map[id]]=c});
+    root=map[wz.from];N[root].name=cname+' · '+N[root].name;
+  }else{
+    const entries=wz.scen.map((s,i)=>{const sn=wz.scen.length>1?s.en.trim():cname;
+      if(s.mode!=='fix'){const m=s.mode==='cover'?MSG_COVER:MSG_HUMAN;return add({name:`${sn} · ${s.mode==='cover'?'cover':'moderator'}`,type:'end',outcome:s.mode,reason:`${cname}: ${sn}`,say:{en:s.msgEn||m.en,ar:s.msgAr||m.ar}})}
+      let fallback=s.after==='timer'?add({name:`${sn} · recovery window`,type:'timer',timer:s.timer,say:{en:MSG_TIMER.en.replace('rec_device',s.timer),ar:MSG_TIMER.ar.replace('rec_device',s.timer)}}):`@${s.after}:${cname}: ${sn}, not fixed`;
+      let next=fallback;
+      for(let j=s.fixes.length-1;j>=0;j--){const f=s.fixes[j];const last=next===fallback;
+        next=add({name:`${sn} · fix ${j+1}`,type:'question',say:{en:f.en,ar:f.ar},opts:[{l:{en:'Fixed, continuing',ar:'اتحلت، هكمل'},go:'@continue',neg:false,cov:false,tag:''},{l:{en:'Still not working',ar:'لسه مش شغالة'},go:next,neg:true,cov:last&&s.after!=='timer',tag:''}]})}
+      return next});
+    root=entries[0];
+    if(wz.scen.length>1)root=add({name:`${cname} · which scenario?`,type:'question',say:{en:wz.qEn,ar:wz.qAr},opts:wz.scen.map((s,i)=>({l:{en:s.en,ar:s.ar},go:entries[i],neg:false,cov:s.mode==='cover',tag:s.en}))});
+  }
+  const opt={l:{en:cname,ar:wz.nameAr.trim()},go:root,neg:false,cov:false,tag:(wz.tag||cname).trim()};
+  const k=N.start.opts.findIndex(o=>o.go==='other');k>=0?N.start.opts.splice(k,0,opt):N.start.opts.push(opt);
+  wzClose();feRoot=root;feCollapsed.clear();save();feValidate();feCanvas();fit();feSelect(root);
+  const h=$('#fe-health');h.textContent='✓ Case “'+cname+'” added';setTimeout(feValidate,2200);
+}
+function deleteCase(root){
+  const opt=N.start.opts.find(o=>o.go===root);if(!opt)return;
+  const others=new Set();N.start.opts.filter(o=>o.go!==root).forEach(o=>reach(o.go).forEach(x=>others.add(x)));
+  const mine=[...reach(root)].filter(x=>!others.has(x));
+  askConfirm(`Delete the case <b>${esc(opt.l.en)}</b>? Its button and ${mine.length} step${mine.length!==1?'s':''} used only by this case will be removed.`,'Delete case',()=>{
+    snap();N.start.opts=N.start.opts.filter(o=>o!==opt);mine.forEach(x=>delete N[x]);
+    for(const n of Object.values(N))if(n.type==='question')n.opts.forEach(o=>{if(!o.go.startsWith('@')&&!N[o.go])o.go='@human:Step removed by admin'});
+    feRoot='all';feSel='start';changed();fit()});
+}
+
+/* ---------- flow editor: flowchart canvas + inspector ---------- */
+const BASE_GROUPS=['Start','Electricity','Internet','Zoom','Device','Emergency','Other'];
+const groupsAll=()=>[...new Set([...BASE_GROUPS,...Object.values(N).map(n=>n.group)])];
+const TYPE_NAME={question:'Question',timer:'Recovery timer',end:'End case'};
+const ICON={question:'<svg viewBox="0 0 16 16"><path d="M8 1.5 14.5 8 8 14.5 1.5 8Z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
+ timer:'<svg viewBox="0 0 16 16"><circle cx="8" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 6v3l2 1.5M6 1.5h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+ end:'<svg viewBox="0 0 16 16"><rect x="2.5" y="2.5" width="11" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
+ start:'<svg viewBox="0 0 16 16"><path d="M5 3.5v9l7-4.5Z" fill="currentColor"/></svg>'};
+const OUT={'@continue':'Continue session','@cover':'Cover required','@human':'Human moderator'};
+let feSel='start',feRoot='all',feCollapsed=new Set(),feZoom=1,feUndo=[],feOpenAns=-1,feIssuesOpen=false,feView='canvas';
+const strip=h=>String(h).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+const short=(h,n=90)=>{const t=strip(fill(h));return t.length>n?t.slice(0,n-1)+'…':t};
+function snap(){feUndo.push(JSON.stringify(N));if(feUndo.length>50)feUndo.shift();$('#fe-undo').disabled=false}
+function save(){try{localStorage.setItem('scb-flow-v1',JSON.stringify(N))}catch(e){}}
+let feT=null;
+function changed(opts={}){save();feValidate();if(opts.lazy){clearTimeout(feT);feT=setTimeout(feCanvas,250)}else{feCanvas();feInspector()}}
+function newId(){let k=1;while(N['s'+k])k++;return 's'+k}
+function refsTo(id){const r=[];for(const [nid,n] of Object.entries(N))if(n.type==='question')n.opts.forEach((o,i)=>{if(o.go===id)r.push([nid,i])});return r}
+function makeStep(group,name){const id=newId();N[id]={name:name||'New step',group:group||'Other',type:'question',say:{en:'Write the bot message here.',ar:'اكتب رسالة البوت هنا.'},src:false,opts:[{l:{en:'Fixed, continuing',ar:'اتحلت، هكمل'},go:'@continue',neg:false,cov:false,tag:''},{l:{en:'Still not working',ar:'لسه مش شغالة'},go:'@cover:Not resolved',neg:true,cov:false,tag:''}]};return id}
+
+/* validation */
+function feValidate(){
+  const reach=new Set();const walk=id=>{if(reach.has(id)||!N[id])return;reach.add(id);if(N[id].type==='question')N[id].opts.forEach(o=>{if(!o.go.startsWith('@'))walk(o.go)})};walk('start');
+  const iss=[];
+  for(const [id,n] of Object.entries(N)){
+    if(!reach.has(id))iss.push([id,'is not connected to the flow']);
+    if(!n.say.en.trim()||!n.say.ar.trim())iss.push([id,'is missing the English or Arabic message']);
+    if(n.type==='question'){if(!n.opts.length)iss.push([id,'has no answers']);
+      n.opts.forEach((o,i)=>{if(!o.go.startsWith('@')&&!N[o.go])iss.push([id,`answer ${i+1} leads to a deleted step`]);if(!o.l.en.trim()||!o.l.ar.trim())iss.push([id,`answer ${i+1} needs both labels`])})}
+  }
+  feValidate.bad=new Set(iss.map(x=>x[0]));feValidate.orph=Object.keys(N).filter(id=>!reach.has(id));
+  const h=$('#fe-health');
+  if(!iss.length){h.className='fe-health ok';h.textContent=`✓ ${Object.keys(N).length} steps · flow is complete`;$('#fe-issues').hidden=true;feIssuesOpen=false}
+  else{h.className='fe-health bad';h.textContent=`⚠ ${iss.length} thing${iss.length>1?'s':''} to fix ${feIssuesOpen?'▴':'▾'}`;
+    $('#fe-issues').innerHTML=iss.map(([id,m])=>`<li><button data-open="${id}">${esc(N[id].name)}</button> ${m}</li>`).join('');$('#fe-issues').hidden=!feIssuesOpen}
+}
+
+/* canvas */
+const SZ={step:[224,96],out:[136,34],link:[170,34],missing:[136,34]};
+const GX=22,GY=100;
+function feCanvas(){
+  const root=feRoot==='all'?'start':feRoot;const lim=feRoot==='all'?1:99;
+  const seen=new Set();
+  const build=(id,d)=>{
+    if(!N[id])return{k:'missing',id};
+    if(seen.has(id))return{k:'link',id};
+    seen.add(id);const n=N[id];const it={k:'step',id,n,kids:[]};
+    let edges=n.type==='question'?n.opts.map((o,i)=>({label:L(o.l),cls:o.cov?'cov':o.neg?'neg':'',go:o.go,ai:i}))
+      :n.type==='timer'?[{label:L(B("I'm back",'رجعت')),go:'@continue',ai:-1},{label:L(B("Can't continue / time out",'مش هقدر / الوقت خلص')),cls:'cov',go:'@cover',ai:-1}]
+      :[{label:'',go:'@'+(n.outcome||'cover'),ai:-1}];
+    const hasSteps=edges.some(e=>!e.go.startsWith('@'));
+    if(feCollapsed.has(id)||(d>=lim&&hasSteps)){it.hidden=edges.length;return it}
+    it.kids=edges.map(e=>({e,c:e.go.startsWith('@')?{k:'out',go:e.go.split(':')[0]}:build(e.go,d+1)}));
+    return it};
+  const tree=build(root,0);
+  const width=it=>{const own=SZ[it.k][0];if(!it.kids||!it.kids.length){it.w=own;return own}
+    const s=it.kids.reduce((a,k)=>a+width(k.c),0)+GX*(it.kids.length-1);it.w=Math.max(own,s);return it.w};
+  width(tree);
+  const nodes=[],edges=[];let maxY=0;
+  const place=(it,x0,y)=>{const [w,h]=SZ[it.k];it.x=x0+(it.w-w)/2;it.y=y;nodes.push(it);maxY=Math.max(maxY,y+h+(it.hidden?40:0));
+    if(!it.kids||!it.kids.length)return;
+    const tot=it.kids.reduce((a,k)=>a+k.c.w,0)+GX*(it.kids.length-1);let cx=x0+(it.w-tot)/2;
+    it.kids.forEach(k=>{place(k.c,cx,y+h+GY);const px=it.x+w/2,py=y+h,qx=k.c.x+SZ[k.c.k][0]/2,qy=k.c.y;edges.push({px,py,qx,qy,e:k.e,from:it.id});cx+=k.c.w+GX})};
+  const P=40;place(tree,P,P);
+  const W=tree.w+P*2,H=maxY+P;
+  let svg=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><defs><marker id="fc-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" class="fc-arrow"/></marker></defs>`;
+  let html='';
+  edges.forEach(g=>{const my=g.py+30;const r=Math.min(8,Math.abs(g.qx-g.px)/2);
+    const d=g.px===g.qx?`M${g.px} ${g.py}V${g.qy-2}`:`M${g.px} ${g.py}V${my-r}Q${g.px} ${my} ${g.px+(g.qx>g.px?r:-r)} ${my}H${g.qx+(g.qx>g.px?-r:r)}Q${g.qx} ${my} ${g.qx} ${my+r}V${g.qy-2}`;
+    svg+=`<path class="fc-edge ${g.e.cls||''}" d="${d}" marker-end="url(#fc-ar)"/>`;
+    if(g.e.label){const lw=Math.min(170,Math.max(70,g.e.label.length*6.6+24));html+=`<button class="fc-lab ${g.e.cls||''}" data-id="${g.from}" data-ai="${g.e.ai}" style="left:${g.qx-lw/2}px;top:${g.qy-48}px;width:${lw}px" title="${esc(g.e.label)}">${esc(g.e.label)}</button>`}});
+  svg+='</svg>';
+  nodes.forEach(it=>{const [w,h]=SZ[it.k];const pos=`left:${it.x}px;top:${it.y}px;width:${w}px;height:${h}px`;
+    if(it.k==='out'){const k=it.go.slice(1);html+=`<div class="fc-out ${k}" style="${pos}">${OUT[it.go]}</div>`;return}
+    if(it.k==='missing'){html+=`<div class="fc-out human" style="${pos}">Deleted step</div>`;return}
+    if(it.k==='link'){html+=`<button class="fc-link" data-open="${it.id}" style="${pos}" title="Already shown above">↪ ${esc(N[it.id].name)}</button>`;return}
+    const n=it.n,isStart=it.id==='start';const cls=isStart?'start':n.type;
+    html+=`<div class="fc-node ${cls}${it.id===feSel?' sel':''}" data-open="${it.id}" style="${pos}" role="button" tabindex="0" aria-label="Edit ${esc(n.name)}">
+      <div class="fc-k"><span class="fc-ic">${ICON[isStart?'start':n.type]}</span>${isStart?'Start':TYPE_NAME[n.type]}${isStart?'':`<span class="g">${esc(n.group)}</span>`}</div>
+      <div class="fc-t">${esc(n.name)}</div><div class="fc-s">${esc(short(L(n.say)))}</div>
+      ${feValidate.bad&&feValidate.bad.has(it.id)?'<span class="fc-dot" title="Needs attention"></span>':''}
+      ${(it.kids.length||it.hidden)&&!isStart?`<button class="fc-btn col" data-col="${it.id}" title="${it.hidden?'Expand':'Collapse'}">${it.hidden?'+':'−'}</button>`:''}
+      ${n.type==='question'&&!it.hidden?`<button class="fc-btn add" data-add="${it.id}" title="Add an answer with a new step">+</button>`:''}
+    </div>`;
+    if(it.hidden)html+=`<button class="fc-more" data-col="${it.id}" style="left:${it.x+w/2}px;top:${it.y+h+12}px">▸ Show ${it.hidden} answer${it.hidden>1?'s':''}</button>`;
+  });
+  const inner=$('#fc-inner');inner.style.width=W+'px';inner.style.height=H+'px';inner.innerHTML=svg+html;
+  feCanvas.W=W;feCanvas.H=H;applyZoom();
+  // chips & jump & orphans
+  const chips=[['all','Overview']].concat(N.start.opts.filter(o=>!o.go.startsWith('@')&&N[o.go]).map(o=>[o.go,L(o.l)]));
+  if(feRoot!=='all'&&!chips.some(c=>c[0]===feRoot))chips.push([feRoot,N[feRoot]?N[feRoot].name:'Branch']);
+  $('#fc-chips').innerHTML=chips.map(([id,t])=>`<button class="fc-chip" data-root="${id}" aria-pressed="${feRoot===id}">${esc(t)}</button>`).join('')+'<button class="fc-chip new" id="fc-newcase">+ New case</button>';
+  const dc=$('#fc-delcase');dc.hidden=!N.start.opts.some(o=>o.go===feRoot);
+  $('#fc-jump').innerHTML='<option value="">Find a step…</option>'+groupsAll().map(g=>{const ids=Object.keys(N).filter(i=>N[i].group===g);return ids.length?`<optgroup label="${g}">${ids.map(i=>`<option value="${i}">${esc(N[i].name)}</option>`).join('')}</optgroup>`:''}).join('');
+  const orph=feValidate.orph||[];const o=$('#fc-orph');o.hidden=!orph.length;
+  o.innerHTML=orph.length?`<b>Not connected (${orph.length}):</b> ${orph.map(id=>`<button class="chip" data-open="${id}">${esc(N[id].name)}</button>`).join('')}<span style="color:var(--fg-2)">Pick one in another step's "Leads to", or delete it.</span>`:'';
+}
+function applyZoom(){const z=feZoom;$('#fc-inner').style.transform=`scale(${z})`;$('#fc-scale').style.width=feCanvas.W*z+'px';$('#fc-scale').style.height=feCanvas.H*z+'px';$('#fc-zl').textContent=Math.round(z*100)+'%'}
+function setZoom(z,keepCenter=true){const v=$('#fc-view');const cx=(v.scrollLeft+v.clientWidth/2)/feZoom,cy=(v.scrollTop+v.clientHeight/2)/feZoom;
+  feZoom=Math.max(.3,Math.min(1.6,z));applyZoom();if(keepCenter){v.scrollLeft=cx*feZoom-v.clientWidth/2;v.scrollTop=cy*feZoom-v.clientHeight/2}}
+function fit(){const v=$('#fc-view');feZoom=Math.max(.6,Math.min(1,(v.clientWidth-10)/feCanvas.W,(v.clientHeight-10)/feCanvas.H));applyZoom();
+  v.scrollLeft=Math.max(0,(feCanvas.W*feZoom-v.clientWidth)/2);v.scrollTop=0}
+function centerOn(id){const el=$('#fc-inner').querySelector(`.fc-node[data-open="${id}"]`);if(!el)return false;const v=$('#fc-view');
+  v.scrollTo({left:(el.offsetLeft+el.offsetWidth/2)*feZoom-v.clientWidth/2,top:el.offsetTop*feZoom-80,behavior:'smooth'});return true}
+function feSelect(id,ans=-1,scroll=false){feSel=id;feOpenAns=ans;$('#fe-confirm').hidden=true;
+  $('#fc-inner').querySelectorAll('.fc-node').forEach(n=>n.classList.toggle('sel',n.dataset.open===id));
+  if(scroll&&!centerOn(id)){feRoot='all';feCollapsed.clear();
+    // open the branch that contains it
+    const br=N.start.opts.map(o=>o.go).find(b=>{const s=new Set();const w=x=>{if(s.has(x)||!N[x])return;s.add(x);if(N[x].type==='question')N[x].opts.forEach(o=>w(o.go))};w(b);return s.has(id)});
+    if(br)feRoot=br;feCanvas();setTimeout(()=>centerOn(id),30)}
+  feInspector()}
+
+/* inspector */
+function targetOptions(o){
+  const base=o.go.startsWith('@')?o.go.split(':')[0]:o.go;
+  let h=`<optgroup label="Finish">${Object.entries(OUT).map(([v,t])=>`<option value="${v}"${base===v?' selected':''}>${t}</option>`).join('')}</optgroup>`;
+  for(const g of groupsAll()){const ids=Object.keys(N).filter(i=>N[i].group===g&&i!=='start');if(ids.length)h+=`<optgroup label="Go to step · ${g}">${ids.map(i=>`<option value="${i}"${base===i?' selected':''}>${esc(N[i].name)}</option>`).join('')}</optgroup>`}
+  if(!o.go.startsWith('@')&&!N[o.go])h=`<option selected>⚠ Deleted step</option>`+h;
+  return h+`<optgroup label="Create"><option value="@new">+ New step…</option></optgroup>`;
+}
+function feInspector(){
+  const n=N[feSel];if(!n){feSel='start';return feInspector()}
+  const isStart=feSel==='start';const refs=refsTo(feSel);
+  let h=`<div class="fi-head"><div class="fi-kicker"><span class="fc-ic" style="color:var(--blue-500)">${ICON[isStart?'start':n.type]}</span>${isStart?'Start':TYPE_NAME[n.type]}<span class="sp"></span><code>${feSel}</code></div>
+    <input class="fi-name" id="fi-name" value="${esc(n.name)}" aria-label="Step name"></div><div class="fi-body">`;
+  h+=`<div class="fi-sec"><div class="fi-h"><h5>Step type</h5></div><div class="fi-types">${['question','timer','end'].map(k=>`<button data-type="${k}" aria-pressed="${n.type===k}"${isStart&&k!=='question'?' disabled':''}>${TYPE_NAME[k]}</button>`).join('')}</div>
+    <p class="fi-help">${n.type==='question'?'The bot asks and the tutor taps one of the answers below.':n.type==='timer'?'The tutor gets a countdown. Cover starts automatically when it runs out.':'The case closes right after this message.'}</p>
+    ${isStart?'':`<label class="fi-f" style="margin-top:10px">Group<select id="fi-group">${groupsAll().map(g=>`<option${g===n.group?' selected':''}>${g}</option>`).join('')}</select></label>`}</div>`;
+  h+=`<div class="fi-sec"><div class="fi-h"><h5>Bot message</h5><small>{rec_elec} = minutes</small></div>
+    <label class="fi-f">English<textarea id="fi-say-en">${esc(n.say.en)}</textarea></label>
+    <label class="fi-f">العربية<textarea id="fi-say-ar" dir="rtl">${esc(n.say.ar)}</textarea></label>
+    <label class="toggle" style="margin-top:10px;font-size:12.5px"><input type="checkbox" id="fi-src"${n.src?' checked':''}> Show "Source: Moderation Help Center"</label></div>`;
+  if(n.type==='question'){
+    h+=`<div class="fi-sec"><div class="fi-h"><h5>Answers · ${n.opts.length}</h5><small>Shown as buttons, in order</small></div>
+    ${n.opts.map((o,i)=>{const special=o.go.startsWith('@cover')||o.go.startsWith('@human');const open=feOpenAns===i;return `<div class="fi-ans${open?' open':''}" data-i="${i}">
+      <div class="fi-ans-top"><span class="fi-n">${i+1}</span><input class="fi-in" data-k="en" value="${esc(o.l.en)}" placeholder="Answer in English" aria-label="Answer ${i+1} English">
+        <button class="ib" data-a="up" title="Move up"${i===0?' disabled':''}>↑</button><button class="ib" data-a="down" title="Move down"${i===n.opts.length-1?' disabled':''}>↓</button><button class="ib x" data-a="rm" title="Remove answer">✕</button></div>
+      <input class="fi-in" data-k="ar" dir="rtl" value="${esc(o.l.ar)}" placeholder="الإجابة بالعربي" aria-label="Answer ${i+1} Arabic">
+      <div class="fi-to">Leads to<select class="fi-in" data-k="go">${targetOptions(o)}</select>${!o.go.startsWith('@')&&N[o.go]?`<button class="ib" data-open="${o.go}" title="Open that step">→</button>`:''}</div>
+      ${open?`<div class="fi-row"><label class="fi-f">Button style<select class="fi-in" data-k="style"><option value=""${!o.neg&&!o.cov?' selected':''}>Primary</option><option value="neg"${o.neg?' selected':''}>Secondary</option><option value="cov"${o.cov?' selected':''}>Red (cover)</option></select></label>
+        ${special?`<label class="fi-f">Reason in log<input class="fi-in" data-k="reason" value="${esc(o.go.split(':').slice(1).join(':'))}"></label>`:`<label class="fi-f">Log tag<input class="fi-in" data-k="tag" value="${esc(o.tag||'')}" placeholder="Optional"></label>`}</div>
+        <button class="fi-more" data-a="tog">Hide options ▴</button>`:`<button class="fi-more" data-a="tog">Style &amp; log options ▾</button>`}
+    </div>`}).join('')}
+    <div class="fi-add"><button class="btn" id="fi-add">+ Answer</button><button class="btn" id="fi-add-new">+ Answer &amp; new step</button></div></div>`;
+  }else if(n.type==='timer'){
+    h+=`<div class="fi-sec"><div class="fi-h"><h5>Recovery window</h5></div><label class="fi-f">Time allowed<select id="fi-timer">${CFG_UI['cfg-rec'].map(([k,l])=>`<option value="${k}"${n.timer===k?' selected':''}>${l} · ${CFG[k]} min${k==='rec_elec'?' + '+CFG.grace+' grace':''}</option>`).join('')}</select></label>
+      <div class="fi-note">"I'm back" → <b>Continue session</b><br>"I can't continue" or time runs out → <b>Cover required</b><br>Change the minutes in the Configuration tab.</div></div>`;
+  }else{
+    h+=`<div class="fi-sec"><div class="fi-h"><h5>Outcome</h5></div><label class="fi-f">Result<select id="fi-out"><option value="cover"${n.outcome==='cover'?' selected':''}>Cover required</option><option value="human"${n.outcome==='human'?' selected':''}>Human moderator</option><option value="continue"${n.outcome==='continue'?' selected':''}>Continue session</option></select></label>
+      <label class="fi-f">Reason in log<input id="fi-reason" value="${esc(n.reason||'')}"></label></div>`;
+  }
+  h+=`<div class="fi-sec"><div class="fi-h"><h5>Reached from</h5></div>${refs.length?`<div style="display:flex;flex-wrap:wrap;gap:6px">${refs.map(([nid,i])=>`<button class="chip" data-open="${nid}"><i>${esc(N[nid].name)} →</i> ${esc(N[nid].opts[i].l.en)}</button>`).join('')}</div>`:`<p class="fi-help" style="margin:0">${isStart?'Every case begins here.':'Nothing leads here yet.'}</p>`}</div>`;
+  h+=`</div><div class="fi-foot"><button class="btn" id="fi-dup">Duplicate</button><button class="btn danger" id="fi-del"${isStart?' disabled title="The start step can\'t be deleted"':''}>Delete step</button></div>`;
+  const body=$('#fi').querySelector('.fi-body');const st=body?body.scrollTop:0;
+  $('#fi').innerHTML=h;$('#fi .fi-body').scrollTop=st;
+}
+function askConfirm(msg,ok,fn){const c=$('#fe-confirm');c.hidden=false;c.innerHTML=`<span>${msg}</span><button class="btn sm danger" id="fe-c-ok">${ok}</button><button class="btn sm" id="fe-c-no">Cancel</button>`;
+  $('#fe-c-ok').onclick=()=>{c.hidden=true;fn()};$('#fe-c-no').onclick=()=>c.hidden=true;c.scrollIntoView({block:'nearest',behavior:'smooth'})}
+function addAnswerNewStep(id){const n=N[id];snap();const nid=makeStep(n.group);n.opts.push({l:{en:'New answer',ar:'إجابة جديدة'},go:nid,neg:false,cov:false,tag:''});feCollapsed.delete(id);save();feValidate();feCanvas();feSelect(nid,-1,true)}
+
+/* inspector events */
+const fi=$('#fi');
+fi.addEventListener('focusin',e=>{if(e.target.matches('input:not([type=checkbox]),textarea'))snap()});
+fi.addEventListener('input',e=>{const t=e.target,n=N[feSel];
+  if(t.id==='fi-name')n.name=t.value;else if(t.id==='fi-say-en')n.say.en=t.value;else if(t.id==='fi-say-ar')n.say.ar=t.value;else if(t.id==='fi-reason')n.reason=t.value;
+  else if(t.dataset.k&&t.tagName==='INPUT'){const o=n.opts[+t.closest('.fi-ans').dataset.i];
+    if(t.dataset.k==='en'||t.dataset.k==='ar')o.l[t.dataset.k]=t.value;else if(t.dataset.k==='tag')o.tag=t.value;else if(t.dataset.k==='reason')o.go=o.go.split(':')[0]+':'+t.value}
+  else return;
+  changed({lazy:true});});
+fi.addEventListener('change',e=>{const t=e.target,n=N[feSel];if(t.tagName!=='SELECT'&&t.type!=='checkbox')return;snap();
+  if(t.id==='fi-group')n.group=t.value;else if(t.id==='fi-src')n.src=t.checked;else if(t.id==='fi-timer')n.timer=t.value;else if(t.id==='fi-out')n.outcome=t.value;
+  else if(t.dataset.k==='style'){const o=n.opts[+t.closest('.fi-ans').dataset.i];o.neg=t.value==='neg';o.cov=t.value==='cov'}
+  else if(t.dataset.k==='go'){const i=+t.closest('.fi-ans').dataset.i,o=n.opts[i],v=t.value;
+    if(v==='@new'){const nid=makeStep(n.group);o.go=nid;save();feValidate();feCanvas();return feSelect(nid,-1,true)}
+    const keep=k=>o.go.startsWith(k)?o.go.split(':').slice(1).join(':'):'';
+    o.go=v==='@cover'?'@cover:'+(keep('@cover')||'Not resolved'):v==='@human'?'@human:'+(keep('@human')||'Needs a moderator'):v;
+    if(v==='@cover'&&!o.neg)o.cov=true;}
+  changed();});
+fi.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const n=N[feSel];
+  if(b.dataset.open)return feSelect(b.dataset.open,-1,true);
+  if(b.dataset.type){if(n.type===b.dataset.type)return;snap();n.type=b.dataset.type;
+    if(n.type==='question'&&!n.opts)n.opts=[{l:{en:'Fixed, continuing',ar:'اتحلت، هكمل'},go:'@continue',neg:false,cov:false,tag:''}];
+    if(n.type==='timer'&&!n.timer)n.timer='rec_zoom';if(n.type==='end'&&!n.outcome){n.outcome='cover';n.reason='Cover required'}return changed()}
+  if(b.dataset.a){const i=+b.closest('.fi-ans').dataset.i;
+    if(b.dataset.a==='tog'){feOpenAns=feOpenAns===i?-1:i;return feInspector()}
+    snap();if(b.dataset.a==='up'){[n.opts[i-1],n.opts[i]]=[n.opts[i],n.opts[i-1]];feOpenAns=-1}
+    if(b.dataset.a==='down'){[n.opts[i+1],n.opts[i]]=[n.opts[i],n.opts[i+1]];feOpenAns=-1}
+    if(b.dataset.a==='rm'){n.opts.splice(i,1);feOpenAns=-1}return changed()}
+  if(b.id==='fi-add'){snap();n.opts.push({l:{en:'New answer',ar:'إجابة جديدة'},go:'@continue',neg:false,cov:false,tag:''});feOpenAns=n.opts.length-1;changed();const a=fi.querySelector('.fi-ans:last-of-type input');a&&a.select();return}
+  if(b.id==='fi-add-new')return addAnswerNewStep(feSel);
+  if(b.id==='fi-dup'){snap();const id=newId();N[id]=clone(n);N[id].name=n.name+' (copy)';save();feValidate();feCanvas();return feSelect(id)}
+  if(b.id==='fi-del'){const refs=refsTo(feSel);askConfirm(`Delete <b>${esc(n.name)}</b>?${refs.length?` ${refs.length} answer${refs.length>1?'s':''} lead here and will go to a human moderator instead.`:''}`,'Delete step',()=>{
+    snap();refs.forEach(([nid,i])=>N[nid].opts[i].go='@human:Step removed by admin');const back=refs.length?refs[0][0]:'start';delete N[feSel];if(feRoot===feSel)feRoot='all';feSel=back;changed()})}
+});
+
+/* canvas events */
+const view=$('#fc-view');
+$('#fc-inner').addEventListener('click',e=>{const t=e.target.closest('[data-col],[data-add],[data-ai],[data-open]');if(!t)return;
+  if(t.dataset.col){feRoot==='all'&&!feCollapsed.has(t.dataset.col)&&t.classList.contains('fc-more')?(feRoot=N.start.opts.map(o=>o.go).find(g=>g===t.dataset.col)||t.dataset.col,feCanvas(),fit()):(feCollapsed.has(t.dataset.col)?feCollapsed.delete(t.dataset.col):feCollapsed.add(t.dataset.col),feCanvas());return}
+  if(t.dataset.add)return addAnswerNewStep(t.dataset.add);
+  if(t.dataset.ai!==undefined)return feSelect(t.dataset.id,+t.dataset.ai);
+  if(t.classList.contains('fc-link'))return feSelect(t.dataset.open,-1,true);
+  feSelect(t.dataset.open);});
+$('#fc-inner').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('fc-node')){e.preventDefault();feSelect(e.target.dataset.open)}});
+let drag=null;
+view.addEventListener('pointerdown',e=>{if(e.target.closest('.fc-node,button')||e.button!==0)return;drag={x:e.clientX,y:e.clientY,l:view.scrollLeft,t:view.scrollTop};view.classList.add('drag');view.setPointerCapture(e.pointerId)});
+view.addEventListener('pointermove',e=>{if(!drag)return;view.scrollLeft=drag.l-(e.clientX-drag.x);view.scrollTop=drag.t-(e.clientY-drag.y)});
+['pointerup','pointercancel'].forEach(ev=>view.addEventListener(ev,()=>{drag=null;view.classList.remove('drag')}));
+view.addEventListener('wheel',e=>{if(!e.ctrlKey&&!e.metaKey)return;e.preventDefault();setZoom(feZoom*(e.deltaY<0?1.1:.9))},{passive:false});
+$('#fc-zi').onclick=()=>setZoom(feZoom*1.15);$('#fc-zo').onclick=()=>setZoom(feZoom/1.15);$('#fc-fit').onclick=fit;
+$('#fc-delcase').onclick=()=>deleteCase(feRoot);
+$('#fc-chips').addEventListener('click',e=>{if(e.target.closest('#fc-newcase'))return wzOpen();const b=e.target.closest('[data-root]');if(!b)return;feRoot=b.dataset.root;feCollapsed.clear();feCanvas();fit();
+  if(feRoot!=='all')feSelect(feRoot)});
+$('#fc-jump').addEventListener('change',e=>{if(e.target.value)feSelect(e.target.value,-1,true);e.target.value=''});
+$('#fc-orph').addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b)feSelect(b.dataset.open)});
+
+/* toolbar */
+$('#fe-health').onclick=()=>{if(!feValidate.bad.size)return;feIssuesOpen=!feIssuesOpen;feValidate()};
+$('#fe-issues').addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(b)feSelect(b.dataset.open,-1,true)});
+$('#fe-undo').onclick=()=>{if(!feUndo.length)return;N=JSON.parse(feUndo.pop());if(!N[feSel])feSel='start';if(feRoot!=='all'&&!N[feRoot])feRoot='all';$('#fe-undo').disabled=!feUndo.length;changed()};
+const closeMenu=()=>$('#fe-menu').removeAttribute('open');
+$('#fe-reset').onclick=()=>{closeMenu();askConfirm('Replace your changes with the default flow from the feature document?','Reset flow',()=>{snap();N=clone(DEFAULT_FLOW);feSel='start';feRoot='all';changed();fit()})};
+$('#fe-test').onclick=()=>{showTab('tab-sim');reset(false);window.scrollTo({top:$('.tabsbar').offsetTop-70})};
+$('#fe-copy').onclick=async()=>{closeMenu();const txt=JSON.stringify(N,null,2);
+  try{await navigator.clipboard.writeText(txt);const h=$('#fe-health');const old=h.textContent;h.textContent='✓ Flow copied';setTimeout(feValidate,1500)}
+  catch(e){$('#fe-importbox').hidden=false;const ta=$('#fe-json');ta.value=txt;ta.select();$('#fe-json-err').textContent='Copy is blocked here. The JSON is selected; press Ctrl+C.'}};
+$('#fe-imp').onclick=()=>{closeMenu();$('#fe-importbox').hidden=false;$('#fe-json').value='';$('#fe-json-err').textContent='';$('#fe-json').focus()};
+$('#fe-json-cancel').onclick=()=>$('#fe-importbox').hidden=true;
+$('#fe-json-apply').onclick=()=>{try{const v=JSON.parse($('#fe-json').value);if(!v.start||!v.start.say)throw new Error('the flow needs a "start" step.');
+  for(const n of Object.values(v))if(!n.say||!n.type)throw new Error('every step needs "type" and "say".');
+  snap();N=v;feSel='start';feRoot='all';$('#fe-importbox').hidden=true;changed();fit()}catch(err){$('#fe-json-err').textContent='Could not import: '+err.message}};
+document.addEventListener('click',e=>{if(!e.target.closest('#fe-menu'))closeMenu()});
+$('#fe-newcase').onclick=wzOpen;$('#fe-newcase2').onclick=()=>{closeMenu();wzOpen()};
+function feSetView(){feCanvas();feInspector();requestAnimationFrame(fit)}
+feValidate();feCanvas();feInspector();
+if(!$('#p-flow').hidden)requestAnimationFrame(fit);
+
 renderAna();
 $('#chat').dir=$('#opts').dir='rtl';
 reset(false);
