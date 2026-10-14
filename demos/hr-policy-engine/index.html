@@ -1,0 +1,863 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iSchool B2G · HR Policy Engine – Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Brand font: Somar Rounded (iSchool). Uses the locally installed font if present; Nunito is the rounded fallback. */
+@font-face{font-family:"Somar Rounded";src:local("Somar Rounded"),local("SomarRounded-Regular"),url("https://brand.ischooltech.com/fonts/SomarRounded-Regular.ttf") format("truetype");font-weight:400;font-display:swap}
+@font-face{font-family:"Somar Rounded";src:local("Somar Rounded Medium"),local("SomarRounded-Medium"),url("https://brand.ischooltech.com/fonts/SomarRounded-Medium.ttf") format("truetype");font-weight:500;font-display:swap}
+@font-face{font-family:"Somar Rounded";src:local("Somar Rounded SemiBold"),local("SomarRounded-SemiBold"),url("https://brand.ischooltech.com/fonts/SomarRounded-SemiBold.ttf") format("truetype");font-weight:600;font-display:swap}
+@font-face{font-family:"Somar Rounded";src:local("Somar Rounded Bold"),local("SomarRounded-Bold"),url("https://brand.ischooltech.com/fonts/SomarRounded-Bold.ttf") format("truetype");font-weight:700;font-display:swap}
+
+:root{
+  /* Primary */ --blue:#056FEC; --orange:#FF7F1C; --yellow:#FFD700;
+  /* Secondary */ --blue-deep:#043FAD; --sky:#05ACFF; --bg:#F7FAFF;
+  /* Neutrals */ --white:#FFFFFF; --n100:#E6EDF1; --n200:#B1D1E6; --n300:#85A5B9; --n400:#597587; --navy:#1F2A55;
+  /* Semantic */ --err-soft:#FFD1D1; --err:#DE1F1F; --err-deep:#AA1818;
+  --ok-soft:#BCECCA; --ok:#0EAA3A; --ok-deep:#0A852D;
+  --warn-soft:#FCF9E5; --warn:#FFBB1C; --warn-deep:#B4810B;
+  --blue-soft:#EAF3FE; --orange-soft:#FFF1E6;
+  --radius:16px; --shadow:0 1px 2px rgba(31,42,85,.04),0 4px 16px rgba(31,42,85,.05);
+}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 "Somar Rounded","Nunito",system-ui,sans-serif;background:var(--bg);color:var(--navy)}
+a{color:var(--blue)}
+header{display:flex;align-items:center;gap:18px;padding:12px 24px;background:var(--white);border-bottom:1px solid var(--n100);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+.brand .mark{font-size:22px;font-weight:700;color:var(--blue);letter-spacing:-.02em}
+.brand .mark i{font-style:normal;color:var(--orange)}
+.brand .div{width:1px;height:22px;background:var(--n100)}
+.pill-tag{display:inline-block;font-size:11.5px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--yellow);color:var(--navy)}
+header .sp{flex:1}
+.seg{display:inline-flex;background:var(--bg);border:1px solid var(--n100);border-radius:999px;padding:3px}
+.seg button{border:0;background:none;padding:6px 16px;border-radius:999px;font:inherit;font-weight:500;color:var(--n400);cursor:pointer}
+.seg button.on{background:var(--blue);color:#fff}
+select,input,textarea{font:inherit;color:inherit;border:1px solid var(--n100);border-radius:12px;padding:7px 12px;background:#fff;outline:none}
+select:focus,input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+input[type=number]{width:96px}
+label.inline{display:flex;align-items:center;gap:8px;font-weight:500;color:var(--n400)}
+.layout{display:grid;grid-template-columns:236px 1fr;min-height:calc(100vh - 61px)}
+nav{background:var(--white);border-right:1px solid var(--n100);padding:16px 12px}
+nav .grp{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--n300);margin:16px 12px 6px;font-weight:600}
+nav button{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;border:0;background:none;padding:9px 14px;border-radius:999px;cursor:pointer;font:inherit;font-weight:500;color:var(--navy);margin-bottom:2px}
+nav button:hover{background:var(--bg)}
+nav button.active{background:var(--blue-soft);color:var(--blue);font-weight:600}
+.count{font-size:11.5px;background:var(--orange);color:#fff;border-radius:999px;padding:1px 8px;font-weight:600}
+.count.n{background:var(--n200);color:var(--navy)}
+main{padding:24px 28px;max-width:1180px}
+h2{margin:0 0 4px;font-size:24px;font-weight:600}
+.sub{color:var(--n400);margin:0 0 20px}
+.card{background:var(--white);border:1px solid var(--n100);border-radius:var(--radius);padding:18px 20px;margin-bottom:18px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 12px;font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+.card h3 .ic{width:28px;height:28px;border-radius:9px;display:inline-grid;place-items:center;background:var(--blue-soft);color:var(--blue);font-size:15px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:11px 0;border-top:1px solid var(--n100)}
+.card h3+.row,.row:first-child{border-top:0}
+.row .lbl b{display:block;font-weight:600}
+.row .lbl small{color:var(--n400)}
+.ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.btn{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 22px;border-radius:999px;border:1px solid var(--blue);background:transparent;color:var(--blue);font:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:.12s}
+.btn:hover{background:var(--blue-soft)}
+.btn.primary{background:var(--blue);color:#fff}
+.btn.primary:hover{background:var(--blue-deep)}
+.btn.danger{background:var(--err);border-color:var(--err);color:#fff}
+.btn.danger:hover{background:var(--err-deep)}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.ok:hover{background:var(--ok-deep)}
+.btn.text{border-color:transparent}
+.btn.sm{height:32px;padding:0 14px;font-size:13px}
+.btn:disabled{background:var(--n100);border-color:var(--n100);color:var(--n300);cursor:not-allowed}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:10px 10px;border-bottom:1px solid var(--n100);vertical-align:middle}
+th{font-size:12px;color:var(--n400);font-weight:600;text-transform:uppercase;letter-spacing:.04em;background:var(--bg)}
+th:first-child{border-radius:10px 0 0 10px}th:last-child{border-radius:0 10px 10px 0}
+tr:last-child td{border-bottom:0}
+.scroll{max-height:340px;overflow:auto}
+.tag{display:inline-block;font-size:12px;padding:3px 10px;border-radius:999px;font-weight:600;white-space:nowrap}
+.t-ok{background:var(--ok-soft);color:var(--ok-deep)}.t-warn{background:var(--warn-soft);color:var(--warn-deep);box-shadow:inset 0 0 0 1px #f3e6a6}
+.t-bad{background:var(--err-soft);color:var(--err-deep)}.t-info{background:var(--blue-soft);color:var(--blue)}
+.t-mut{background:var(--n100);color:var(--n400)}.t-orange{background:var(--orange-soft);color:#c75a05}
+.switch{position:relative;width:44px;height:24px;flex:none}
+.switch input{opacity:0;width:0;height:0}
+.switch span{position:absolute;inset:0;background:var(--n200);border-radius:24px;cursor:pointer;transition:.15s}
+.switch span:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.switch input:checked+span{background:var(--blue)}
+.switch input:checked+span:before{transform:translateX(20px)}
+.callout{border-radius:12px;padding:10px 14px;margin:10px 0;font-size:14px}
+.callout.info{background:var(--blue-soft);color:var(--blue-deep)}
+.callout.warn{background:var(--warn-soft);color:var(--warn-deep);border:1px solid #f3e6a6}
+.callout.bad{background:var(--err-soft);color:var(--err-deep)}
+.callout.ok{background:#E9F8EE;color:var(--ok-deep)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpi{background:var(--white);border:1px solid var(--n100);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--blue)}
+.kpi.o:before{background:var(--orange)}.kpi.y:before{background:var(--yellow)}.kpi.g:before{background:var(--ok)}.kpi.r:before{background:var(--err)}
+.kpi small{color:var(--n400);font-weight:500}.kpi .v{font-size:24px;font-weight:700;margin-top:2px}
+.kpi.hero{background:linear-gradient(135deg,var(--blue),var(--blue-deep));color:#fff;border:0}
+.kpi.hero:before{background:var(--yellow)}.kpi.hero small{color:#cfe2ff}
+.bar{height:8px;background:var(--n100);border-radius:999px;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--blue);border-radius:999px}
+.bar.o i{background:var(--orange)}.bar.r i{background:var(--err)}
+.slots{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.slot{border:1px solid var(--n100);border-radius:999px;padding:7px 14px;cursor:pointer;display:flex;gap:8px;align-items:center;font-size:14px}
+.slot.sel{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)}
+.flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px;margin-bottom:18px}
+.flow .node{padding:6px 14px;border-radius:999px;border:1px solid var(--n100);background:#fff;font-weight:500}
+.flow .node.on{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)}
+.flow .node.alert{border-color:var(--err);background:var(--err-soft);color:var(--err-deep)}
+.muted{color:var(--n400)}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:12.5px}
+pre{background:var(--navy);color:#dbe6ff;padding:14px;border-radius:12px;overflow:auto;font-size:12px;margin:0}
+.toast{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:8px;z-index:20}
+.toast div{background:var(--navy);color:#fff;padding:11px 16px;border-radius:14px;box-shadow:0 8px 24px rgba(31,42,85,.25);max-width:380px;animation:in .2s;border-left:4px solid var(--yellow)}
+@keyframes in{from{transform:translateY(8px);opacity:0}}
+.empty{color:var(--n300);text-align:center;padding:24px}
+.modal-bg{position:fixed;inset:0;background:rgba(31,42,85,.45);display:flex;align-items:center;justify-content:center;z-index:30}
+.modal{background:#fff;border-radius:20px;padding:22px;width:min(460px,92vw)}
+.modal h3{margin:0 0 8px;font-weight:600}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.frozen{color:var(--err);font-weight:600}
+.period-chip{font-size:12px;color:var(--n400);background:var(--bg);border:1px solid var(--n100);border-radius:999px;padding:2px 10px;font-weight:500}
+.limit-box{border:1px solid var(--n100);border-radius:14px;padding:14px;background:var(--bg)}
+.limit-box + .limit-box{margin-top:12px}
+.limit-box .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-weight:600}
+.limit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.limit-grid label{font-size:12.5px;color:var(--n400);font-weight:500;display:flex;flex-direction:column;gap:4px}
+.limit-grid select,.limit-grid input{width:100%}
+.ladder{display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap}
+.ladder .step{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--n400);font-weight:600}
+.ladder input{width:62px;text-align:center;padding:5px 6px}
+.icon-btn{width:30px;height:30px;border-radius:50%;border:1px solid var(--n100);background:#fff;color:var(--blue);cursor:pointer;font:inherit;font-weight:700}
+.icon-btn:hover{background:var(--blue-soft)}
+.drop{border:1.5px dashed var(--n200);border-radius:14px;padding:16px;text-align:center;background:var(--bg);cursor:pointer;color:var(--n400);display:block}
+.drop:hover{border-color:var(--blue);color:var(--blue)}
+.drop.has{border-style:solid;border-color:var(--ok);background:#E9F8EE;color:var(--ok-deep);text-align:left;display:flex;justify-content:space-between;align-items:center}
+.decision{font-size:11px;font-weight:600;background:var(--yellow);color:var(--navy);border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:middle}
+.outcome{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--n100);font-size:14px}
+.outcome:first-child{border-top:0}
+.rule-tbl td{vertical-align:middle}
+@media (max-width:860px){.layout{grid-template-columns:1fr}nav{display:flex;overflow-x:auto;border-right:0;border-bottom:1px solid var(--n100)}nav .grp{display:none}nav button{white-space:nowrap;width:auto}.grid2,.kpis{grid-template-columns:1fr 1fr}.limit-grid{grid-template-columns:1fr}main{padding:16px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="mark">i<i>S</i>chool</span><span class="div"></span><span>B2G HR Policy Engine</span><span class="pill-tag">Prototype</span></div>
+  <span class="sp"></span>
+  <div class="seg" id="roleSeg"></div>
+  <span id="tutorPick"></span>
+  <label class="inline">Organization <select id="orgSel" onchange="App.setOrg(this.value)"></select></label>
+  <span class="period-chip" id="clock"></span>
+</header>
+<div class="layout">
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+<div class="toast" id="toast"></div>
+<div id="modalRoot"></div>
+
+<script>
+/* ================= Clock & helpers ================= */
+const NOW = new Date('2026-10-12T10:00:00').getTime();
+const H = 3600e3, DAY = 24*H, MIN = 60e3;
+const pad=n=>String(n).padStart(2,'0');
+const dayKey = t => {const d=new Date(t);return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`};
+const parseDay = s => new Date(s+'T00:00:00').getTime();
+const addMonths=(t,n)=>{const d=new Date(t);d.setMonth(d.getMonth()+n);return d.getTime()};
+const fmtDT = t => new Date(t).toLocaleString('en-GB',{weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+const fmtD = t => new Date(t).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+const fmtDs = t => new Date(t).toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short'});
+const hhmm = t => new Date(t).toTimeString().slice(0,5);
+const money = n => 'EGP ' + Number(n).toLocaleString('en-US',{maximumFractionDigits:2});
+const uid = p => p + '-' + Math.random().toString(36).slice(2,7).toUpperCase();
+const esc = s => String(s ?? '').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ord = n => n+(['th','st','nd','rd'][(n%100>10&&n%100<14)?0:(n%10<4?n%10:0)]);
+const kb = b => b>1e6?(b/1e6).toFixed(1)+' MB':Math.max(1,Math.round(b/1e3))+' KB';
+const grade = g => g.split(' · ')[0];
+const PERIODS = {MONTH:'Month',SEMESTER:'Semester',INTAKE:'Entire intake / project'};
+const TYPES = {
+  planned:  {label:'Planned excuse', tag:'t-info',   limit:'plannedLimit',  period:'plannedPeriod',  over:'plannedOver',  rule:'PLANNED_OVER'},
+  emergency:{label:'Emergency leave',tag:'t-orange', limit:'emergencyLimit',period:'emergencyPeriod',over:'emergencyOver',rule:'EMERGENCY_OVER'},
+  sick:     {label:'Sick leave',     tag:'t-warn',   limit:'sickLimit',     period:'sickPeriod',     over:'sickOver',     rule:'SICK_OVER'},
+};
+const DOC = {NOT_REQUIRED:['Not required','t-mut'],AWAITING:['Awaiting upload','t-warn'],SUBMITTED:['Submitted · review','t-info'],SUBMITTED_LATE:['Late upload · review','t-orange'],ACCEPTED:['Accepted','t-ok'],REJECTED:['Rejected','t-bad'],MISSING:['Missing','t-bad']};
+const docTag = s => `<span class="tag ${DOC[s][1]}">${DOC[s][0]}</span>`;
+
+/* ================= Seed data (isolated per org) ================= */
+const ORGS = [
+  {id:'DECI', name:'DECI', price:250, start:'2026-09-01', end:'2027-06-30', groups:['Python L2','Web Dev L1','AI Basics','Scratch L3']},
+  {id:'DEMI-S', name:'DEMI Summer', price:200, start:'2026-07-01', end:'2026-12-31', groups:['Robotics A','Game Dev B','Python L1','Data L1']},
+  {id:'DEMI-3', name:'DEMI 3rd Intake', price:220, start:'2026-09-15', end:'2027-03-15', groups:['Mobile Apps','Python L3','Web Dev L2','Cyber 101']},
+];
+const NAMES = [['Ahmed Samir',null],['Nour Hassan',300],['Omar Khaled',null],['Salma Adel',275],['Youssef Tarek',null],['Mariam Fathy',260],['Karim Ezzat',null]];
+const defaultRules = () => ({
+  NO_SHOW:        {label:'No-show',                        ladder:[2,3],   period:'MONTH',   escalateAt:2},
+  EMERGENCY_OVER: {label:'Emergency leave over limit',     ladder:[1,2,3], period:'MONTH',   escalateAt:3},
+  PLANNED_OVER:   {label:'Planned excuse over limit',      ladder:[1,2,3], period:'INTAKE',  escalateAt:0},
+  SICK_OVER:      {label:'Sick leave over limit',          ladder:[1,2,3], period:'SEMESTER',escalateAt:0},
+  SICK_NO_DOC:    {label:'Sick leave – missing document',  ladder:[1,2,3], period:'INTAKE',  escalateAt:3},
+});
+
+function seedOrg(o, oi){
+  const tutors = NAMES.map((n,i)=>({id:`T${oi+1}${pad(i+1)}`,name:n[0],rate:n[1],frozen:false,frozenAt:null,frozenBy:null,isCover:i>=5}));
+  const sessions=[], slotHours=[16,18,20];
+  const first = Math.max(parseDay(o.start), NOW-56*DAY);
+  const startDay = Math.round((parseDay(dayKey(first)) - parseDay(dayKey(NOW)))/DAY);
+  for(let d=startDay; d<7; d++){
+    tutors.slice(0,5).forEach((t,ti)=>{
+      slotHours.forEach((h,si)=>{
+        if((ti+si+d+100)%2) return;
+        const st=new Date(NOW); st.setDate(st.getDate()+d); st.setHours(h,0,0,0);
+        if(st.getDay()===5) return;
+        const ts=st.getTime();
+        sessions.push({id:uid('S'),tutorId:t.id,assignedTutorId:t.id,group:`${o.groups[(ti+si)%4]} · G${10+ti*3+si}`,start:ts,status: ts<NOW?'Completed':'Scheduled'});
+      });
+    });
+  }
+  sessions.sort((a,b)=>a.start-b.start);
+  const db={policy:{
+      plannedEnabled:true, plannedNoticeHours:48, allowPartialSlots:true, requireApproval:true,
+      plannedLimit:4, plannedPeriod:'INTAKE', plannedOver:'BLOCK',
+      emergencyLimit:2, emergencyPeriod:'MONTH', emergencyOver:'PENALTY',
+      sickEnabled:true, sickLimit:3, sickPeriod:'SEMESTER', sickOver:'PENALTY',
+      sickDocRequired:true, sickDocDeadlineHours:48, sickDocTypes:'PDF, JPG, PNG',
+      intakeStart:o.start, intakeEnd:o.end, semesterMonths:4,
+      defaultPrice:o.price, dispatchThresholdHours:48, coverSafetyHours:4,
+      rules:defaultRules(), showDeductionPreview:true, allowCancelDeduction:true,
+      cancelEnabled:true, reclaimWindowMin:15, cancelLimit:2, cancelPeriod:'MONTH', cancelledCounts:true, coverReclaim:'NO_RECLAIM',
+    }, tutors, sessions, requests:[], penalties:[], alerts:[]};
+
+  const nowMonth = new Date(NOW).getMonth();
+  const pastDays = (tid, pred) => [...new Set(sessions.filter(s=>s.tutorId===tid && s.start<NOW && pred(new Date(s.start))).map(s=>dayKey(s.start)))].sort();
+  const R = t => t.rate ?? o.price;
+  const hist = (ti, type, dk, coverIdx, extra={}) => {
+    if(!dk) return null;
+    const t=tutors[ti], ss=sessions.filter(s=>s.tutorId===t.id && dayKey(s.start)===dk && s.assignedTutorId===t.id);
+    if(!ss.length) return null;
+    ss.forEach(s=>{s.assignedTutorId=tutors[coverIdx].id; s.status='Completed'; s.coverFor=t.id; s.claimPool='cover';});
+    const r={id:uid('R'),tutorId:t.id,type,sessionIds:ss.map(s=>s.id),firstStart:ss[0].start,notice:type==='planned'?72:6,
+      reason:{planned:'Family event',emergency:'Family emergency',sick:'Flu / fever'}[type],submittedAt:ss[0].start-(type==='planned'?72:6)*H,status:'Approved',preview:0,
+      docStatus:type==='sick'?'ACCEPTED':null, doc:null, docDeadline:type==='sick'?ss[0].start+48*H:null, ...extra};
+    db.requests.push(r); return r;
+  };
+  const omarOct = pastDays(tutors[2].id, d=>d.getMonth()===nowMonth);
+  hist(2,'emergency',omarOct[0],5); hist(2,'emergency',omarOct[2],6);
+  hist(4,'emergency',pastDays(tutors[4].id, d=>d.getMonth()!==nowMonth).slice(-3)[0],5);
+  hist(0,'planned',pastDays(tutors[0].id, d=>d.getMonth()!==nowMonth).slice(-4)[0],6);
+  const nourDays = pastDays(tutors[1].id, d=>d.getMonth()===nowMonth);
+  hist(1,'planned',nourDays[1],5);
+  // Sick leave history
+  hist(3,'sick',pastDays(tutors[3].id, d=>d.getMonth()===nowMonth)[1],6,{doc:{name:'medical_report_salma.pdf',size:182000,type:'application/pdf',uploadedAt:NOW-6*DAY}});
+  const nourSick = hist(1,'sick',nourDays[nourDays.length-1],6,{docStatus:'AWAITING',reason:'Stomach infection'});
+  if(nourSick) nourSick.docDeadline = nourSick.firstStart + 48*H;
+  const ys = hist(4,'sick',pastDays(tutors[4].id, d=>d.getMonth()===nowMonth)[0],5,{docStatus:'MISSING'});
+  if(ys){ db.penalties.push({id:uid('P'),tutorId:tutors[4].id,code:'SICK_NO_DOC',label:'Sick leave – missing document',occurrence:1,multiplier:1,rate:R(tutors[4]),sessions:ys.sessionIds.length,total:R(tutors[4])*ys.sessionIds.length,reason:'No medical document uploaded before the deadline',status:'Deducted',escalated:false,at:ys.docDeadline,sessionId:ys.sessionIds[0],group:sessions.find(s=>s.id===ys.sessionIds[0]).group,requestId:ys.id}); }
+  // Omar: one no-show earlier this month
+  const ns = sessions.find(s=>s.tutorId===tutors[2].id && s.assignedTutorId===tutors[2].id && s.start<NOW && new Date(s.start).getMonth()===nowMonth && s.status==='Completed');
+  if(ns){ ns.status='No-Show'; db.penalties.push({id:uid('P'),tutorId:tutors[2].id,code:'NO_SHOW',label:'No-show',occurrence:1,multiplier:2,rate:o.price,sessions:1,total:2*o.price,reason:'No-show',status:'Deducted',escalated:false,at:ns.start,sessionId:ns.id,group:ns.group}); }
+  db.requests.sort((a,b)=>b.firstStart-a.firstStart);
+  return db;
+}
+const DB = {}; ORGS.forEach((o,i)=>DB[o.id]=seedOrg(o,i));
+
+/* ================= App ================= */
+const App = {
+  org:'DECI', role:'ops', view:'policy', tutorAs:null, sumPeriod:'MONTH', sessTab:'upcoming',
+  draft:{type:'planned', day:null, slots:[], reason:'', file:null},
+  get d(){return DB[this.org]}, get p(){return DB[this.org].policy},
+  setOrg(id){this.org=id; if(!this.d.tutors.find(t=>t.id===this.tutorAs)) this.tutorAs=this.d.tutors[0].id; this.resetDraft(); this.render(); toast(`Switched to ${orgName(id)}. Policy and data are separate for each intake.`)},
+  setRole(r){this.role=r; this.view = r==='tutor' ? 'summary' : 'policy'; this.render()},
+  viewAs(tid){this.tutorAs=tid; this.setRole('tutor')},
+  go(v){this.view=v; this.render()},
+  resetDraft(){this.draft={type:this.p.plannedEnabled?'planned':'emergency',day:null,slots:[],reason:'',file:null}},
+  tutor(id){return this.d.tutors.find(t=>t.id===id)},
+  rateOf(t){return t.rate ?? this.p.defaultPrice},
+  session(id){return this.d.sessions.find(s=>s.id===id)},
+  req(id){return this.d.requests.find(r=>r.id===id)},
+
+  render(){
+    document.getElementById('clock').textContent = 'Sim time · ' + fmtDT(NOW);
+    document.getElementById('roleSeg').innerHTML = `<button class="${this.role==='ops'?'on':''}" onclick="App.setRole('ops')">HR / Ops</button><button class="${this.role==='tutor'?'on':''}" onclick="App.setRole('tutor')">Tutor</button>`;
+    document.getElementById('tutorPick').innerHTML = this.role==='tutor' ? `<select onchange="App.tutorAs=this.value;App.resetDraft();App.render()">${this.d.tutors.map(x=>`<option value="${x.id}" ${x.id===this.tutorAs?'selected':''}>${x.name}${x.isCover?' (cover)':''}</option>`).join('')}</select>` : '';
+    document.getElementById('orgSel').innerHTML = ORGS.map(o=>`<option value="${o.id}" ${o.id===this.org?'selected':''}>${o.name}</option>`).join('');
+    const d=this.d;
+    const item=(v,label,c,cls='')=>`<button class="${this.view===v?'active':''}" onclick="App.go('${v}')"><span>${label}</span>${c?`<span class="count ${cls}">${c}</span>`:''}</button>`;
+    let nav='';
+    if(this.role==='tutor'){
+      const mine=d.requests.filter(r=>r.tutorId===this.tutorAs);
+      const docs=mine.filter(r=>['AWAITING','MISSING','REJECTED'].includes(r.docStatus) && r.status!=='Cancelled').length;
+      nav = `<div class="grp">Tutor portal</div>${item('summary','My Summary & Salary')}${item('tutor','Request Absence')}${item('myleaves','My Leaves & Documents',docs)}`;
+    } else {
+      const pend=d.requests.filter(r=>r.status==='Pending').length;
+      const docs=d.requests.filter(r=>['SUBMITTED','SUBMITTED_LATE'].includes(r.docStatus) && r.status!=='Cancelled').length;
+      const disp=d.sessions.filter(s=>['Buffer Pool','Cover Queue'].includes(s.status)||s.reclaim).length;
+      const swt=d.sessions.filter(s=>s.status==='Session Without Tutor').length;
+      const inv=d.penalties.filter(p=>p.escalated && p.status==='Under Review').length;
+      const al=d.alerts.filter(a=>!a.read).length;
+      nav = `<div class="grp">Settings</div>${item('policy','HR Policy')}`+
+        `<div class="grp">Operations / HR</div>`+item('approvals','Approvals',pend)+item('sickdocs','Sick Leave Documents',docs)+item('dispatch','Cover Dispatch',disp+swt, swt?'':'n')+
+        item('sessions','Sessions')+item('ledger','Deductions Ledger')+item('investigation','Investigation Queue',inv)+item('tutors','Tutors')+item('alerts','Alerts',al);
+    }
+    document.getElementById('nav').innerHTML = nav;
+    const V={policy:vPolicy,tutor:vTutor,summary:vSummary,myleaves:vMyLeaves,approvals:vApprovals,sickdocs:vSickDocs,dispatch:vDispatch,sessions:vSessions,ledger:vLedger,investigation:vInvestigation,tutors:vTutors,alerts:vAlerts};
+    document.getElementById('main').innerHTML = V[this.view]();
+  }
+};
+const orgName = id => ORGS.find(o=>o.id===id).name;
+function toast(msg){const el=document.createElement('div');el.textContent=msg;document.getElementById('toast').appendChild(el);setTimeout(()=>el.remove(),4200)}
+function modal(html){document.getElementById('modalRoot').innerHTML=`<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal">${html}</div></div>`}
+function closeModal(){document.getElementById('modalRoot').innerHTML=''}
+function statusTag(s){
+  const m={'Scheduled':'t-mut','Buffer Pool':'t-info','Cover Queue':'t-orange','Reassigned':'t-ok','Session Without Tutor':'t-bad','No-Show':'t-bad','Completed':'t-ok',
+    'Pending':'t-warn','Approved':'t-ok','Rejected':'t-bad','Cancelled':'t-mut','Deducted':'t-bad','Under Review':'t-warn','Waived':'t-mut'};
+  return `<span class="tag ${m[s]||'t-mut'}">${s}</span>`;
+}
+const typeTag = ty => `<span class="tag ${TYPES[ty].tag}">${TYPES[ty].label}</span>`;
+
+/* ================= Period engine ================= */
+function periodWindow(type, t){
+  const p=App.p, is=parseDay(p.intakeStart), ie=parseDay(p.intakeEnd)+DAY;
+  if(type==='MONTH'){const d=new Date(t);const a=new Date(d.getFullYear(),d.getMonth(),1).getTime();return {from:a,to:addMonths(a,1),label:new Date(t).toLocaleDateString('en-GB',{month:'long',year:'numeric'})}}
+  if(type==='SEMESTER'){
+    let a=is, k=1; while(addMonths(a,p.semesterMonths)<=t && addMonths(a,p.semesterMonths)<ie){a=addMonths(a,p.semesterMonths);k++}
+    const b=Math.min(addMonths(a,p.semesterMonths),ie);
+    return {from:a,to:b,label:`Semester ${k} (${fmtDs(a)} – ${fmtDs(b-DAY)})`};
+  }
+  return {from:is,to:ie,label:`Intake (${fmtD(is)} – ${fmtD(ie-DAY)})`};
+}
+const inWin=(t,w)=>t>=w.from && t<w.to;
+function counts(r){ return r.status!=='Rejected' && (r.status!=='Cancelled' || App.p.cancelledCounts); }
+function usage(tid,type,t){
+  const p=App.p, T=TYPES[type], per=p[T.period], w=periodWindow(per,t);
+  const used=App.d.requests.filter(r=>r.tutorId===tid && r.type===type && counts(r) && inWin(r.firstStart,w)).length;
+  const limit=p[T.limit];
+  return {used,limit,left:Math.max(0,limit-used),win:w,period:per};
+}
+function limitBar(u){const pct=Math.min(100,u.used/Math.max(1,u.limit)*100);const cls=u.used>=u.limit?'r':(u.used>=u.limit-1?'o':'');return `<div class="bar ${cls}"><i style="width:${pct}%"></i></div>`}
+
+/* ================= Configurable deduction engine ================= */
+function previewViolation(t, code, nSessions, at=NOW){
+  const rule=App.p.rules[code], w=periodWindow(rule.period, at);
+  const prior=App.d.penalties.filter(x=>x.tutorId===t.id && x.code===code && x.status!=='Waived' && inWin(x.at,w)).length;
+  const occ=prior+1, mult=rule.ladder[Math.min(occ-1,rule.ladder.length-1)], R=App.rateOf(t);
+  return {code,rule,occ,mult,R,n:nSessions,total:mult*R*nSessions,escalate:rule.escalateAt>0 && occ>=rule.escalateAt,win:w};
+}
+function applyViolation(t, code, sessions, reason, requestId){
+  const v=previewViolation(t,code,sessions.length);
+  const pen={id:uid('P'),tutorId:t.id,code,label:v.rule.label,occurrence:v.occ,multiplier:v.mult,rate:v.R,sessions:sessions.length,total:v.total,reason,
+    status:v.escalate?'Under Review':'Deducted',escalated:v.escalate,at:NOW,sessionId:sessions[0]?.id,group:sessions[0]?.group||'—',requestId};
+  App.d.penalties.unshift(pen);
+  if(v.escalate) App.d.alerts.unshift({id:uid('A'),to:'HR',msg:`${t.name} escalated to the Investigation Queue: ${v.rule.label}, ${ord(v.occ)} occurrence (${money(pen.total)}).`,at:NOW,read:false,level:'high'});
+  return pen;
+}
+const vText = v => v.mult===0 ? `0× (recorded, no deduction)` : `${money(v.total)} = ${v.mult} × ${money(v.R)}${v.n>1?` × ${v.n} sessions`:''}`;
+
+/* ================= HR Policy ================= */
+function setPol(k,v){ const p=App.p, old=p[k]; p[k] = typeof old==='number' ? Number(v) : v; App.render(); toast(`Saved for ${orgName(App.org)} only`); }
+function setRule(code,k,v){ const r=App.p.rules[code]; r[k]= k==='escalateAt'?Number(v):v; App.render(); toast('Deduction rule updated'); }
+function setStep(code,i,v){ App.p.rules[code].ladder[i]=Math.max(0,Number(v)||0); App.render(); }
+function addStep(code){ const l=App.p.rules[code].ladder; l.push(l[l.length-1]+1); App.render(); }
+function delStep(code){ const l=App.p.rules[code].ladder; if(l.length>1) l.pop(); App.render(); }
+const sw=k=>`<label class="switch"><input type="checkbox" ${App.p[k]?'checked':''} onchange="setPol('${k}',this.checked)"><span></span></label>`;
+const num=(k,suffix='',min=0,step=1)=>`<span class="ctl"><input type="number" min="${min}" step="${step}" value="${App.p[k]}" onchange="setPol('${k}',this.value)"> <span class="muted">${suffix}</span></span>`;
+const perSel=(k,cur,fn)=>`<select onchange="${fn||`setPol('${k}',this.value)`}">${Object.entries(PERIODS).map(([v,l])=>`<option value="${v}" ${(cur??App.p[k])===v?'selected':''}>Per ${l.toLowerCase()}</option>`).join('')}</select>`;
+const overSel=(k,rule)=>`<select onchange="setPol('${k}',this.value)"><option value="BLOCK" ${App.p[k]==='BLOCK'?'selected':''}>Block submission</option><option value="PENALTY" ${App.p[k]==='PENALTY'?'selected':''}>Allow + “${App.p.rules[rule].label}” deduction</option></select>`;
+function limitBox(type){
+  const T=TYPES[type], p=App.p, w=periodWindow(p[T.period],NOW);
+  return `<div class="limit-box"><div class="hd"><span>${T.label}s</span><span class="period-chip">Current window: ${w.label}</span></div>
+    <div class="limit-grid">
+      <label>Maximum per tutor<input type="number" min="0" value="${p[T.limit]}" onchange="setPol('${T.limit}',this.value)"></label>
+      <label>Limit is counted${perSel(T.period)}</label>
+      <label>When limit is reached${overSel(T.over,T.rule)}</label>
+    </div></div>`;
+}
+const COVER_RECLAIM = {
+  NO_RECLAIM:'Keep the cover tutor (no tutor shortage — avoids double payment)',
+  RECLAIM_STANDBY:'Return to main tutor, cover goes on standby (tutor shortage)',
+  MANUAL:'Needs admin approval before changing the assignment',
+  ALT_SESSION:'Keep cover; give main tutor another same-grade session (Maha’s proposal)',
+};
+function vPolicy(){
+  const p=App.p;
+  return `<h2>HR Policy — ${orgName(App.org)}</h2>
+  <p class="sub">Settings → HR Policy. Every value is stored per organization / intake with no effect on other cohorts. Switch organization at the top to check.</p>
+  <div class="card"><h3><span class="ic">◷</span>Leave limits</h3>
+    ${limitBox('planned')}${limitBox('emergency')}${limitBox('sick')}
+    <div class="callout info">Each request counts once, however many slots it covers. Rejected requests never count. ${p.cancelledCounts?'Cancelled requests still count (anti-abuse).':'Cancelled requests do not count.'}</div>
+  </div>
+
+  <div class="card"><h3><span class="ic">✚</span>Sick leave & supporting documents</h3>
+   <div class="grid2" style="gap:0 28px">
+    <div>
+     <div class="row"><div class="lbl"><b>Enable sick leave</b><small>Tutors can submit sick leave for this organization</small></div>${sw('sickEnabled')}</div>
+     <div class="row"><div class="lbl"><b>Supporting document required</b><small>Medical report / doctor's note</small></div>${sw('sickDocRequired')}</div>
+     <div class="row"><div class="lbl"><b>Accepted file types</b><small>Shown to the tutor on upload</small></div><input value="${esc(p.sickDocTypes)}" onchange="setPol('sickDocTypes',this.value)" style="width:150px"></div>
+    </div>
+    <div>
+     <div class="row"><div class="lbl"><b>Upload deadline</b><small>Hours after the first excused session starts</small></div>${num('sickDocDeadlineHours','hours',1)}</div>
+     <div class="row"><div class="lbl"><b>Missing / rejected document</b><small>Uses the “Sick leave – missing document” rule below</small></div><span class="tag t-warn">${p.rules.SICK_NO_DOC.ladder.map(m=>m+'×').join(' → ')}</span></div>
+     <div class="row"><div class="lbl"><b>Late upload</b><small>HR can accept it with a justification and cancel the deduction</small></div><span class="tag t-ok">Enabled</span></div>
+    </div>
+   </div>
+  </div>
+
+  <div class="card"><h3><span class="ic">%</span>Deduction scheme (occurrence-based)</h3>
+   <p class="muted" style="margin:-4px 0 12px">Deduction = multiplier × R × affected sessions. The multiplier grows with each occurrence in the counting window; the last value applies to later occurrences. Use <b>0×</b> to record a violation without a financial deduction.</p>
+   <table class="rule-tbl"><tr><th>Violation</th><th>Multiplier per occurrence</th><th>Occurrences counted</th><th>Escalate to Investigation</th></tr>
+   ${Object.entries(p.rules).map(([code,r])=>`<tr><td><b>${r.label}</b><div class="muted mono">${code}</div></td>
+     <td><div class="ladder">${r.ladder.map((m,i)=>`<span class="step">${ord(i+1)}${i===r.ladder.length-1?'+':''}<input type="number" min="0" step="0.5" value="${m}" onchange="setStep('${code}',${i},this.value)"></span>`).join('')}
+       <button class="icon-btn" title="Add occurrence" onclick="addStep('${code}')">+</button><button class="icon-btn" title="Remove last" onclick="delStep('${code}')">−</button></div></td>
+     <td>${perSel(null,r.period,`setRule('${code}','period',this.value)`)}</td>
+     <td><select onchange="setRule('${code}','escalateAt',this.value)"><option value="0" ${r.escalateAt==0?'selected':''}>Never</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${r.escalateAt==n?'selected':''}>From ${ord(n)} occurrence</option>`).join('')}</select></td></tr>`).join('')}
+   </table>
+  </div>
+
+  <div class="card"><h3><span class="ic">↺</span>Leave cancellation & session reclaim</h3>
+   <div class="grid2" style="gap:0 28px">
+    <div>
+     <div class="row"><div class="lbl"><b>Allow tutors to cancel a leave</b><small>Never allowed once a session has started</small></div>${sw('cancelEnabled')}</div>
+     <div class="row"><div class="lbl"><b>Reclaim cut-off</b><small>Main tutor can't reclaim a session closer than this to start</small></div>${num('reclaimWindowMin','min before start',0)}</div>
+     <div class="row"><div class="lbl"><b>Max cancellations</b><small>Stops repeated request-and-cancel</small></div><span class="ctl"><input type="number" min="0" value="${p.cancelLimit}" onchange="setPol('cancelLimit',this.value)">${perSel('cancelPeriod')}</span></div>
+     <div class="row"><div class="lbl"><b>Cancelled leaves still count toward limits</b></div>${sw('cancelledCounts')}</div>
+    </div>
+    <div>
+     <div class="row"><div class="lbl"><b>Not yet assigned</b><small>In Buffer Pool / Cover Queue / Without Tutor</small></div><span class="tag t-ok">Returns to main tutor</span></div>
+     <div class="row"><div class="lbl"><b>Claimed by a buffer tutor</b><small>Buffer tutor already planned around it</small></div><span class="tag t-bad">Main tutor can't reclaim</span></div>
+     <div class="row" style="display:block"><div class="lbl"><b>Claimed by a cover tutor</b> <span class="decision">Open decision · Education Team</span><small style="display:block">Choose per project</small></div>
+       <select style="width:100%;margin-top:6px" onchange="setPol('coverReclaim',this.value)">${Object.entries(COVER_RECLAIM).map(([k,l])=>`<option value="${k}" ${p.coverReclaim===k?'selected':''}>${l}</option>`).join('')}</select></div>
+    </div>
+   </div>
+  </div>
+
+  <div class="grid2">
+   <div class="card"><h3><span class="ic">▤</span>Intake timeline</h3>
+    <div class="row"><div class="lbl"><b>Intake start</b></div><input type="date" value="${p.intakeStart}" onchange="setPol('intakeStart',this.value)"></div>
+    <div class="row"><div class="lbl"><b>Intake end</b></div><input type="date" value="${p.intakeEnd}" onchange="setPol('intakeEnd',this.value)"></div>
+    <div class="row"><div class="lbl"><b>Semester length</b><small>Counted from intake start</small></div>${num('semesterMonths','months',1)}</div>
+   </div>
+   <div class="card"><h3><span class="ic">✎</span>Planned excuse rules</h3>
+    <div class="row"><div class="lbl"><b>Enable planned excuses</b></div>${sw('plannedEnabled')}</div>
+    <div class="row"><div class="lbl"><b>Minimum lead time</b><small>Hours before session start</small></div>
+      <select onchange="setPol('plannedNoticeHours',this.value)">${[12,24,36,48,72].map(h=>`<option ${p.plannedNoticeHours==h?'selected':''} value="${h}">${h} h</option>`).join('')}</select></div>
+    <div class="row"><div class="lbl"><b>Allow partial / specific slots</b></div>${sw('allowPartialSlots')}</div>
+    <div class="row"><div class="lbl"><b>Require Ops/HR approval</b></div>${sw('requireApproval')}</div>
+   </div>
+   <div class="card"><h3><span class="ic">⇄</span>Cover dispatch routing</h3>
+    <div class="row"><div class="lbl"><b>Routing threshold</b><small>≥ threshold → Buffer Pool; below → Cover Team</small></div>${num('dispatchThresholdHours','hours',1)}</div>
+    <div class="row"><div class="lbl"><b>Cover safety threshold</b><small>Unclaimed this close → Session Without Tutor</small></div>${num('coverSafetyHours','h before start',0)}</div>
+   </div>
+   <div class="card"><h3><span class="ic">R</span>Rate & visibility</h3>
+    <div class="row"><div class="lbl"><b>Default base session price (R)</b></div>${num('defaultPrice','EGP',0,5)}</div>
+    <div class="row"><div class="lbl"><b>Show deduction to tutor before request</b></div>${sw('showDeductionPreview')}</div>
+    <div class="row"><div class="lbl"><b>Admins can cancel deductions</b><small>Including automatic ones</small></div>${sw('allowCancelDeduction')}</div>
+   </div>
+  </div>
+  <div class="card"><h3><span class="ic">{ }</span>org_hr_policies (live record)</h3>
+   <pre>${esc(JSON.stringify({org_id:App.org,intake_start:p.intakeStart,intake_end:p.intakeEnd,semester_length_months:p.semesterMonths,
+     limits:Object.fromEntries(Object.entries(TYPES).map(([k,T])=>[k,{max:p[T.limit],period:p[T.period],over_limit_action:p[T.over]}])),
+     sick_leave:{enabled:p.sickEnabled,document_required:p.sickDocRequired,accepted_types:p.sickDocTypes,upload_deadline_hours:p.sickDocDeadlineHours},
+     deduction_rules:Object.fromEntries(Object.entries(p.rules).map(([k,r])=>[k,{multipliers:r.ladder,period:r.period,escalate_at_occurrence:r.escalateAt||null}])),
+     cancellation:{enabled:p.cancelEnabled,reclaim_cutoff_minutes:p.reclaimWindowMin,max_cancellations:p.cancelLimit,period:p.cancelPeriod,cancelled_counts_toward_limits:p.cancelledCounts,cover_reclaim_policy:p.coverReclaim},
+     default_session_price:p.defaultPrice,dispatch_threshold_hours:p.dispatchThresholdHours,cover_safety_hours:p.coverSafetyHours},null,2))}</pre>
+  </div>`;
+}
+
+/* ================= Tutor: Summary & Salary ================= */
+function vSummary(){
+  const d=App.d, t=App.tutor(App.tutorAs), R=App.rateOf(t);
+  const w=periodWindow(App.sumPeriod, NOW);
+  const attended=d.sessions.filter(s=>s.assignedTutorId===t.id && s.status==='Completed' && inWin(s.start,w) && s.start<NOW);
+  const gross=attended.length*R;
+  const pens=d.penalties.filter(x=>x.tutorId===t.id && x.status!=='Waived' && inWin(x.at,w));
+  const ded=pens.reduce((a,x)=>a+x.total,0);
+  const reqs=d.requests.filter(r=>r.tutorId===t.id), rw=reqs.filter(r=>counts(r) && inWin(r.firstStart,w));
+  const noShows=d.sessions.filter(s=>s.tutorId===t.id && s.status==='No-Show' && inWin(s.start,w)).length;
+  const covers=attended.filter(s=>s.tutorId!==t.id).length;
+  const pendingDocs=reqs.filter(r=>r.status!=='Cancelled' && ['AWAITING','MISSING','REJECTED'].includes(r.docStatus));
+  return `<h2>Hi ${t.name.split(' ')[0]} 👋</h2>
+  <p class="sub">Your attendance, leaves and salary for ${orgName(App.org)}. Rate R = ${money(R)} per session ${t.rate?'(your profile rate)':'(organization default)'}.</p>
+  ${t.frozen?`<div class="callout bad">Your profile is <b>frozen</b> pending HR review. You can't claim offers or get new assignments.</div>`:''}
+  ${pendingDocs.length?`<div class="callout warn">You have <b>${pendingDocs.length}</b> sick leave(s) needing a supporting document. <a href="#" onclick="App.go('myleaves')">Upload now</a> to avoid or appeal a deduction.</div>`:''}
+  <div class="row" style="border:0;padding:0 0 14px"><div class="lbl"><b>Salary period</b><small>${w.label}</small></div>
+    <div class="seg">${Object.entries({MONTH:'This month',SEMESTER:'This semester',INTAKE:'Whole intake'}).map(([k,l])=>`<button class="${App.sumPeriod===k?'on':''}" onclick="App.sumPeriod='${k}';App.render()">${l}</button>`).join('')}</div></div>
+  <div class="kpis">
+   <div class="kpi"><small>Sessions attended</small><div class="v">${attended.length}</div><small>${covers} as cover</small></div>
+   <div class="kpi g"><small>Gross earnings</small><div class="v">${money(gross)}</div><small>${attended.length} × ${money(R)}</small></div>
+   <div class="kpi r"><small>Deductions</small><div class="v">${money(ded)}</div><small>${pens.length} violation${pens.length===1?'':'s'}</small></div>
+   <div class="kpi hero"><small>Net salary due</small><div class="v">${money(gross-ded)}</div><small>Gross − deductions</small></div>
+  </div>
+  <div class="grid2">
+   <div class="card"><h3><span class="ic">◷</span>My leave balances (current window)</h3>
+     ${['planned','emergency','sick'].map(ty=>{const u=usage(t.id,ty,NOW);return `<div class="limit-box"><div class="hd"><span>${TYPES[ty].label}s</span><span>${u.used} / ${u.limit}</span></div>${limitBar(u)}<div class="muted" style="margin-top:6px;font-size:13px">${PERIODS[u.period]} · ${u.win.label} · ${u.left} left</div></div>`}).join('')}
+   </div>
+   <div class="card"><h3><span class="ic">#</span>Counts in selected period</h3>
+     <table>
+      <tr><td>Planned excuses</td><td style="text-align:right"><b>${rw.filter(r=>r.type==='planned').length}</b></td></tr>
+      <tr><td>Emergency leaves</td><td style="text-align:right"><b>${rw.filter(r=>r.type==='emergency').length}</b></td></tr>
+      <tr><td>Sick leaves</td><td style="text-align:right"><b>${rw.filter(r=>r.type==='sick').length}</b></td></tr>
+      <tr><td>Slots excused</td><td style="text-align:right"><b>${rw.reduce((a,r)=>a+r.sessionIds.length,0)}</b></td></tr>
+      <tr><td>Cancelled leaves</td><td style="text-align:right"><b>${reqs.filter(r=>r.status==='Cancelled'&&inWin(r.firstStart,w)).length}</b></td></tr>
+      <tr><td>No-shows</td><td style="text-align:right"><b>${noShows}</b></td></tr>
+     </table>
+     <div class="actions"><button class="btn" onclick="App.go('myleaves')">My leaves</button><button class="btn primary" onclick="App.go('tutor')">+ Request absence</button></div>
+   </div>
+  </div>
+  <div class="grid2">
+   <div class="card"><h3><span class="ic">✓</span>Attended sessions (${attended.length})</h3>
+    ${attended.length?`<div class="scroll"><table><tr><th>Date</th><th>Group</th><th>Earned</th></tr>${attended.slice().reverse().map(s=>`<tr><td>${fmtDs(s.start)} ${hhmm(s.start)}</td><td>${esc(s.group)} ${s.tutorId!==t.id?'<span class="tag t-info">cover</span>':''}</td><td>${money(R)}</td></tr>`).join('')}</table></div>`:'<div class="empty">No attended sessions in this period</div>'}
+   </div>
+   <div class="card"><h3><span class="ic">−</span>Deductions (${pens.length})</h3>
+    ${pens.length?`<table><tr><th>Date</th><th>Violation</th><th>Calc</th><th>Amount</th></tr>${pens.map(x=>`<tr><td>${fmtDs(x.at)}</td><td>${esc(x.label)}<div class="muted" style="font-size:12px">${ord(x.occurrence)} occurrence</div></td><td class="mono">${x.multiplier} × ${x.rate}${x.sessions>1?' × '+x.sessions:''}</td><td><b>${money(x.total)}</b> ${x.status==='Under Review'?statusTag('Under Review'):''}</td></tr>`).join('')}</table>`:'<div class="empty">No deductions 🎉</div>'}
+   </div>
+  </div>`;
+}
+
+/* ================= Tutor: My leaves, documents, cancellation ================= */
+function vMyLeaves(){
+  const d=App.d, p=App.p, t=App.tutor(App.tutorAs);
+  const reqs=d.requests.filter(r=>r.tutorId===t.id);
+  const cw=periodWindow(p.cancelPeriod,NOW), cUsed=reqs.filter(r=>r.status==='Cancelled' && inWin(r.cancelledAt,cw)).length;
+  return `<h2>My leaves & documents</h2>
+  <p class="sub">Upload sick-leave documents, track their review, and cancel a leave you no longer need. Cancellations used: <b>${cUsed} / ${p.cancelLimit}</b> (${cw.label}).</p>
+  <div class="card">${reqs.length?`<table><tr><th>Type</th><th>Date</th><th>Slots</th><th>Status</th><th>Document</th><th></th></tr>
+   ${reqs.map(r=>{
+     const needUp = r.type==='sick' && ['AWAITING','MISSING','REJECTED'].includes(r.docStatus) && r.status!=='Cancelled';
+     const cp = cancelPreview(r);
+     return `<tr><td>${typeTag(r.type)}</td><td>${fmtDs(r.firstStart)} ${hhmm(r.firstStart)}</td><td>${r.sessionIds.length}</td><td>${statusTag(r.status)}</td>
+     <td>${r.type==='sick'?`${docTag(r.docStatus)}${r.doc?`<div class="muted" style="font-size:12px">📎 ${esc(r.doc.name)}</div>`:''}${r.docStatus==='AWAITING'?`<div class="muted" style="font-size:12px">Upload by ${fmtDT(r.docDeadline)}</div>`:''}`:'<span class="muted">—</span>'}</td>
+     <td style="white-space:nowrap">${needUp?`<label class="btn sm primary">Upload<input type="file" hidden accept=".pdf,.jpg,.jpeg,.png" onchange="uploadDoc('${r.id}',this.files[0])"></label> `:''}
+       ${cp.show?`<button class="btn sm" ${cp.allowed?'':`disabled title="${esc(cp.reason)}"`} onclick="openCancel('${r.id}')">Cancel leave</button>`:''}</td></tr>
+     ${cp.show&&!cp.allowed?`<tr><td colspan="6" style="padding-top:0"><span class="muted" style="font-size:12.5px">ⓘ ${esc(cp.reason)}</span></td></tr>`:''}`}).join('')}</table>`:'<div class="empty">No leaves yet</div>'}</div>
+  <div class="card"><h3><span class="ic">ⓘ</span>Cancellation rules for ${orgName(App.org)}</h3>
+   <div class="outcome">⛔<span>You can't cancel a leave once one of its sessions has started.</span></div>
+   <div class="outcome">⏱<span>Sessions starting in less than <b>${p.reclaimWindowMin} min</b> can't be reclaimed.</span></div>
+   <div class="outcome">↩<span>If no one has taken your session yet, it comes back to you.</span></div>
+   <div class="outcome">🔒<span>If a buffer tutor has claimed it, it stays with them.</span></div>
+   <div class="outcome">👥<span>If a cover tutor has it: ${COVER_RECLAIM[p.coverReclaim]}.</span></div>
+  </div>`;
+}
+function uploadDoc(rid,f){
+  if(!f) return; const r=App.req(rid);
+  r.doc={name:f.name,size:f.size,type:f.type,url:URL.createObjectURL(f),uploadedAt:NOW};
+  r.docStatus = ['MISSING','REJECTED'].includes(r.docStatus) ? 'SUBMITTED_LATE' : 'SUBMITTED';
+  toast(r.docStatus==='SUBMITTED_LATE'?'Late document uploaded — HR can review it and cancel the deduction':'Document uploaded — waiting for HR review');
+  App.render();
+}
+function cancelPreview(r){
+  const p=App.p, out={show:false,allowed:false,reason:'',items:[]};
+  if(!['Pending','Approved'].includes(r.status)) return out;
+  const ss=r.sessionIds.map(id=>App.session(id));
+  if(ss.every(s=>s.start<=NOW)) return out;
+  out.show=true;
+  if(!p.cancelEnabled){out.reason='Leave cancellation is turned off for this organization.';return out}
+  if(ss.some(s=>s.start<=NOW)){out.reason='A session in this leave has already started, so it can’t be cancelled.';return out}
+  const cw=periodWindow(p.cancelPeriod,NOW), used=App.d.requests.filter(x=>x.tutorId===r.tutorId && x.status==='Cancelled' && inWin(x.cancelledAt,cw)).length;
+  if(used>=p.cancelLimit){out.reason=`Cancellation limit reached (${used}/${p.cancelLimit} for ${cw.label}).`;return out}
+  out.allowed=true;
+  out.items = ss.map(s=>{
+    const mins=(s.start-NOW)/MIN, who=s.assignedTutorId?App.tutor(s.assignedTutorId):null;
+    if(r.status==='Pending') return {s,kind:'return',text:'Request withdrawn — the session stays with you.'};
+    if(mins<p.reclaimWindowMin) return {s,kind:'keep',text:`Starts in ${Math.round(mins)} min — too close to reclaim.`};
+    if(['Buffer Pool','Cover Queue','Session Without Tutor'].includes(s.status)) return {s,kind:'return',text:'Not claimed yet — returns to you.'};
+    if(s.status==='Reassigned' && s.claimPool==='buffer') return {s,kind:'keep',text:`Claimed by buffer tutor ${who.name} — stays with them.`};
+    if(s.status==='Reassigned'){
+      if(p.coverReclaim==='NO_RECLAIM') return {s,kind:'keep',text:`Cover tutor ${who.name} keeps it (avoids double payment).`};
+      if(p.coverReclaim==='RECLAIM_STANDBY') return {s,kind:'return',text:`Returns to you; ${who.name} goes on standby.`,standby:who.id};
+      if(p.coverReclaim==='MANUAL') return {s,kind:'manual',text:`Sent to Ops for approval; ${who.name} stays assigned until then.`};
+      return {s,kind:'alt',text:`${who.name} keeps it; you'll be offered another ${grade(s.group)} session as cover.`};
+    }
+    return {s,kind:'keep',text:'No change.'};
+  });
+  return out;
+}
+function openCancel(rid){
+  const r=App.req(rid), cp=cancelPreview(r); if(!cp.allowed) return;
+  const icon={return:'↩',keep:'🔒',manual:'⏳',alt:'⇄'};
+  modal(`<h3>Cancel ${TYPES[r.type].label.toLowerCase()}?</h3><p class="muted">Here's what happens to each session:</p>
+   ${cp.items.map(i=>`<div class="outcome"><span>${icon[i.kind]}</span><span><b>${fmtDs(i.s.start)} ${hhmm(i.s.start)}</b> · ${esc(i.s.group)}<br><span class="muted">${i.text}</span></span></div>`).join('')}
+   ${App.p.cancelledCounts?'<div class="callout warn">This leave will still count toward your limit.</div>':''}
+   <div class="actions"><button class="btn" onclick="closeModal()">Keep leave</button><button class="btn danger" onclick="doCancel('${rid}')">Cancel leave</button></div>`);
+}
+function doCancel(rid){
+  const r=App.req(rid), cp=cancelPreview(r), t=App.tutor(r.tutorId), d=App.d; let back=0;
+  cp.items.forEach(({s,kind,standby})=>{
+    if(kind==='return'){ s.assignedTutorId=t.id; s.status='Scheduled'; delete s.claimPool; delete s.coverFor; back++;
+      if(standby) d.alerts.unshift({id:uid('A'),to:'Operations',msg:`${App.tutor(standby).name} is on standby after ${t.name} reclaimed ${s.group} (${fmtDT(s.start)}).`,at:NOW,read:false,level:'high'}); }
+    if(kind==='manual'){ s.reclaim={tutorId:t.id,at:NOW}; d.alerts.unshift({id:uid('A'),to:'Operations',msg:`${t.name} cancelled leave and asks to reclaim ${s.group} (${fmtDT(s.start)}). Approval needed in Cover Dispatch.`,at:NOW,read:false,level:'high'}); }
+    if(kind==='alt'){
+      const alt=d.sessions.find(x=>x.start>NOW && x.tutorId!==t.id && grade(x.group)===grade(s.group) && ['Buffer Pool','Cover Queue','Session Without Tutor'].includes(x.status) && !d.sessions.some(y=>y.assignedTutorId===t.id && y.start===x.start));
+      if(alt){ alt.assignedTutorId=t.id; alt.status='Reassigned'; alt.claimPool='cover'; alt.coverFor=alt.tutorId; toast(`${t.name} assigned as cover to ${alt.group} on ${fmtDT(alt.start)}`); }
+      else d.alerts.unshift({id:uid('A'),to:'Operations',msg:`No open ${grade(s.group)} session for ${t.name}. Tutor is on standby for the next one.`,at:NOW,read:false,level:'high'});
+    }
+  });
+  r.status='Cancelled'; r.cancelledAt=NOW;
+  if(back===r.sessionIds.length) d.penalties.filter(x=>x.requestId===r.id && x.status!=='Waived').forEach(x=>{x.status='Waived';x.waiveReason='Leave cancelled, sessions reclaimed';});
+  closeModal(); toast(`Leave cancelled — ${back} of ${r.sessionIds.length} session(s) returned to you`); App.render();
+}
+
+/* ================= Tutor: Request absence ================= */
+function tutorSessionsByDay(tid){
+  const m={}; App.d.sessions.filter(s=>s.tutorId===tid && s.assignedTutorId===tid && s.status==='Scheduled' && s.start>NOW).forEach(s=>{(m[dayKey(s.start)] ||= []).push(s)});
+  return m;
+}
+function draftCalc(){
+  const d=App.draft, p=App.p, t=App.tutor(App.tutorAs), T=TYPES[d.type];
+  const sel=d.slots.map(id=>App.session(id)).filter(Boolean);
+  if(!sel.length) return null;
+  const earliest=Math.min(...sel.map(s=>s.start)), notice=(earliest-NOW)/H, R=App.rateOf(t);
+  const u=usage(t.id,d.type,earliest);
+  const out={sel,notice,R,u,earliest,errors:[],warns:[],deduction:0,overV:null,docV:null,route:notice>=p.dispatchThresholdHours?'Buffer Offer Pool':'Dedicated Cover Team',notes:[]};
+  if(d.type==='planned'){
+    if(!p.plannedEnabled) out.errors.push('Planned excuses are turned off for this organization.');
+    if(notice<p.plannedNoticeHours) out.errors.push(`Planned excuses need at least ${p.plannedNoticeHours}h notice. This one has ${notice.toFixed(1)}h. Submit it as an emergency or sick leave instead.`);
+  }
+  if(d.type==='sick' && !p.sickEnabled) out.errors.push('Sick leave is turned off for this organization.');
+  if(u.used>=u.limit){
+    if(p[T.over]==='BLOCK') out.errors.push(`You've used ${u.used} of ${u.limit} ${T.label.toLowerCase()}s for ${u.win.label}. New requests are blocked until the next window.`);
+    else { out.overV=previewViolation(t,T.rule,sel.length); out.deduction+=out.overV.total; out.warns.push(`Limit reached (${u.used}/${u.limit} for ${u.win.label}). “${out.overV.rule.label}”, ${ord(out.overV.occ)} occurrence: ${vText(out.overV)}${out.overV.escalate?' — sent to HR investigation':''}.`); }
+  } else out.notes.push(`Uses 1 ${T.label.toLowerCase()}. You'll have ${u.left-1} of ${u.limit} left for ${u.win.label}.`);
+  if(d.type==='planned') out.notes.push(p.requireApproval?'Needs Ops/HR approval before it takes effect.':'Takes effect immediately.');
+  if(d.type==='sick' && p.sickDocRequired){
+    out.docDeadline = earliest + p.sickDocDeadlineHours*H;
+    out.docV = previewViolation(t,'SICK_NO_DOC',sel.length);
+    if(!d.file) out.warns.push(`No document attached. Upload it by <b>${fmtDT(out.docDeadline)}</b>. If it's missing or rejected: “${out.docV.rule.label}”, ${ord(out.docV.occ)} occurrence → ${vText(out.docV)}.`);
+  }
+  return out;
+}
+function vTutor(){
+  const d=App.d, p=App.p, t=App.tutor(App.tutorAs), R=App.rateOf(t);
+  const byDay=tutorSessionsByDay(t.id), days=Object.keys(byDay).sort();
+  if(App.draft.day && !byDay[App.draft.day]) App.draft.day=null;
+  const day=App.draft.day, daySessions=day?byDay[day]:[], c=draftCalc(), ty=App.draft.type;
+  const tile=(k,cls)=>{const u=usage(t.id,k,NOW);return `<div class="kpi ${cls}"><small>${TYPES[k].label}s left</small><div class="v">${u.left} / ${u.limit}</div><small>${PERIODS[u.period]}</small>${limitBar(u)}</div>`};
+  return `<h2>Request absence</h2><p class="sub">Submit a planned excuse, emergency leave or sick leave. You'll see your balance and any deduction before you send it.</p>
+  ${t.isCover?`<div class="callout info">Cover-team tutors have no owned sessions in this demo. Switch to another tutor to try the form.</div>`:''}
+  <div class="kpis">${tile('planned','')}${tile('emergency','o')}${tile('sick','y')}
+   <div class="kpi g"><small>Session rate (R)</small><div class="v">${money(R)}</div><small>${t.rate?'Your profile rate':'Org default'}</small></div></div>
+  <div class="card"><h3><span class="ic">✎</span>New request</h3>
+   <div class="row"><div class="lbl"><b>Type</b></div><div class="seg">
+     <button class="${ty==='planned'?'on':''}" ${p.plannedEnabled?'':'disabled'} onclick="App.draft.type='planned';App.render()">Planned excuse</button>
+     <button class="${ty==='emergency'?'on':''}" onclick="App.draft.type='emergency';App.render()">Emergency leave</button>
+     <button class="${ty==='sick'?'on':''}" ${p.sickEnabled?'':'disabled'} onclick="App.draft.type='sick';App.render()">Sick leave</button></div></div>
+   <div class="row"><div class="lbl"><b>Date</b></div>
+     <select onchange="pickDay(this.value)"><option value="">Select a date…</option>${days.map(k=>`<option value="${k}" ${k===day?'selected':''}>${fmtDs(byDay[k][0].start)} — ${byDay[k].length} slot(s)</option>`).join('')}</select></div>
+   ${day?`<div class="row" style="display:block"><b>Slots</b> <span class="muted">${p.allowPartialSlots?'— choose specific slots or':'— all slots of the date apply'}</span>
+     ${p.allowPartialSlots?` <button class="btn text sm" onclick="pickDay('${day}',true)">Select all slots</button>`:''}
+     <div class="slots">${daySessions.map(s=>{const on=App.draft.slots.includes(s.id);return `<div class="slot ${on?'sel':''}" onclick="${p.allowPartialSlots?`toggleSlot('${s.id}')`:''}">${on?'✓':'○'} ${hhmm(s.start)} · ${esc(s.group)}</div>`}).join('')}</div></div>`:''}
+   <div class="row"><div class="lbl"><b>Reason</b></div><input style="flex:1;max-width:420px" value="${esc(App.draft.reason)}" oninput="App.draft.reason=this.value" placeholder="${ty==='sick'?'e.g. Fever, doctor visit':'Optional note'}"></div>
+   ${ty==='sick'?`<div class="row" style="display:block"><div class="lbl" style="margin-bottom:8px"><b>Supporting document</b> ${p.sickDocRequired?'<span class="tag t-warn">Required</span>':'<span class="tag t-mut">Optional</span>'}<small style="display:block">Medical report or doctor's note · ${esc(p.sickDocTypes)}${p.sickDocRequired?` · you can also upload within ${p.sickDocDeadlineHours}h after the leave starts`:''}</small></div>
+     ${App.draft.file?`<div class="drop has"><span>📎 <b>${esc(App.draft.file.name)}</b> · ${kb(App.draft.file.size)}</span><button class="btn sm text" onclick="App.draft.file=null;App.render()">Remove</button></div>`
+     :`<label class="drop">⬆ Click to upload your document<br><small>${esc(p.sickDocTypes)}</small><input type="file" hidden accept=".pdf,.jpg,.jpeg,.png" onchange="attachDraft(this.files[0])"></label>`}</div>`:''}
+   ${c?`<div class="row"><div class="lbl"><b>Notice</b></div><span>${c.notice.toFixed(1)} h before the first slot</span></div>
+     ${c.errors.map(e=>`<div class="callout bad">${e}</div>`).join('')}
+     ${c.notes.map(n=>`<div class="callout info">${n}</div>`).join('')}
+     ${p.showDeductionPreview?c.warns.map(n=>`<div class="callout warn">${n}</div>`).join(''):''}
+     ${p.showDeductionPreview?`<div class="callout ${c.deduction?'warn':'ok'}"><b>Deduction now:</b> ${c.deduction?money(c.deduction):'None'}${ty==='sick'&&App.draft.file?' · document attached, pending HR review':''}</div>`:''}
+     ${c.errors.length?'':`<div class="callout info">Your session(s) go to the <b>${c.route}</b> (threshold ${p.dispatchThresholdHours}h)${ty==='planned'&&p.requireApproval?' after approval':''}.</div>`}`:''}
+   <div class="actions"><button class="btn primary" ${!c||c.errors.length?'disabled':''} onclick="submitRequest()">Submit request</button></div>
+  </div>`;
+}
+function attachDraft(f){ if(!f) return; App.draft.file={name:f.name,size:f.size,type:f.type,url:URL.createObjectURL(f)}; App.render(); }
+function pickDay(k,all){App.draft.day=k||null;App.draft.slots=(k&&(all||!App.p.allowPartialSlots))?tutorSessionsByDay(App.tutorAs)[k].map(s=>s.id):[];App.render()}
+function toggleSlot(id){const s=App.draft.slots,i=s.indexOf(id);i>=0?s.splice(i,1):s.push(id);App.render()}
+function submitRequest(){
+  const c=draftCalc(); if(!c||c.errors.length) return;
+  const t=App.tutor(App.tutorAs), p=App.p, dr=App.draft;
+  const r={id:uid('R'),tutorId:t.id,type:dr.type,sessionIds:[...dr.slots],firstStart:c.earliest,notice:c.notice,reason:dr.reason,submittedAt:NOW,status:'Pending',preview:c.deduction,
+    docStatus:dr.type==='sick'?(p.sickDocRequired?(dr.file?'SUBMITTED':'AWAITING'):(dr.file?'SUBMITTED':'NOT_REQUIRED')):null,
+    doc:dr.type==='sick'&&dr.file?{...dr.file,uploadedAt:NOW}:null, docDeadline:c.docDeadline||null};
+  App.d.requests.unshift(r);
+  if(c.overV) applyViolation(t,c.overV.code,c.sel,`${TYPES[dr.type].label} over limit`,r.id);
+  if(dr.type!=='planned'){ approve(r.id,true); toast(`${TYPES[dr.type].label} recorded and sent to the ${c.route}${r.docStatus==='AWAITING'?'. Remember to upload your document.':''}`); }
+  else if(!p.requireApproval){ approve(r.id,true); toast('Planned excuse applied'); }
+  else toast('Planned excuse sent for Ops/HR approval');
+  App.resetDraft(); App.render();
+}
+
+/* ================= Approvals ================= */
+function approve(rid,silent){
+  const r=App.req(rid); r.status='Approved';
+  r.sessionIds.forEach(sid=>route(App.session(sid)));
+  if(!silent){toast(`Approved — ${r.sessionIds.length} session(s) dispatched`);App.render()}
+}
+function reject(rid){const r=App.req(rid);r.status='Rejected';toast('Request rejected — it no longer counts toward the limit');App.render()}
+function route(s){ const n=(s.start-NOW)/H; s.assignedTutorId=null; delete s.claimPool; s.status=n>=App.p.dispatchThresholdHours?'Buffer Pool':'Cover Queue'; }
+function vApprovals(){
+  const d=App.d, rows=d.requests.filter(r=>r.submittedAt>=NOW-DAY||r.status==='Pending');
+  return `<h2>Approvals</h2><p class="sub">Planned excuses waiting for Ops/HR review. Emergency and sick leaves take effect immediately and are listed for visibility. Sick-leave documents are reviewed in <a href="#" onclick="App.go('sickdocs')">Sick Leave Documents</a>.</p>
+  <div class="card">${rows.length?`<table><tr><th>Tutor</th><th>Type</th><th>First slot</th><th>Slots</th><th>Notice</th><th>Balance</th><th>Deduction</th><th>Status</th><th></th></tr>
+   ${rows.map(r=>{const t=App.tutor(r.tutorId), u=usage(t.id,r.type,r.firstStart);return `<tr><td>${t.name}<div class="muted mono">${t.id}</div></td><td>${typeTag(r.type)}</td><td>${fmtDT(r.firstStart)}</td><td>${r.sessionIds.length}</td><td>${r.notice.toFixed(1)}h</td><td>${u.used}/${u.limit} <div class="muted" style="font-size:12px">${PERIODS[u.period]}</div></td><td>${r.preview?money(r.preview):'—'}</td><td>${statusTag(r.status)}</td>
+    <td style="white-space:nowrap">${r.status==='Pending'?`<button class="btn sm ok" onclick="approve('${r.id}')">Approve</button> <button class="btn sm" onclick="reject('${r.id}')">Reject</button>`:''}</td></tr>`}).join('')}</table>`
+   :`<div class="empty">No new requests. Switch to <a href="#" onclick="App.setRole('tutor');App.go('tutor')">Tutor → Request Absence</a> to create one.</div>`}</div>`;
+}
+
+/* ================= Sick leave documents (HR) ================= */
+function viewDoc(rid){
+  const r=App.req(rid), f=r.doc;
+  const body = f.url ? (f.type.startsWith('image/')?`<img src="${f.url}" style="max-width:100%;border-radius:12px">`:`<iframe src="${f.url}" style="width:100%;height:360px;border:1px solid var(--n100);border-radius:12px"></iframe>`)
+    : `<div class="drop" style="cursor:default">📄 ${esc(f.name)}<br><small>Demo file — no preview</small></div>`;
+  modal(`<h3>${esc(f.name)}</h3><p class="muted">${App.tutor(r.tutorId).name} · ${kb(f.size)} · uploaded ${fmtDT(f.uploadedAt)}</p>${body}<div class="actions"><button class="btn" onclick="closeModal()">Close</button></div>`);
+}
+function docAccept(rid){
+  const r=App.req(rid), late=r.docStatus==='SUBMITTED_LATE'; r.docStatus='ACCEPTED';
+  if(late) App.d.penalties.filter(x=>x.requestId===r.id && x.code==='SICK_NO_DOC' && x.status!=='Waived').forEach(x=>{x.status='Waived';x.waiveReason='Late document accepted with justification';});
+  toast(late?'Late document accepted — missing-document deduction cancelled':'Document accepted'); App.render();
+}
+function docFail(rid, status){
+  const r=App.req(rid), t=App.tutor(r.tutorId), ss=r.sessionIds.map(id=>App.session(id));
+  r.docStatus=status;
+  const pen=applyViolation(t,'SICK_NO_DOC',ss, status==='REJECTED'?'Supporting document rejected':'No document uploaded before the deadline', r.id);
+  toast(`${ord(pen.occurrence)} missing-document occurrence: ${pen.multiplier}× → ${money(pen.total)}${pen.escalated?' · escalated to Investigation':''}`); App.render();
+}
+function keepLate(rid){const r=App.req(rid); r.docStatus='REJECTED'; toast('Late document declined — deduction kept'); App.render();}
+function vSickDocs(){
+  const d=App.d, p=App.p, rows=d.requests.filter(r=>r.type==='sick' && r.status!=='Cancelled');
+  const order={SUBMITTED_LATE:0,SUBMITTED:1,AWAITING:2,MISSING:3,REJECTED:4,ACCEPTED:5,NOT_REQUIRED:6};
+  rows.sort((a,b)=>order[a.docStatus]-order[b.docStatus]);
+  const n=k=>rows.filter(r=>r.docStatus===k).length;
+  return `<h2>Sick leave documents</h2><p class="sub">Review supporting documents. A missing or rejected document applies the “${p.rules.SICK_NO_DOC.label}” rule (${p.rules.SICK_NO_DOC.ladder.map(m=>m+'×').join(' → ')}, counted ${PERIODS[p.rules.SICK_NO_DOC.period].toLowerCase()}).</p>
+  <div class="kpis"><div class="kpi"><small>To review</small><div class="v">${n('SUBMITTED')+n('SUBMITTED_LATE')}</div></div><div class="kpi y"><small>Awaiting upload</small><div class="v">${n('AWAITING')}</div></div><div class="kpi r"><small>Missing / rejected</small><div class="v">${n('MISSING')+n('REJECTED')}</div></div><div class="kpi g"><small>Accepted</small><div class="v">${n('ACCEPTED')}</div></div></div>
+  <div class="card">${rows.length?`<table><tr><th>Tutor</th><th>Leave</th><th>Reason</th><th>Document</th><th>Deadline</th><th>Status</th><th></th></tr>
+  ${rows.map(r=>{const t=App.tutor(r.tutorId);const pen=d.penalties.find(x=>x.requestId===r.id&&x.code==='SICK_NO_DOC');
+   let act='';
+   if(r.docStatus==='SUBMITTED') act=`<button class="btn sm ok" onclick="docAccept('${r.id}')">Accept</button> <button class="btn sm danger" onclick="docFail('${r.id}','REJECTED')">Reject</button>`;
+   if(r.docStatus==='SUBMITTED_LATE') act=`<button class="btn sm ok" onclick="docAccept('${r.id}')">Accept & cancel deduction</button> <button class="btn sm" onclick="keepLate('${r.id}')">Keep deduction</button>`;
+   if(r.docStatus==='AWAITING') act=`<button class="btn sm" onclick="docFail('${r.id}','MISSING')">Simulate deadline passed</button>`;
+   return `<tr><td>${t.name}<div class="muted mono">${t.id}</div></td><td>${fmtDs(r.firstStart)}<div class="muted" style="font-size:12px">${r.sessionIds.length} slot(s)</div></td><td>${esc(r.reason)||'—'}</td>
+   <td>${r.doc?`<a href="#" onclick="viewDoc('${r.id}');return false">📎 ${esc(r.doc.name)}</a>`:'<span class="muted">—</span>'}</td>
+   <td>${r.docDeadline?fmtDT(r.docDeadline):'—'}</td>
+   <td>${docTag(r.docStatus)}${pen?`<div class="muted" style="font-size:12px">${pen.status==='Waived'?'Deduction cancelled':`${ord(pen.occurrence)} occ. · ${money(pen.total)}`}</div>`:''}</td>
+   <td style="white-space:nowrap">${act}</td></tr>`}).join('')}</table>`:'<div class="empty">No sick leaves</div>'}</div>`;
+}
+
+/* ================= Dispatch ================= */
+function eligibleClaimers(s,pool){
+  return App.d.tutors.filter(t=>!t.frozen && t.id!==s.tutorId && (pool==='cover'?t.isCover:pool==='any'?true:!t.isCover)
+    && !App.d.sessions.some(x=>x.assignedTutorId===t.id && x.start===s.start));
+}
+function claim(sid){
+  const s=App.session(sid), tid=document.getElementById('cl-'+sid).value; if(!tid) return;
+  s.claimPool = s.status==='Buffer Pool'?'buffer':'cover';
+  s.assignedTutorId=tid; s.status='Reassigned'; s.coverFor=s.tutorId;
+  toast(`Reassigned to ${App.tutor(tid).name}`); App.render();
+}
+function expire(sid){
+  const s=App.session(sid); s.status='Session Without Tutor';
+  const msg=`URGENT: ${s.group} on ${fmtDT(s.start)} has no tutor. No cover claimed it within the ${App.p.coverSafetyHours}h safety threshold.`;
+  ['Team Leader','Operations'].forEach(to=>App.d.alerts.unshift({id:uid('A'),to,msg,at:NOW,read:false,level:'urgent'}));
+  toast('Flagged as Session Without Tutor — alerts sent to TL & Ops'); App.render();
+}
+function reclaimDecide(sid,ok){
+  const s=App.session(sid), main=App.tutor(s.reclaim.tutorId), cover=App.tutor(s.assignedTutorId);
+  if(ok){ s.assignedTutorId=main.id; s.status='Scheduled'; delete s.claimPool; App.d.alerts.unshift({id:uid('A'),to:'Operations',msg:`${cover.name} released from ${s.group}; on standby.`,at:NOW,read:false,level:'high'}); toast(`Returned to ${main.name}; ${cover.name} on standby`); }
+  else toast(`${cover.name} keeps the session`);
+  delete s.reclaim; App.render();
+}
+function vDispatch(){
+  const d=App.d,p=App.p;
+  const buf=d.sessions.filter(s=>s.status==='Buffer Pool'), cov=d.sessions.filter(s=>s.status==='Cover Queue'), swt=d.sessions.filter(s=>s.status==='Session Without Tutor'), rec=d.sessions.filter(s=>s.reclaim);
+  const rowsFor=(list,pool)=>list.length?`<table><tr><th>Session</th><th>Start</th><th>Notice</th><th>Original tutor</th><th>Claim as</th><th></th></tr>${list.map(s=>{
+    const el=eligibleClaimers(s,pool);
+    return `<tr><td>${esc(s.group)}</td><td>${fmtDT(s.start)}</td><td>${((s.start-NOW)/H).toFixed(1)}h</td><td>${App.tutor(s.tutorId).name}</td>
+    <td><select id="cl-${s.id}"><option value="">Select tutor…</option>${el.map(t=>`<option value="${t.id}">${t.name}</option>`).join('')}</select></td>
+    <td style="white-space:nowrap"><button class="btn sm primary" onclick="claim('${s.id}')">Claim</button>${pool==='cover'?` <button class="btn sm" onclick="expire('${s.id}')">Simulate unclaimed</button>`:''}</td></tr>`}).join('')}</table>`:'<div class="empty">Empty</div>';
+  return `<h2>Cover dispatch</h2><p class="sub">Routing threshold ${p.dispatchThresholdHours}h · safety threshold ${p.coverSafetyHours}h · frozen tutors can't claim sessions.</p>
+  <div class="flow"><span class="node">Absence approved</span>→<span class="node ${buf.length?'on':''}">≥ ${p.dispatchThresholdHours}h · Buffer Offer (${buf.length})</span>
+   <span class="node ${cov.length?'on':''}">&lt; ${p.dispatchThresholdHours}h · Cover Team (${cov.length})</span>→<span class="node">Claimed → Reassign</span><span class="node ${swt.length?'alert':''}">Unclaimed → Without Tutor (${swt.length})</span></div>
+  ${rec.length?`<div class="card" style="border-color:var(--yellow)"><h3><span class="ic" style="background:var(--warn-soft);color:var(--warn-deep)">⏳</span>Reclaim requests (manual approval)</h3><table><tr><th>Session</th><th>Start</th><th>Main tutor</th><th>Current cover</th><th></th></tr>${rec.map(s=>`<tr><td>${esc(s.group)}</td><td>${fmtDT(s.start)}</td><td>${App.tutor(s.reclaim.tutorId).name}</td><td>${App.tutor(s.assignedTutorId).name}</td><td style="white-space:nowrap"><button class="btn sm ok" onclick="reclaimDecide('${s.id}',true)">Return to main tutor</button> <button class="btn sm" onclick="reclaimDecide('${s.id}',false)">Keep cover</button></td></tr>`).join('')}</table></div>`:''}
+  ${swt.length?`<div class="card" style="border-color:var(--err)"><h3 style="color:var(--err-deep)"><span class="ic" style="background:var(--err-soft);color:var(--err)">!</span>Sessions without tutor</h3><table><tr><th>Session</th><th>Start</th><th>Original tutor</th><th>Assign now</th><th></th></tr>${swt.map(s=>`<tr><td>${esc(s.group)}</td><td>${fmtDT(s.start)}</td><td>${App.tutor(s.tutorId).name}</td><td><select id="cl-${s.id}"><option value="">Select…</option>${eligibleClaimers(s,'any').map(t=>`<option value="${t.id}">${t.name}${t.isCover?' (cover)':''}</option>`).join('')}</select></td><td><button class="btn sm primary" onclick="claim('${s.id}')">Assign</button></td></tr>`).join('')}</table></div>`:''}
+  <div class="card"><h3><span class="ic" style="background:var(--orange-soft);color:var(--orange)">⚡</span>Dedicated cover team queue <span class="tag t-orange">short notice</span></h3>${rowsFor(cov,'cover')}</div>
+  <div class="card"><h3><span class="ic">⇄</span>Buffer offer pool <span class="tag t-info">planned</span></h3>${rowsFor(buf,'buffer')}</div>`;
+}
+
+/* ================= Sessions & ledger ================= */
+function noShow(sid){
+  const s=App.session(sid), t=App.tutor(s.assignedTutorId||s.tutorId); s.status='No-Show';
+  const pen=applyViolation(t,'NO_SHOW',[s],'No-show');
+  toast(`No-show, ${ord(pen.occurrence)} occurrence: ${pen.multiplier} × ${money(pen.rate)} = ${money(pen.total)}${pen.escalated?' → Investigation Queue':''}`); App.render();
+}
+function complete(sid){App.session(sid).status='Completed';App.render()}
+function vSessions(){
+  const d=App.d, up=App.sessTab==='upcoming';
+  const list=d.sessions.filter(s=>up?s.start>NOW:s.start<=NOW); if(!up) list.reverse();
+  return `<h2>Sessions</h2><p class="sub">Roster for ${orgName(App.org)}. Use “Mark no-show” to simulate attendance and see the deduction rules apply.</p>
+  <div class="seg" style="margin-bottom:14px"><button class="${up?'on':''}" onclick="App.sessTab='upcoming';App.render()">Upcoming</button><button class="${up?'':'on'}" onclick="App.sessTab='past';App.render()">Past</button></div>
+  <div class="card"><table><tr><th>Start</th><th>Group</th><th>Owner</th><th>Delivered by</th><th>Status</th><th></th></tr>
+  ${list.slice(0,80).map(s=>{const a=s.assignedTutorId?App.tutor(s.assignedTutorId):null;return `<tr><td>${fmtDT(s.start)}</td><td>${esc(s.group)}</td><td>${App.tutor(s.tutorId).name}</td><td>${a?a.name+(a.id!==s.tutorId?` <span class="tag t-info">${s.claimPool||'cover'}</span>`:'')+(a.frozen?' <span class="frozen">(frozen)</span>':''):'<span class="muted">—</span>'}</td><td>${statusTag(s.status)}</td>
+  <td style="white-space:nowrap">${up&&['Scheduled','Reassigned'].includes(s.status)?`<button class="btn sm" onclick="noShow('${s.id}')">Mark no-show</button> <button class="btn sm text" onclick="complete('${s.id}')">Completed</button>`:''}</td></tr>`}).join('')}</table></div>`;
+}
+function waive(pid){
+  const p=App.d.penalties.find(x=>x.id===pid);
+  modal(`<h3>Cancel deduction</h3><p class="muted">${esc(p.label)} · ${App.tutor(p.tutorId).name} · ${esc(p.group)} · ${money(p.total)}. It will be marked <b>Waived</b> and reversed in payroll.</p>
+   <label>Justification<br><select id="wr" style="width:100%"><option>Late document accepted with justification</option><option>Sick leave submitted</option><option>System / scheduling error</option><option>Exception approved by HR</option><option>Other</option></select></label>
+   <div class="actions"><button class="btn" onclick="closeModal()">Back</button><button class="btn primary" onclick="doWaive('${pid}')">Cancel deduction</button></div>`);
+}
+function doWaive(pid){const p=App.d.penalties.find(x=>x.id===pid);p.status='Waived';p.waiveReason=document.getElementById('wr').value;
+  const r=p.requestId&&App.req(p.requestId); if(r&&p.code==='SICK_NO_DOC'&&r.docStatus!=='ACCEPTED') r.docStatus=r.doc?'ACCEPTED':r.docStatus;
+  closeModal();toast('Deduction cancelled');App.render()}
+function confirmPen(pid){const p=App.d.penalties.find(x=>x.id===pid);p.status='Deducted';toast('Deduction confirmed — case closed');App.render()}
+function vLedger(){
+  const d=App.d, act=d.penalties.filter(p=>p.status!=='Waived'), total=act.reduce((a,p)=>a+p.total,0);
+  return `<h2>Deductions ledger</h2><p class="sub">tutor_penalties: each row stores the violation, occurrence number, multiplier, a snapshot of R and the affected sessions.</p>
+  <div class="kpis"><div class="kpi r"><small>Active deductions</small><div class="v">${money(total)}</div></div><div class="kpi y"><small>Under review</small><div class="v">${act.filter(p=>p.status==='Under Review').length}</div></div><div class="kpi o"><small>Violations</small><div class="v">${act.length}</div></div><div class="kpi g"><small>Cancelled</small><div class="v">${d.penalties.length-act.length}</div></div></div>
+  <div class="card"><table><tr><th>Date</th><th>Tutor</th><th>Violation</th><th>Session</th><th>Occ.</th><th>Calc</th><th>Total</th><th>Status</th><th></th></tr>
+  ${d.penalties.map(p=>`<tr><td>${fmtDs(p.at)}</td><td>${App.tutor(p.tutorId).name}</td><td>${esc(p.label)}${p.waiveReason?`<div class="muted" style="font-size:12px">Cancelled: ${esc(p.waiveReason)}</div>`:''}</td><td>${esc(p.group)}</td><td>${ord(p.occurrence)}</td><td class="mono">${p.multiplier} × ${p.rate}${p.sessions>1?' × '+p.sessions:''}</td><td><b>${money(p.total)}</b></td><td>${statusTag(p.status)}</td>
+   <td>${p.status!=='Waived'&&App.p.allowCancelDeduction?`<button class="btn sm" onclick="waive('${p.id}')">Cancel deduction</button>`:''}</td></tr>`).join('')||'<tr><td colspan=9 class="empty">No deductions</td></tr>'}</table></div>`;
+}
+
+/* ================= Investigation & freeze ================= */
+function freeze(tid){
+  const t=App.tutor(tid); t.frozen=true; t.frozenAt=NOW; t.frozenBy='HR Lead (you)';
+  let moved=0; App.d.sessions.forEach(s=>{ if(s.assignedTutorId===tid && s.start>NOW && ['Scheduled','Reassigned'].includes(s.status)){ route(s); moved++; } });
+  App.d.alerts.unshift({id:uid('A'),to:'Operations',msg:`${t.name} frozen. ${moved} future session(s) moved to dispatch.`,at:NOW,read:false,level:'high'});
+  toast(`${t.name} frozen — ${moved} future session(s) sent to dispatch`); App.render();
+}
+function unfreeze(tid){
+  modal(`<h3>Unfreeze ${App.tutor(tid).name}</h3><p class="muted">The tutor gets back access to assignments, buffer offers and rosters.</p>
+  <label>Justification<br><select id="ur" style="width:100%"><option>Sick leave submitted</option><option>Investigation closed — no fault</option><option>Warning issued</option></select></label>
+  <label class="inline" style="margin-top:12px"><input type="checkbox" id="uw"> Also cancel the related escalated deduction(s)</label>
+  <div class="actions"><button class="btn" onclick="closeModal()">Back</button><button class="btn ok" onclick="doUnfreeze('${tid}')">Unfreeze</button></div>`);
+}
+function doUnfreeze(tid){
+  const t=App.tutor(tid), reason=document.getElementById('ur').value, w=document.getElementById('uw').checked;
+  t.frozen=false; t.frozenAt=null; t.frozenBy=null;
+  App.d.penalties.filter(p=>p.tutorId===tid && p.escalated && p.status==='Under Review').forEach(p=>{p.status=w?'Waived':'Deducted'; if(w)p.waiveReason=reason;});
+  closeModal(); toast(`${t.name} unfrozen (${reason})`); App.render();
+}
+function vInvestigation(){
+  const rows=App.d.penalties.filter(p=>p.escalated && p.status==='Under Review');
+  return `<h2>HR investigation queue</h2><p class="sub">Repeated violations escalate here according to the deduction scheme. HR can confirm or cancel the deduction, and freeze the tutor.</p>
+  <div class="callout info">Try it: in <a href="#" onclick="App.go('sessions')">Sessions</a>, mark a no-show for <b>Omar Khaled</b>. It's his 2nd this month, which escalates.</div>
+  <div class="card">${rows.length?`<table><tr><th>Tutor</th><th>Violation</th><th>Group & slot</th><th>R</th><th>Deduction</th><th>Profile</th><th></th></tr>
+  ${rows.map(p=>{const t=App.tutor(p.tutorId),s=App.session(p.sessionId);return `<tr><td>${t.name}<div class="muted mono">${t.id}</div></td><td>${esc(p.label)}<div class="muted" style="font-size:12px">${ord(p.occurrence)} occurrence · ${fmtDs(p.at)}</div></td><td>${esc(p.group)}${s?`<div class="muted">${fmtDT(s.start)}</div>`:''}</td><td>${money(p.rate)}</td><td><b>${money(p.total)}</b><div class="muted mono">${p.multiplier} × R</div></td>
+   <td>${t.frozen?`<span class="tag t-bad">Frozen</span><div class="muted">${fmtDs(t.frozenAt)} · ${t.frozenBy}</div>`:'<span class="tag t-ok">Active</span>'}</td>
+   <td style="white-space:nowrap">${t.frozen?`<button class="btn sm ok" onclick="unfreeze('${t.id}')">Unfreeze</button>`:`<button class="btn sm danger" onclick="freeze('${t.id}')">Freeze tutor</button>`}
+     <button class="btn sm" onclick="confirmPen('${p.id}')">Confirm</button> <button class="btn sm text" onclick="waive('${p.id}')">Cancel deduction</button></td></tr>`}).join('')}</table>`:'<div class="empty">The queue is empty</div>'}</div>`;
+}
+function vTutors(){
+  const d=App.d,p=App.p;
+  return `<h2>Tutors</h2><p class="sub">teacher_profiles for ${orgName(App.org)}. Leave the rate blank to use the org default R (${money(p.defaultPrice)}). Balances use the current policy window.</p>
+  <div class="card"><table><tr><th>Tutor</th><th>Rate (R)</th><th>Planned</th><th>Emergency</th><th>Sick</th><th>Deductions</th><th>Status</th><th></th></tr>
+  ${d.tutors.map(t=>{const ded=d.penalties.filter(x=>x.tutorId===t.id&&x.status!=='Waived').reduce((a,x)=>a+x.total,0);
+   const cell=ty=>{const u=usage(t.id,ty,NOW);return `${u.used} / ${u.limit} ${u.used>=u.limit?'<span class="tag t-bad">limit</span>':''}<div class="muted" style="font-size:12px">${PERIODS[u.period]}</div>`};
+   return `<tr><td>${t.name} ${t.isCover?'<span class="tag t-orange">cover</span>':''}<div class="muted mono">${t.id}</div></td>
+   <td><input type="number" placeholder="${p.defaultPrice}" value="${t.rate??''}" onchange="App.tutor('${t.id}').rate=this.value===''?null:Number(this.value);App.render()" style="width:96px"></td>
+   <td>${cell('planned')}</td><td>${cell('emergency')}</td><td>${cell('sick')}</td><td>${ded?money(ded):'—'}</td>
+   <td>${t.frozen?'<span class="tag t-bad">Frozen</span>':'<span class="tag t-ok">Active</span>'}</td>
+   <td style="white-space:nowrap"><button class="btn sm text" onclick="App.viewAs('${t.id}')">View as tutor</button> ${t.frozen?`<button class="btn sm ok" onclick="unfreeze('${t.id}')">Unfreeze</button>`:`<button class="btn sm danger" onclick="freeze('${t.id}')">Freeze</button>`}</td></tr>`}).join('')}</table></div>`;
+}
+function vAlerts(){
+  const d=App.d, html=`<h2>Alerts</h2><p class="sub">Notifications sent to Team Leaders, Operations and HR.</p>
+  <div class="card">${d.alerts.length?`<table><tr><th>To</th><th>Message</th><th>Priority</th><th>When</th></tr>${d.alerts.map(a=>`<tr style="${a.read?'':'font-weight:600'}"><td>${a.to}</td><td>${esc(a.msg)}</td><td>${a.level==='urgent'?'<span class="tag t-bad">Urgent</span>':'<span class="tag t-warn">High</span>'}</td><td>${fmtDT(a.at)}</td></tr>`).join('')}</table>`:'<div class="empty">No alerts</div>'}</div>`;
+  d.alerts.forEach(a=>a.read=true); setTimeout(()=>{const n=document.querySelector('#nav .active .count'); if(n) n.remove();});
+  return html;
+}
+
+App.tutorAs = App.d.tutors[0].id;
+App.render();
+</script>
+</body>
+</html>
