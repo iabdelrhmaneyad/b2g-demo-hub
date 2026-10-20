@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support · iSchool CS Ticketing (Prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#056FEC; --blue-d:#0459c0; --blue-l:#eaf3ff; --yellow:#FFD700; --orange:#FF7F1C; --orange-btn:#ff9a3c;
+  --ink:#1d2b3a; --ink2:#3d4d5c; --muted:#6b7b8b; --muted2:#8c9aa8; --line:#e6ebf0; --line2:#d9e0e7;
+  --bg:#ffffff; --top:#f7f9fb; --chip:#eef1f4; --took-bg:#fff4a8; --took-ink:#e08a00;
+  --ok:#0eaa3a; --ok-l:#e6f7ec; --bad:#de1f1f; --bad-l:#fdeaea; --warn-l:#fff6e5; --warn:#b26a00;
+  --font:'Outfit',"Segoe UI",system-ui,-apple-system,Roboto,"Noto Sans Arabic",Tahoma,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:var(--font);color:var(--ink);background:var(--bg);font-size:14px;-webkit-font-smoothing:antialiased;overflow:hidden}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+svg.i{width:20px;height:20px;fill:currentColor;flex:none;display:inline-block;vertical-align:middle}
+[hidden]{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ---------- top bar ---------- */
+.app{display:grid;grid-template-rows:66px 1fr;height:100vh;border-top:3px solid #34393f}
+.topbar{display:flex;align-items:stretch;background:var(--top);border-bottom:1px solid var(--line);min-width:0}
+.tb-seg{display:flex;align-items:center;padding:0 28px;border-right:1px solid var(--line);gap:10px;white-space:nowrap}
+.tb-seg.first{padding:0 22px 0 30px;gap:18px}
+.tb-btn{background:none;border:0;display:flex;align-items:center;gap:8px;padding:6px 4px;color:var(--ink);font-size:16px;font-weight:400;border-radius:6px}
+.tb-btn:hover{background:#eef3f9}
+.tb-btn .chev{width:18px;height:18px}
+.tb-home{color:var(--blue)} .tb-home svg{width:26px;height:26px}
+.tb-back svg{width:24px;height:24px}
+.logo svg{height:27px;width:auto;display:block}
+.tb-support{color:var(--blue);font-weight:500}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:18px;padding-right:44px}
+.avail{border:1px solid var(--line2);background:#fff;border-radius:20px;padding:4px 32px;font-size:16px}
+.avail.off{color:var(--bad);border-color:#f3b9b9;background:#fff6f6}
+.bell{color:var(--blue);background:none;border:0;padding:2px;position:relative}
+.bell svg{width:24px;height:24px}
+.badge{background:var(--orange);color:#fff;border-radius:12px;padding:2px 6px;font-size:15px;font-weight:500;margin-left:-6px}
+.user{display:flex;align-items:center;gap:10px;color:var(--blue);font-size:17px;background:none;border:0;position:relative}
+.avatar{width:44px;height:44px;border-radius:50%;background:#cfe3ff;display:grid;place-items:center;color:var(--blue);overflow:hidden}
+.avatar svg{width:38px;height:38px;margin-top:8px}
+.menu{position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(20,40,70,.14);min-width:230px;padding:6px;z-index:40;color:var(--ink);font-size:14px;text-align:left}
+.menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:6px}
+.menu button:hover{background:var(--blue-l)}
+.menu .sep{height:1px;background:var(--line);margin:4px 0}
+
+/* ---------- layout ---------- */
+.body{display:grid;grid-template-columns:270px 1fr;min-height:0}
+.body.collapsed{grid-template-columns:minmax(0,1fr)}
+.body.collapsed .side{display:none}
+.side{border-right:1px solid var(--line);overflow-y:auto;padding:28px 12px 30px 10px;background:#fff}
+.side::-webkit-scrollbar{width:8px}.side::-webkit-scrollbar-thumb{background:#c9d0d6;border-radius:6px}
+.nav-g{margin-bottom:22px}
+.nav-h{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;padding:10px 18px;font-size:15.5px;font-weight:500;color:var(--ink);border-radius:8px}
+.nav-h:hover{background:#f4f7fa}
+.nav-h .i{color:#8193a5;width:19px;height:19px}
+.nav-h .chev{margin-left:auto;color:#8193a5;transition:transform .15s}
+.nav-g.open .nav-h .chev{transform:rotate(180deg)}
+.nav-sub{display:none;padding:6px 0 0}
+.nav-g.open .nav-sub{display:block}
+.nav-sub button{display:block;width:100%;text-align:left;background:none;border:0;padding:10px 14px 10px 34px;font-size:15px;color:var(--ink2);line-height:1.45;border-left:3px solid transparent;border-radius:0 6px 6px 0}
+.nav-sub button:hover{background:#f4f7fa}
+.nav-sub button.active{background:#eef4fd;color:var(--blue);border-left-color:var(--blue)}
+
+/* ---------- main ---------- */
+.main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.toolbar{display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:12px 38px 12px 20px;border-bottom:1px solid var(--line);min-height:58px;flex-wrap:wrap}
+.tool{background:none;border:0;color:#5b6f82;display:inline-flex;align-items:center;gap:6px;padding:7px 9px;border-radius:6px;font-size:16px;position:relative}
+.tool:hover{background:#f1f5f9}
+.tool.blue{color:var(--blue)}
+.tool .dot{position:absolute;top:2px;right:2px;min-width:16px;height:16px;border-radius:8px;background:var(--orange);color:#fff;font-size:10.5px;display:grid;place-items:center;padding:0 4px;font-weight:600}
+.range{color:#5b6f82;font-size:14.5px;margin:0 8px 0 14px;white-space:nowrap}
+.pager{display:flex;align-items:center;gap:6px;color:#5b6f82;font-size:14.5px;margin-right:14px}
+.pager input{width:50px;height:32px;border:1px solid var(--line2);border-radius:4px;text-align:center;color:#8d9bab}
+.pager .tool{padding:4px}
+.tool:disabled{opacity:.35;cursor:default}
+.tsep{width:14px}
+.searchbar{display:flex;align-items:center;gap:22px;padding:14px 18px}
+.search{display:flex;align-items:center;border:1px solid var(--line2);height:50px;width:236px;padding:0 14px;gap:14px;border-radius:2px;background:#fff}
+.search:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(5,111,236,.12)}
+.search input{border:0;outline:0;width:100%;font-size:16px;background:transparent}
+.search input::placeholder{color:#b3c0cc}
+.search .clr{border:0;background:none;color:var(--muted2);padding:2px;display:none}
+.search.has .clr{display:block}
+.toggle{display:flex;align-items:center;gap:12px;color:var(--ink2);font-size:16px;cursor:pointer;user-select:none}
+.toggle input{position:absolute;opacity:0}
+.toggle .tr{width:42px;height:22px;border-radius:12px;background:#e5e9ee;position:relative;transition:.15s}
+.toggle .tr::after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:.15s}
+.toggle input:checked + .tr{background:var(--bad)}
+.toggle input:checked + .tr::after{left:22px}
+.toggle input:focus-visible + .tr{outline:2px solid var(--blue);outline-offset:2px}
+.active-filters{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:60%}
+.af{background:var(--blue-l);color:var(--blue);border-radius:14px;padding:4px 10px;font-size:12.5px;white-space:nowrap}
+.af.clear{background:none;border:0;color:var(--muted);text-decoration:underline}
+
+.tablewrap{flex:1;min-height:0;overflow:auto;border-top:1px solid var(--line)}
+.tablewrap::-webkit-scrollbar{height:10px;width:10px}.tablewrap::-webkit-scrollbar-thumb{background:#c9d0d6;border-radius:6px}.tablewrap::-webkit-scrollbar-track{background:#f1f3f5}
+table.grid{border-collapse:separate;border-spacing:0;min-width:3260px;width:100%}
+.grid th{position:sticky;top:0;background:#fff;z-index:2;text-align:left;font-weight:500;font-size:13px;letter-spacing:.06em;color:#5f7183;text-transform:uppercase;padding:14px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+.grid td{vertical-align:top;padding:20px 14px 14px;border-bottom:1px solid var(--line);color:var(--ink2)}
+.grid tr:hover td{background:#fbfcfe}
+.grid tr.flash td{animation:flash 2.4s ease}
+@keyframes flash{0%,40%{background:#fff8d6}100%{background:transparent}}
+.c-edit{width:58px;padding-left:24px!important}
+.editbtn{background:none;border:0;color:var(--blue);padding:4px;border-radius:6px}
+.editbtn:hover{background:var(--blue-l)}
+.editbtn svg{width:22px;height:22px}
+.c-id{font-size:19px;color:var(--ink);width:106px}
+.c-contact{width:280px;font-size:14px;line-height:1.3;color:#4f6072}
+.c-contact .nm{color:var(--ink);font-size:14px;unicode-bidi:plaintext}
+.c-contact .gr{margin-top:6px}
+.who{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;background:#f2eefe;color:#6a4fc9;margin-left:6px;vertical-align:1px}
+.who.st{background:#e9f4ff;color:#0b63c9}
+.big{font-size:16px;color:var(--ink)}
+.sub{font-size:14px;color:#6c7d8e;margin-top:3px}
+.c-tutor{width:350px}.c-tl{width:262px}.c-sd{width:132px}.c-cd{width:150px}.c-rd{width:162px}.c-topic{width:290px}.c-rev{width:200px}
+.dt{display:flex;align-items:center;gap:6px;font-size:16px;color:var(--ink);white-space:nowrap}
+.dt svg{width:14px;height:14px;color:#4b5d6e}
+.tm{display:flex;align-items:center;gap:6px;font-size:14px;color:#5b6c7d;margin-top:14px;white-space:nowrap}
+.tm svg{width:13px;height:13px;color:#4b5d6e}
+.took{display:inline-flex;align-items:center;gap:6px;background:var(--took-bg);color:var(--took-ink);border-radius:6px;padding:8px 10px;margin-top:12px;font-size:14px;min-width:126px;white-space:nowrap}
+.took svg{width:13px;height:13px}
+.late{display:inline-block;margin-left:6px;font-size:11px;color:var(--bad);background:var(--bad-l);border-radius:8px;padding:1px 6px}
+.topic{font-size:16px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px}
+.chip{display:inline-block;background:var(--chip);color:#6c7d8e;border-radius:6px;padding:3px 10px;font-size:13.5px;margin-top:6px;max-width:210px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:top}
+.chip.own{background:#f2eefe;color:#6a4fc9}
+.na{color:var(--muted2);font-size:13.5px}
+.rev{appearance:none;-webkit-appearance:none;border:1px solid var(--line2);border-radius:6px;padding:8px 32px 8px 10px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23597587'%3E%3Cpath d='M7.4 8.6 12 13.2l4.6-4.6L18 10l-6 6-6-6z'/%3E%3C/svg%3E") no-repeat right 8px center/18px;min-width:184px;font-size:14px;color:var(--ink2)}
+.rev:focus{outline:2px solid rgba(5,111,236,.35);outline-offset:1px}
+.rev.ok{border-color:#9fd9b1;background-color:var(--ok-l);color:#0b7a2c}
+.rev.no{border-color:#f1aaaa;background-color:var(--bad-l);color:#b01818}
+.rev.blank{border-color:#f0d08a;background-color:var(--warn-l);color:var(--warn)}
+.pill{display:inline-block;border-radius:14px;padding:4px 12px;font-size:13.5px;white-space:nowrap}
+.st-Open{background:#e9f2ff;color:#0b5fc8}.st-In.Progress,.st-InProgress{background:#efe9ff;color:#5b3fc4}
+.st-Pending{background:#fff3df;color:#a35d00}.st-Completed{background:var(--ok-l);color:#0b7a2c}.st-Closed{background:#eceff2;color:#4f5f6f}
+.ur-Low{background:#eef1f4;color:#5b6c7d}.ur-Medium{background:#e9f2ff;color:#0b5fc8}.ur-High{background:#fff0e2;color:#c25a00}.ur-Urgent{background:var(--bad-l);color:#b01818}
+.att{display:inline-flex;align-items:center;gap:4px;color:var(--blue);background:none;border:0;padding:2px 0;font-size:13.5px;max-width:230px;text-align:left}
+.att svg{width:15px;height:15px;flex:none}
+.att span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clip{max-width:230px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:14px;line-height:1.35}
+.compact .grid td{padding-top:10px;padding-bottom:8px}
+.compact .tm{margin-top:4px}.compact .took{margin-top:6px;padding:4px 8px}
+.empty{padding:70px 20px;text-align:center;color:var(--muted)}
+.empty h3{color:var(--ink);font-weight:500;margin:10px 0 6px;font-size:18px}
+.empty svg{width:46px;height:46px;color:#b8c4cf}
+.linkbtn{background:none;border:0;color:var(--blue);text-decoration:underline;padding:4px}
+
+/* ---------- modals ---------- */
+.overlay{position:fixed;inset:0;background:rgba(40,46,54,.55);display:flex;align-items:flex-start;justify-content:center;padding:4vh 16px;z-index:50;overflow:auto}
+.overlay.center{align-items:center}
+.modal{background:#fff;border-radius:22px;width:min(872px,100%);box-shadow:0 20px 60px rgba(0,0,0,.25);display:flex;flex-direction:column;max-height:92vh}
+.m-head{display:flex;align-items:center;gap:12px;padding:20px 26px 18px 42px;border-bottom:1px solid var(--line)}
+.m-head h2{margin:0;font-size:21px;font-weight:400;color:var(--ink)}
+.m-head .ic{color:var(--blue)}
+.m-close{margin-left:auto;background:none;border:0;color:var(--ink);padding:4px;border-radius:6px}
+.m-close:hover{background:#f1f4f7}
+.m-close svg{width:24px;height:24px}
+.m-body{padding:28px 26px 10px 48px;overflow:auto}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px 18px}
+.ff{position:relative;display:flex;align-items:center;height:48px;border:1px solid var(--line2);border-radius:4px;background:#fff}
+.ff:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(5,111,236,.1)}
+.ff .fi{position:absolute;left:46px;color:#5d7083;width:18px;height:18px;pointer-events:none}
+.ff select,.ff input{appearance:none;-webkit-appearance:none;border:0;outline:0;background:transparent;align-self:stretch;height:auto;min-height:46px;width:100%;padding:0 52px 0 56px;font-size:16px;color:var(--ink);cursor:pointer}
+.ff.has-ic select,.ff.has-ic input{padding-left:88px}
+.ff select.ph{color:#5d6f80}
+.ff .chev{position:absolute;right:0;top:0;bottom:0;width:34px;border-left:1px solid var(--line2);display:grid;place-items:center;color:#4b5d6e;pointer-events:none}
+.ff .chev svg{width:22px;height:22px}
+.ff.date .chevbtn{pointer-events:auto;background:none;border:0;border-left:1px solid var(--line2)}
+.ff.date input::-webkit-calendar-picker-indicator{opacity:0;position:absolute;right:0;width:34px;height:100%;cursor:pointer}
+.ff.date .phl{position:absolute;left:76px;color:#5d6f80;font-size:16px;pointer-events:none}
+.ff.date.is-empty input{color:transparent}
+.ff.date.is-empty:focus-within input{color:var(--ink)}
+.ff.date.is-empty:focus-within .phl{display:none}
+.ff.date:not(.is-empty) .phl{display:none}
+.ff.date .fi{left:46px}
+.ff.date input{padding-left:76px}
+.ff.review{grid-column:1 / -1;border-color:#f0d08a;background:#fffdf6}
+.ff .tag{position:absolute;top:-9px;left:12px;background:#fff;padding:0 6px;font-size:12px;color:var(--warn)}
+.ferr{color:var(--bad);font-size:13.5px;margin:12px 2px 0;min-height:18px}
+.m-foot{display:flex;justify-content:center;gap:18px;padding:16px 26px 30px}
+.btn{border:0;border-radius:20px;padding:8px 34px;font-size:15px;font-weight:500;color:#fff;background:var(--blue);min-height:34px}
+.btn:hover{background:var(--blue-d)}
+.btn.orange{background:var(--orange-btn)}.btn.orange:hover{background:#f08a25}
+.btn.ghost{background:#fff;color:var(--ink2);border:1px solid var(--line2)}.btn.ghost:hover{background:#f4f7fa}
+.btn.danger{background:var(--bad)}
+.btn.sm{padding:6px 16px;font-size:13.5px;min-height:30px}
+.btn:disabled{opacity:.5;cursor:default}
+
+/* contact update + confirm */
+.modal.sm{width:min(560px,100%)}
+.frm{display:grid;gap:16px}
+.frm label.l{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:500}
+.inp{width:100%;height:42px;border:1px solid var(--line2);border-radius:6px;padding:0 12px;font-size:15px;background:#fff;outline:0}
+.inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(5,111,236,.1)}
+.inp[readonly]{background:#f4f6f8;color:var(--ink2)}
+.inp.err{border-color:var(--bad)}
+textarea.inp{height:auto;padding:10px 12px;resize:vertical;min-height:80px;line-height:1.4}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:#fff;padding:8px 18px;font-size:14px;color:var(--ink2)}
+.seg button+button{border-left:1px solid var(--line2)}
+.seg button.on{background:var(--blue);color:#fff}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.hint{font-size:12.5px;color:var(--muted);margin-top:5px}
+.msg-err{color:var(--bad);font-size:13px;margin-top:6px}
+.note-box{background:var(--warn-l);border:1px solid #f3d79c;color:#7a4a00;border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.45}
+.note-box.blue{background:var(--blue-l);border-color:#bcd8fb;color:#0b4c9a}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:6px 10px;font-size:14px;margin-top:10px}
+.kv b{font-weight:500;color:var(--ink);word-break:break-all}
+
+/* edit ticket */
+.modal.xl{width:min(1180px,100%)}
+.m-head .meta{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--muted)}
+.ed{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:22px;padding:22px 26px 6px 34px}
+.sec{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:16px;background:#fff}
+.sec h3{margin:0 0 12px;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:#5f7183;font-weight:500;display:flex;align-items:center;gap:8px}
+.sec h3 .cnt{background:var(--chip);border-radius:10px;padding:0 8px;font-size:12px;letter-spacing:0}
+.sec.hl{border-color:#bcd8fb;background:#f7fbff}
+.sec.abs{border-color:#f0d08a;background:#fffdf5}
+.info{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 16px}
+.info .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.info .v{font-size:14.5px;color:var(--ink);margin-top:3px;word-break:break-word;unicode-bidi:plaintext}
+.info .full{grid-column:1/-1}
+.fld{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.fld>span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+select.inp{appearance:none;-webkit-appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23597587'%3E%3Cpath d='M7.4 8.6 12 13.2l4.6-4.6L18 10l-6 6-6-6z'/%3E%3C/svg%3E") no-repeat right 8px center/18px;padding-right:32px}
+.labels{display:flex;flex-wrap:wrap;gap:6px}
+.lab{border:1px solid var(--line2);background:#fff;border-radius:14px;padding:4px 12px;font-size:13px;color:var(--ink2)}
+.lab.on{background:var(--blue-l);border-color:#a9cdfa;color:var(--blue)}
+.change{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-top:12px}
+.change .box{border-radius:10px;padding:12px 14px;border:1px solid var(--line)}
+.change .old{background:#fbf3f3;border-color:#f1cfcf}
+.change .new{background:#f1faf4;border-color:#bfe6cc}
+.change .box small{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px}
+.change .box b{font-weight:500;font-size:15.5px;word-break:break-all}
+.change .old b{text-decoration:line-through;text-decoration-color:rgba(176,24,24,.45)}
+.arrow{color:var(--muted2);font-size:22px}
+.files{display:flex;flex-direction:column;gap:6px}
+.file{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13.5px}
+.file .att{max-width:none;flex:1}
+.file small{color:var(--muted2)}
+.file .x{background:none;border:0;color:var(--muted2);padding:2px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:-4px -18px 14px;padding:0 14px}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 12px;font-size:14px;color:var(--muted)}
+.tabs button.on{color:var(--blue);border-bottom-color:var(--blue);font-weight:500}
+.thread{display:flex;flex-direction:column;gap:10px;max-height:300px;overflow:auto;padding-right:4px}
+.bub{border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.45;max-width:88%;white-space:pre-wrap;unicode-bidi:plaintext}
+.bub .mh{font-size:12px;color:var(--muted);margin-bottom:4px;display:flex;gap:8px;flex-wrap:wrap}
+.bub.in{background:#f3f5f8;align-self:flex-start}
+.bub.out{background:#eaf3ff;align-self:flex-end}
+.bub.note{background:#fff8dc;border:1px dashed #e6c35a;align-self:stretch;max-width:none}
+.vis{font-size:11px;border-radius:8px;padding:0 6px}
+.vis.pub{background:#d8ebff;color:#0b5fc8}.vis.int{background:#ffe9a8;color:#7a5600}
+.compose{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+.compose .acts{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.compose .acts .sp{flex:1}
+.hist{list-style:none;margin:0;padding:0;max-height:300px;overflow:auto}
+.hist li{display:grid;grid-template-columns:150px 1fr;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.hist time{color:var(--muted)}
+.ed-foot{display:flex;justify-content:flex-end;gap:12px;padding:14px 26px 22px;border-top:1px solid var(--line)}
+.tl{display:grid;gap:10px;font-size:14px}
+.tl div{display:flex;justify-content:space-between;gap:10px}
+.tl span{color:var(--muted)}
+.tl b{font-weight:500;text-align:right}
+.sysbadge{display:inline-flex;align-items:center;gap:6px;background:#e7f7ec;color:#0b7a2c;border-radius:14px;padding:3px 10px;font-size:12.5px}
+.sysbadge svg{width:14px;height:14px}
+
+
+/* edit ticket — original layout */
+.modal.tk{width:min(940px,100%);border-radius:14px;max-height:94vh;overflow:hidden}
+.tk-head{position:relative;display:flex;align-items:center;justify-content:center;padding:18px 48px;border-bottom:1px solid var(--line)}
+.tk-head h2{margin:0;font-size:18px;font-weight:600;color:#1d3150}
+.tk-close{position:absolute;right:16px;top:50%;transform:translateY(-50%);background:none;border:0;color:#1d3150;padding:4px;border-radius:6px}
+.tk-close:hover{background:#f1f4f7}.tk-close svg{width:20px;height:20px}
+.tk-scroll{overflow:auto;flex:1;min-height:0}
+.tk-scroll::-webkit-scrollbar{width:10px}.tk-scroll::-webkit-scrollbar-thumb{background:#c9d0d6;border-radius:6px}.tk-scroll::-webkit-scrollbar-track{background:#f1f3f5}
+.tk-grid{display:grid;grid-template-columns:1fr 1fr}
+.tk-left{padding:22px 18px 22px 22px;border-right:1px solid #dfe8f2;min-width:0}
+.tk-right{padding:22px 22px 22px 16px;min-width:0}
+.tk-info{display:grid;grid-template-columns:1fr 1fr;gap:16px 18px}
+.tk-info .full{grid-column:1/-1}
+.tk-k{font-size:11.5px;color:#5f7d9c;font-weight:500;margin-bottom:5px}
+.tk-v{text-align:left;font-size:14px;color:#1d2b3a;line-height:1.45;word-break:break-word;unicode-bidi:plaintext}
+.tk-chip{display:inline-block;background:#e9eef3;color:#4c5e70;border-radius:10px;padding:2px 10px;font-size:12px}
+.tk-chip.blue{background:#e3effd;color:#0b5fc8}
+.tk-change{border:1px solid #bcd8fb;background:#f5f9ff;border-radius:10px;padding:12px 14px}
+.tk-info.in{gap:10px 18px}
+.tk-old{color:#b01818;text-decoration:line-through;text-decoration-color:rgba(176,24,24,.4);word-break:break-all}
+.tk-new{color:#0b7a2c;font-weight:500;word-break:break-all}
+.tk-sys{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:12.5px;color:#0b7a2c}.tk-sys svg{width:14px;height:14px}
+.tk-sep{height:1px;background:var(--line);margin:22px 0 18px}
+.tk-f{display:block;margin-bottom:16px}
+.tk-f>span{display:block;font-size:13.5px;color:#2b3b4c;margin-bottom:7px}
+.tk-sel{position:relative;display:flex;align-items:center;height:40px;border:1px solid #c7d6e6;border-radius:8px;background:#fff}
+.tk-sel:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(5,111,236,.1)}
+.tk-sel select{appearance:none;-webkit-appearance:none;border:0;outline:0;background:transparent;width:100%;height:100%;padding:0 40px 0 12px;font-size:14.5px;color:#1d2b3a;cursor:pointer}
+.tk-sel select:disabled{cursor:default;color:#4f6072}
+.tk-sel.ph select{color:#9fb6cc}
+.tk-sel.gray{background:#e9eff4;border-color:#cad7e3}
+.tk-chev{position:absolute;right:10px;color:#3d4d5c;pointer-events:none;display:grid}.tk-chev svg{width:20px;height:20px}
+.tk-x{position:absolute;right:8px;background:none;border:0;color:#3d4d5c;padding:3px;display:none;border-radius:4px}
+.tk-x:hover{background:#eef2f6}.tk-x svg{width:16px;height:16px}
+.tk-sel.clr .tk-x{display:grid}.tk-sel.clr .tk-chev{display:none}
+.tk-asg{position:relative;margin:0;display:flex;align-items:center;gap:8px;height:42px;border:1px solid #c7d6e6;border-radius:4px;padding:0 40px 0 26px;min-width:0}
+.tk-asg:focus-within{border-color:var(--blue)}
+.tk-asg legend{font-size:11.5px;color:#2b3b4c;padding:0 4px;margin-left:-2px}
+.tk-asg>svg{width:15px;height:15px;color:#4f6072}
+.tk-code{background:#e9eef3;color:#4c5e70;font-size:11px;border-radius:4px;padding:1px 5px}
+.tk-asg-n{font-size:14px;color:#1d2b3a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tk-asg.ph .tk-asg-n{color:#9fb6cc}
+.tk-asg select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.tk-asg .tk-x{display:grid;z-index:1;border-left:1px solid #c7d6e6;border-radius:0;right:0;top:-6px;bottom:0;width:34px;place-items:center}
+.tk-asg .tk-x[hidden]{display:none}
+.tk-hint{display:block;font-size:12px;color:var(--muted);margin-top:5px}
+.tk-drop{display:flex;align-items:center;gap:14px;border:1px solid #c7d6e6;border-radius:8px;padding:0 16px;height:46px;cursor:pointer;color:#3d5a78;font-size:12.5px;background:#fff}
+.tk-drop svg{width:20px;height:20px;color:var(--blue)}
+.tk-drop:hover,.tk-drop.over{border-color:var(--blue);background:#f6faff}
+.tk-drop span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tk-files{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px}
+.tk-hist{margin:4px 0 14px;font-size:13.5px}.tk-hist summary{cursor:pointer;color:#2b3b4c;padding:6px 0}
+.tk-actions{display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--line);padding-top:14px}
+.tk-h{margin:0 0 10px;font-size:15px;font-weight:500;color:#1d2b3a}
+.tk-threads{display:flex;flex-direction:column;gap:8px;max-height:220px;overflow:auto}
+.tk-empty{display:flex;flex-direction:column;align-items:center;gap:6px;color:#8aa4bf;font-size:14px;padding:14px 0}
+.tk-empty svg{width:20px;height:20px;color:#5f7d9c}
+.tk-note{background:#fff8e1;border:1px solid #f3dfa0;border-radius:8px;padding:8px 10px;font-size:13.5px;white-space:pre-wrap}
+.tk-mh{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;color:#5f7d9c;margin-bottom:4px}
+.tk-msg.out .tk-mh span:last-child{color:#4a8fe0}
+.tk-ta{width:100%;border:1px solid #c7d6e6;border-radius:8px;padding:10px 12px;font-size:14px;min-height:76px;resize:vertical;outline:0;line-height:1.4}
+.tk-ta:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(5,111,236,.1)}
+.tk-ta::placeholder{color:#9fb6cc}
+.tk-addnote{display:block;width:100%;margin-top:6px;border:0;border-radius:10px;background:#ff9a3c;color:#fff;font-size:13px;font-weight:500;padding:5px}
+.tk-addnote:disabled{background:#ffe6d3;cursor:default}
+.tk-conv{border:1px solid #e1e8f0;border-radius:4px;height:220px;overflow:auto;padding:12px 10px;display:flex;flex-direction:column;gap:10px;box-shadow:inset 0 1px 0 #e1e8f0}
+.tk-msg{border:1px solid #d9e7f7;border-radius:4px;padding:8px 10px;font-size:13.5px;line-height:1.55;white-space:pre-wrap;max-width:78%;unicode-bidi:plaintext}
+.tk-msg.out{align-self:flex-end;background:#eef5fd}
+.tk-msg.in{align-self:flex-start;background:#f6f7f9;border-color:#e3e8ee}
+.tk-max{text-align:right;font-size:12.5px;color:#3d4d5c;margin:6px 0}
+.tk-drop.sm{height:38px}
+.tk-send{border:0;border-radius:10px;background:var(--blue);color:#fff;font-size:13px;font-weight:500;padding:4px 14px;margin-top:8px}
+.tk-send:disabled{background:#b9d5f5;cursor:default}
+@media (max-width:820px){.tk-grid{grid-template-columns:1fr}.tk-left{border-right:0;border-bottom:1px solid var(--line)}}
+
+/* toasts */
+.toasts{position:fixed;right:22px;bottom:22px;display:flex;flex-direction:column;gap:8px;z-index:90}
+.toast{background:#1f2d3b;color:#fff;border-radius:10px;padding:11px 16px;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.2);max-width:420px;animation:tin .2s ease}
+.toast.ok{background:#0d6b2c}.toast.err{background:#a31616}
+@keyframes tin{from{transform:translateY(8px);opacity:0}}
+
+@media (max-width:1100px){
+  .tb-seg{padding:0 14px}.tb-right{padding-right:16px;gap:10px}.user .nm{display:none}
+  .ed{grid-template-columns:1fr}
+}
+@media (max-width:820px){
+  .body{grid-template-columns:minmax(0,1fr)}.side{display:none}
+  .topbar{overflow-x:auto}.toolbar{padding:10px 12px;justify-content:flex-start}.searchbar{flex-wrap:wrap;gap:12px}.search{width:100%}.active-filters{max-width:100%;margin-left:0;justify-content:flex-start}
+  .tb-seg.hide-sm{display:none}
+  .fgrid,.row2{grid-template-columns:1fr}.info{grid-template-columns:1fr 1fr}
+  .m-body{padding:20px}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M7.4 8.6 12 13.2l4.6-4.6L18 10l-6 6-6-6z"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M8.6 16.6 13.2 12 8.6 7.4 10 6l6 6-6 6z"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></symbol>
+  <symbol id="i-bank" viewBox="0 0 24 24"><path d="M4 10h3v7H4zm6.5 0h3v7h-3zM2 19h20v3H2zm15-9h3v7h-3zM12 1 2 6v2h20V6z"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1z"/></symbol>
+  <symbol id="i-person" viewBox="0 0 24 24"><path d="M12 12c2.2 0 4-1.8 4-4s-1.8-4-4-4-4 1.8-4 4 1.8 4 4 4zm0 2c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4z"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12z"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14z"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11z"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6zm8 5H6v-2h8zm4-6H6V6h12z"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2zm2.07-7.75-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 21h16v2H4zM5 17.25V20h2.75l8.1-8.1-2.75-2.75zm13.71-7.54a1 1 0 0 0 0-1.41l-1.96-1.96a1 1 0 0 0-1.41 0l-1.34 1.34 3.37 3.37z"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8zm-1 7V3.5L18.5 9zM8 13h8v2H8zm0 4h5v2H8z"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z"/></symbol>
+  <symbol id="i-export" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h8v-2H6V4h7v5h5v3h2V8zm5 12-1.41 1.41L19.17 17H13v2h6.17l-1.58 1.59L19 22l4-4z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><path d="M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z"/></symbol>
+  <symbol id="i-tune" viewBox="0 0 24 24"><path d="M3 17v2h6v-2zM3 5v2h10V5zm10 16v-2h8v-2h-8v-2h-2v6zM7 9v2H3v2h4v2h2V9zm14 4v-2H11v2zm-6-4h2V7h4V5h-4V3h-2z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm.5 5v5.25l4.5 2.67-.75 1.23L11 13V7z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8z"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></symbol>
+  <symbol id="i-attach" viewBox="0 0 24 24"><path d="M16.5 6v11.5a4 4 0 0 1-8 0V5a2.5 2.5 0 0 1 5 0v10.5a1 1 0 0 1-2 0V6H10v9.5a2.5 2.5 0 0 0 5 0V5a4 4 0 0 0-8 0v12.5a5.5 5.5 0 0 0 11 0V6z"/></symbol>
+  <symbol id="i-contact" viewBox="0 0 24 24"><path d="M9 12c2.2 0 4-1.8 4-4S11.2 4 9 4 5 5.8 5 8s1.8 4 4 4zm0 2c-2.7 0-8 1.3-8 4v2h9.5l.4-2.9 1.7-1.7C11.3 14.2 10 14 9 14zm11.7-1.3-1.4-1.4a.9.9 0 0 0-1.3 0l-1.1 1.1 2.7 2.7 1.1-1.1a.9.9 0 0 0 0-1.3zM12 19.3V22h2.7l6-6-2.7-2.7z"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M5 20h14v-2H5zm0-10h4v6h6v-6h4l-7-7z" transform="translate(0 0)"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5a2 2 0 0 0-2-2zm0 12h-4a3 3 0 0 1-6 0H5V5h14z"/></symbol>
+</svg>
+
+<div class="app">
+  <header class="topbar">
+    <div class="tb-seg first">
+      <button class="tb-btn tb-back" id="btnBack" title="Collapse / expand sidebar" aria-label="Toggle sidebar"><svg class="i"><use href="#i-back"/></svg></button>
+      <a class="logo" href="#" id="logoLink" aria-label="iSchool home">
+        <!-- Official iSchool primary logo (brand.ischooltech.com/logo), embedded inline -->
+        <svg width="481" height="138" viewBox="0 0 481 138" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="iSchool">
+<path d="M473.385 51.418C473.385 51.7433 473.272 52.0361 473.028 52.2801C472.784 52.5241 472.491 52.6542 472.149 52.6542C471.905 52.6542 471.678 52.5891 471.466 52.459C471.255 52.3289 471.108 52.1337 471.011 51.906L469.726 48.848H467.888V51.418C467.888 51.7596 467.774 52.0524 467.53 52.2964C467.286 52.5403 466.993 52.6542 466.652 52.6542H466.619C466.277 52.6542 465.985 52.5403 465.741 52.2964C465.497 52.0524 465.383 51.7596 465.383 51.418V44.4563C465.383 44.0659 465.48 43.6918 465.676 43.3502C465.871 43.0086 466.147 42.7321 466.489 42.5369C466.83 42.3417 467.205 42.2441 467.595 42.2441H469.628C470.929 42.2441 471.905 42.5207 472.556 43.0574C473.207 43.5942 473.516 44.4075 473.516 45.481V45.5298C473.516 46.0991 473.402 46.5871 473.19 47.0263C472.963 47.4492 472.654 47.7908 472.231 48.0022L471.889 48.1811L473.239 50.8812C473.337 51.0602 473.385 51.2391 473.385 51.4343V51.418ZM470.62 46.4407C470.897 46.2618 471.027 45.9853 471.027 45.6437V45.5949C471.027 44.928 470.506 44.6027 469.465 44.6027H467.888V46.7335H469.465C469.97 46.7335 470.36 46.6359 470.637 46.457L470.62 46.4407Z" fill="#056FEC"/>
+<path d="M469.482 58.4129C463.333 58.4129 458.34 53.4194 458.34 47.2709C458.34 41.1225 463.333 36.1289 469.482 36.1289C475.63 36.1289 480.624 41.1225 480.624 47.2709C480.624 53.4194 475.63 58.4129 469.482 58.4129ZM469.482 38.4874C464.635 38.4874 460.682 42.44 460.682 47.2872C460.682 52.1344 464.635 56.0869 469.482 56.0869C474.329 56.0869 478.281 52.1344 478.281 47.2872C478.281 42.44 474.329 38.4874 469.482 38.4874Z" fill="#056FEC"/>
+<path d="M113.461 50.1813C110.533 28.6943 95.8288 8.80132 74.6348 2.50649C50.6431 -5.26852 24.667 6.13374 7.24657 21.7488C3.37536 25.2134 8.30383 31.1667 12.419 27.9786C33.8245 10.1188 66.9575 1.88839 87.4846 24.2049C94.5439 31.7034 98.2687 40.7634 99.2609 50.1813H113.461Z" fill="#FFD700"/>
+<path d="M97.8296 68.431C95.2271 78.8248 89.6968 88.6981 81.8406 96.3104C72.0975 106.314 60.3863 115.049 48.2847 118.139C30.8317 122.889 14.5662 112.706 22.3737 93.5615C30.0022 75.1162 45.6009 62.9982 65.9491 54.4913L64.9406 52.3767C78.7013 44.2927 66.128 23.2123 52.2047 30.9873C38.3464 39.3316 26.1798 50.3598 15.5096 63.6651C2.57846 79.2802 -6.90437 104.427 6.49846 123.035C23.4146 145.937 56.8729 139.463 76.0988 124.222C94.4789 110.624 109.638 91.4958 113.136 68.4473H97.8296V68.431Z" fill="#FFD700"/>
+<path d="M72.8942 73.3927L74.2117 108.608C74.472 115.277 70.7472 119.539 64.4524 119.783C58.1576 120.026 54.1075 116.058 53.8635 109.389L52.546 74.1735C52.2858 67.5045 56.0106 63.2429 62.3053 62.9989C68.6001 62.7549 72.6502 66.7238 72.8942 73.3927Z" fill="#056FEC"/>
+<path d="M215.982 101.953C211.363 108.183 203.962 112.314 194.967 113.567C176.62 116.104 162.452 105.808 160.013 88.2899C157.589 70.7718 168.406 56.9947 186.753 54.4573C194.821 53.3349 202.173 54.8151 208.582 59.0442C210.696 60.5406 212.062 62.7202 212.42 65.3065C213.185 70.8043 210.062 74.9195 204.564 75.684C202.108 76.0256 199.896 75.5051 198.074 74.4478C194.837 72.6261 192.153 72.0568 189.225 72.4634C182.801 73.358 179.125 78.6281 180.084 85.5248C181.044 92.4214 186.021 96.4879 192.446 95.5932C196.073 95.089 198.903 93.2672 201.034 90.5834C202.872 88.4201 204.873 87.314 207.199 86.9887C212.811 86.2079 216.926 89.3309 217.69 94.8288C218.064 97.5126 217.332 100.001 215.95 101.986L215.982 101.953Z" fill="#056FEC"/>
+<path d="M283.323 88.2749L280.769 110.429C280.021 116.87 275.808 120.432 269.725 119.716C263.625 119.017 260.339 114.593 261.088 108.152L263.381 88.3562C264.145 81.671 261.527 77.6859 255.785 77.0353C249.458 76.3033 245.586 80.0119 244.724 87.5104L242.594 106.021C241.845 112.462 237.633 116.024 231.549 115.308C225.45 114.609 222.164 110.185 222.912 103.744L230.134 41.1694C230.882 34.7282 235.095 31.166 241.178 31.8817C247.278 32.5811 250.564 37.0054 249.815 43.4466L247.457 63.8438L247.685 63.8763C251.653 60.2978 256.924 58.8827 263.137 59.5984C278.248 61.3389 285.291 71.4236 283.339 88.2911L283.323 88.2749Z" fill="#056FEC"/>
+<path d="M320.684 59.0293C339.211 59.0293 351.817 71.1798 351.817 88.8769C351.817 106.574 339.194 118.724 320.684 118.724C302.174 118.724 289.536 106.574 289.536 88.8769C289.536 71.1798 302.158 59.0293 320.684 59.0293ZM320.684 100.556C327.174 100.556 331.533 95.8386 331.533 88.8769C331.533 81.9151 327.174 77.1981 320.684 77.1981C314.194 77.1981 309.835 81.9151 309.835 88.8769C309.835 95.8386 314.194 100.556 320.684 100.556Z" fill="#056FEC"/>
+<path d="M389.194 56.1816C407.721 56.1816 420.327 68.3321 420.327 86.0292C420.327 103.726 407.705 115.877 389.194 115.877C370.684 115.877 358.046 103.726 358.046 86.0292C358.046 68.3321 370.668 56.1816 389.194 56.1816ZM389.194 97.6917C395.684 97.6917 400.044 92.9747 400.044 86.013C400.044 79.0512 395.684 74.3342 389.194 74.3342C382.704 74.3342 378.345 79.0512 378.345 86.013C378.345 92.9747 382.704 97.6917 389.194 97.6917Z" fill="#056FEC"/>
+<path d="M451.557 47.7262L444.677 110.333C443.961 116.79 439.781 120.353 433.681 119.686C427.581 119.019 424.263 114.611 424.979 108.17L431.859 45.5629C432.575 39.1217 436.755 35.5432 442.855 36.2101C448.954 36.877 452.273 41.285 451.557 47.7262Z" fill="#056FEC"/>
+<path d="M126.213 117.536C115.38 118.708 104.271 116.43 94.9182 111.144C92.1694 109.615 90.2175 106.622 89.8597 103.336C89.2416 97.6597 93.2592 92.7149 99.0009 92.0968C101.262 91.8528 103.36 92.2758 105.377 93.3818C111.818 97.1229 118.032 98.5869 124.408 97.9037C126.457 97.676 133.126 96.6024 132.638 92.0318V91.8041C132.345 89.3967 131.19 87.6726 118.064 85.7695C102.742 83.5736 89.9085 80.353 88.0379 62.9487V62.7372C86.3951 47.7077 97.2768 35.9151 114.502 34.0608C124.017 33.036 132.898 34.5162 140.917 38.4688C143.357 39.5749 146.204 42.3075 146.675 46.6179C147.293 52.2946 143.276 57.2394 137.534 57.8575C135.598 58.069 133.809 57.7762 131.906 56.9304C126.002 54.2628 120.943 53.2055 116.405 53.7098C111.818 54.214 109.037 56.2472 109.313 58.8985V59.1262C109.655 62.1191 111.021 63.3553 125.026 65.3723C138.998 67.438 152.157 71.5858 153.913 87.8677V88.0955C155.654 103.987 144.772 115.568 126.197 117.585L126.213 117.536Z" fill="#056FEC"/>
+<path d="M60.11 55.7925C67.6649 55.7925 73.7893 49.668 73.7893 42.1131C73.7893 34.5581 67.6649 28.4336 60.11 28.4336C52.5551 28.4336 46.4307 34.5581 46.4307 42.1131C46.4307 49.668 52.5551 55.7925 60.11 55.7925Z" fill="#FF7F1C"/>
+        </svg>
+      </a>
+    </div>
+    <div class="tb-seg"><button class="tb-btn tb-home" id="btnHome" aria-label="Home"><svg class="i"><use href="#i-home"/></svg></button></div>
+    <div class="tb-seg hide-sm" style="position:relative">
+      <button class="tb-btn" data-menu="orgMenu"><svg class="i" style="color:#5b88c9;width:26px;height:26px"><use href="#i-bank"/></svg>&nbsp;<span id="orgLbl">B2G</span><svg class="i chev"><use href="#i-chev"/></svg></button>
+      <div class="menu" id="orgMenu" hidden><button data-org="B2G">B2G</button><button data-org="B2C">B2C</button></div>
+    </div>
+    <div class="tb-seg hide-sm" style="position:relative">
+      <button class="tb-btn" data-menu="intakeMenu">
+        <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="3" width="28" height="24" rx="3" fill="#f3f0e6" stroke="#d8cfae"/><circle cx="15" cy="13" r="6" fill="#d9b45a"/><path d="M9 21h12v2H9z" fill="#4a7c59"/><path d="M12 13l3-3 3 3-3 3z" fill="#fff"/></svg>
+        <span id="intakeLbl">DEMI 3rd Intake</span><svg class="i chev"><use href="#i-chev"/></svg></button>
+      <div class="menu" id="intakeMenu" hidden><button data-intake="DEMI 1st Intake">DEMI 1st Intake</button><button data-intake="DEMI 2nd Intake">DEMI 2nd Intake</button><button data-intake="DEMI 3rd Intake">DEMI 3rd Intake</button></div>
+    </div>
+    <div class="tb-seg" style="position:relative;border-right:0">
+      <button class="tb-btn tb-support" data-menu="supportMenu">Support<svg class="i chev"><use href="#i-chev"/></svg></button>
+      <div class="menu" id="supportMenu" hidden style="left:0;right:auto"><button data-nav="Support">Support tickets</button><button data-act="contact">Update student / guardian contact</button></div>
+    </div>
+    <div class="tb-right">
+      <span class="avail" id="availPill">Available</span>
+      <button class="bell" id="btnBell" aria-label="Notifications"><svg class="i"><use href="#i-bell"/></svg></button>
+      <span class="badge" id="bellBadge">1354</span>
+      <div style="position:relative">
+        <button class="user" data-menu="userMenu"><span class="avatar"><svg class="i"><use href="#i-person"/></svg></span><span class="nm">Abdelrhman.Elagan</span><svg class="i chev"><use href="#i-chev"/></svg></button>
+        <div class="menu" id="userMenu" hidden>
+          <button data-act="contact">Update student / guardian contact</button>
+          <div class="sep"></div>
+          <button data-act="resetdemo">Reset demo data</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="body" id="body">
+    <nav class="side" aria-label="Main navigation">
+      <div class="nav-g"><button class="nav-h"><svg class="i"><use href="#i-book"/></svg>Content<svg class="i chev"><use href="#i-chev"/></svg></button>
+        <div class="nav-sub"><button>Courses</button><button>Lessons</button><button>Assessments</button></div></div>
+      <div class="nav-g"><button class="nav-h"><svg class="i"><use href="#i-users"/></svg>Users<svg class="i chev"><use href="#i-chev"/></svg></button>
+        <div class="nav-sub"><button>Students</button><button>Guardians</button><button>Tutors</button><button data-act="contact">Update Contact Info</button></div></div>
+      <div class="nav-g"><button class="nav-h"><svg class="i"><use href="#i-cal"/></svg>Sessions<svg class="i chev"><use href="#i-chev"/></svg></button>
+        <div class="nav-sub"><button>Schedule</button><button>Attendance</button></div></div>
+      <div class="nav-g"><button class="nav-h"><svg class="i"><use href="#i-video"/></svg>Meetings<svg class="i chev"><use href="#i-chev"/></svg></button>
+        <div class="nav-sub"><button>All Meetings</button><button>Recordings</button></div></div>
+      <div class="nav-g"><button class="nav-h"><svg class="i"><use href="#i-chat"/></svg>Community<svg class="i chev"><use href="#i-chev"/></svg></button>
+        <div class="nav-sub"><button>Posts</button><button>Moderation</button></div></div>
+      <div class="nav-g open"><button class="nav-h"><svg class="i"><use href="#i-help"/></svg>General Support<svg class="i chev"><use href="#i-chev"/></svg></button>
+        <div class="nav-sub">
+          <button>Support Response Templates</button><button>Support Topics</button>
+          <button class="active" data-nav="Support">Support</button>
+          <button>Support Dashboard</button><button>CSAT Dashboard</button><button>Surveys</button><button>FAQs</button>
+        </div></div>
+      <div class="nav-g"><button class="nav-h"><svg class="i"><use href="#i-help"/></svg>Tutor Support<svg class="i chev"><use href="#i-chev"/></svg></button>
+        <div class="nav-sub"><button>Tutor Tickets</button><button>Tutor FAQs</button></div></div>
+    </nav>
+
+    <main class="main" id="main">
+      <div class="toolbar">
+        <button class="tool" id="btnContact" title="Demo: update a student's or guardian's email / phone"><svg class="i"><use href="#i-contact"/></svg>Update Contact</button>
+        <button class="tool" id="btnImport" title="Import tickets"><svg class="i"><use href="#i-file"/></svg>Import</button>
+        <input type="file" id="importFile" accept=".csv" hidden>
+        <span class="range" id="rangeLbl">1 - 12 of 0</span>
+        <div class="pager">
+          <button class="tool" id="pgPrev" aria-label="Previous page"><svg class="i"><use href="#i-back"/></svg></button>
+          <input id="pgInput" value="1" inputmode="numeric" aria-label="Page number">
+          <span id="pgTotal">/ 1</span>
+          <button class="tool" id="pgNext" aria-label="Next page"><svg class="i"><use href="#i-next"/></svg></button>
+        </div>
+        <button class="tool" id="btnRefresh" title="Refresh" aria-label="Refresh"><svg class="i"><use href="#i-refresh"/></svg></button>
+        <button class="tool" id="btnExport" title="Export filtered tickets (CSV)" aria-label="Export filtered tickets"><svg class="i"><use href="#i-export"/></svg></button>
+        <button class="tool" id="btnDensity" title="Toggle compact rows" aria-label="Toggle compact rows"><svg class="i"><use href="#i-grid"/></svg></button>
+        <button class="tool blue" id="btnFilter" title="Filter" aria-label="Open filters"><svg class="i"><use href="#i-tune"/></svg><span class="dot" id="filterDot" hidden>0</span></button>
+      </div>
+      <div class="searchbar">
+        <label class="search" id="searchBox"><svg class="i" style="color:#2f3d4a"><use href="#i-search"/></svg>
+          <input id="q" type="search" placeholder="Search" autocomplete="off" aria-label="Search tickets">
+          <button class="clr" id="qClear" type="button" aria-label="Clear search"><svg class="i" style="width:16px;height:16px"><use href="#i-close"/></svg></button></label>
+        <label class="toggle"><input type="checkbox" id="unavail"><span class="tr"></span>Unavailable</label>
+        <div class="active-filters" id="activeFilters"></div>
+      </div>
+      <div class="tablewrap" id="tableWrap">
+        <table class="grid" id="grid">
+          <thead><tr>
+            <th class="c-edit"></th><th>#</th><th>Contact</th><th>Tutor</th><th>Team Leader</th><th>Session Date</th><th>Creation Date</th><th>Resolve Date</th><th>Topic</th><th>Appeal Review</th><th>Department</th><th>Status</th><th>Assignee</th><th>Responder</th><th>Urgency</th><th>Attachment</th><th>Canned Response</th><th>Note</th><th>Response Attachment</th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <div class="empty" id="empty" hidden>
+          <svg class="i"><use href="#i-inbox"/></svg>
+          <h3>No tickets match your search and filters</h3>
+          <div>Try a different keyword or adjust the filters.</div>
+          <button class="linkbtn" id="emptyClear">Clear search &amp; filters</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============ FILTER MODAL ============ -->
+<div class="overlay" id="filterOv" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="fTitle">
+    <div class="m-head"><svg class="i ic"><use href="#i-tune"/></svg><h2 id="fTitle">Filter</h2>
+      <button class="m-close" data-close="filterOv" aria-label="Close"><svg class="i"><use href="#i-close"/></svg></button></div>
+    <div class="m-body">
+      <div class="fgrid" id="fgrid">
+        <div class="ff"><select id="fTopic" aria-label="Topic"></select><span class="chev"><svg class="i"><use href="#i-chev"/></svg></span></div>
+        <div class="ff date is-empty"><svg class="i fi"><use href="#i-cal"/></svg><input type="date" id="fFrom" aria-label="From date"><span class="phl">From Date</span><span class="chev"><svg class="i"><use href="#i-chev"/></svg></span></div>
+        <div class="ff date is-empty"><svg class="i fi"><use href="#i-cal"/></svg><input type="date" id="fTo" aria-label="End date"><span class="phl">End Date</span><span class="chev"><svg class="i"><use href="#i-chev"/></svg></span></div>
+        <div class="ff"><select id="fStatus" aria-label="Status"></select><span class="chev"><svg class="i"><use href="#i-chev"/></svg></span></div>
+        <div class="ff"><select id="fDept" aria-label="Department"></select><span class="chev"><svg class="i"><use href="#i-chev"/></svg></span></div>
+        <div class="ff"><select id="fUrg" aria-label="Urgency"></select><span class="chev"><svg class="i"><use href="#i-chev"/></svg></span></div>
+        <div class="ff has-ic"><svg class="i fi"><use href="#i-person"/></svg><select id="fAdmin" aria-label="Admin"></select><span class="chev"><svg class="i"><use href="#i-chev"/></svg></span></div>
+        <div class="ff has-ic"><svg class="i fi"><use href="#i-person"/></svg><select id="fResp" aria-label="Responder"></select><span class="chev"><svg class="i"><use href="#i-chev"/></svg></span></div>
+        <div class="ff has-ic"><svg class="i fi"><use href="#i-person"/></svg><select id="fTL" aria-label="Team lead"></select><span class="chev"><svg class="i"><use href="#i-chev"/></svg></span></div>
+        <div class="ff"><select id="fUnassigned" aria-label="Show unassigned tickets"></select><span class="chev"><svg class="i"><use href="#i-chev"/></svg></span></div>
+        <div class="ff"><select id="fLate" aria-label="Is late"></select><span class="chev"><svg class="i"><use href="#i-chev"/></svg></span></div>
+        <div class="ff"><select id="fLabel" aria-label="Label"></select><span class="chev"><svg class="i"><use href="#i-chev"/></svg></span></div>
+        <div class="ff review" id="fReviewWrap" hidden><span class="tag">Absence appeals only</span><select id="fReview" aria-label="Appeal review"></select><span class="chev"><svg class="i"><use href="#i-chev"/></svg></span></div>
+      </div>
+      <div class="ferr" id="fErr" role="alert"></div>
+    </div>
+    <div class="m-foot"><button class="btn orange" id="fReset">Reset</button><button class="btn" id="fSearch">Search</button></div>
+  </div>
+</div>
+
+<!-- ============ CONTACT UPDATE MODAL ============ -->
+<div class="overlay center" id="contactOv" hidden>
+  <div class="modal sm" role="dialog" aria-modal="true" aria-labelledby="cTitle">
+    <div class="m-head"><svg class="i ic"><use href="#i-contact"/></svg><h2 id="cTitle">Update Contact Information</h2>
+      <button class="m-close" data-close="contactOv" aria-label="Close"><svg class="i"><use href="#i-close"/></svg></button></div>
+    <div class="m-body" style="padding:22px 28px 6px">
+      <div class="frm">
+        <div><label class="l" for="cStudent">Student</label><select class="inp" id="cStudent"></select></div>
+        <div class="row2">
+          <div><label class="l">Contact owner</label><div class="seg" id="cOwner"><button type="button" data-v="Student" class="on">Student</button><button type="button" data-v="Guardian">Guardian</button></div></div>
+          <div><label class="l">Field to change</label><div class="seg" id="cField"><button type="button" data-v="Email" class="on">Email address</button><button type="button" data-v="Phone">Phone number</button></div></div>
+        </div>
+        <div><label class="l" for="cCurrent" id="cCurLbl">Current email</label><input class="inp" id="cCurrent" readonly tabindex="-1"><div class="hint" id="cOwnerName"></div></div>
+        <div><label class="l" for="cNew" id="cNewLbl">New email</label><input class="inp" id="cNew" autocomplete="off"><div class="hint" id="cHint"></div><div class="msg-err" id="cErr" role="alert"></div></div>
+        <div class="note-box blue" id="cInfo" style="font-size:13px">A ticket will be created automatically and marked <b>Completed</b> by <b>System</b>.</div>
+      </div>
+    </div>
+    <div class="ed-foot" style="border:0"><button class="btn ghost" data-close="contactOv">Cancel</button><button class="btn" id="cSubmit">Update</button></div>
+  </div>
+</div>
+
+<!-- ============ CONFIRM MODAL ============ -->
+<div class="overlay center" id="confirmOv" hidden style="z-index:70">
+  <div class="modal sm" role="alertdialog" aria-modal="true" aria-labelledby="kTitle">
+    <div class="m-head"><h2 id="kTitle">Confirm</h2><button class="m-close" data-close="confirmOv" aria-label="Close"><svg class="i"><use href="#i-close"/></svg></button></div>
+    <div class="m-body" style="padding:20px 28px" id="kBody"></div>
+    <div class="ed-foot" style="border:0"><button class="btn ghost" id="kCancel">Cancel</button><button class="btn" id="kOk">Confirm</button></div>
+  </div>
+</div>
+
+<!-- ============ EDIT TICKET MODAL ============ -->
+<div class="overlay" id="editOv" hidden>
+  <div class="modal tk" role="dialog" aria-modal="true" aria-labelledby="eTitle" id="editModal"></div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script>
+(function(){
+'use strict';
+
+/* =====================================================================
+   Constants & reference lists
+   ===================================================================== */
+const LS_KEY = 'ischool_cs_ticketing_demo_v1';
+const CURRENT_USER = 'Abdelrhman.Elagan';
+const PAGE_SIZE = 12;
+const SLA_MIN = 240;                       // a ticket is "late" if it takes > 4h to resolve
+const PRACTICAL = 'Practical Session Absence Appeal', VIRTUAL = 'Virtual Session Absence Appeal';
+const APPEALS = [PRACTICAL, VIRTUAL];
+const isAppeal = topic => APPEALS.includes(topic);
+const TOPICS = ['Report a Problem / inquiry','Change Student Information',PRACTICAL,VIRTUAL,'Email Address Changed','Phone Number Changed'];
+const EMAIL_T = 'Email Address Changed', PHONE_T = 'Phone Number Changed';
+const STATUSES = ['Open','In Progress','Pending','Completed','Closed'];
+const RESOLVED = new Set(['Completed','Closed']);
+const DEPTS = ['Customer Support','Technical Support','Academic Affairs','Operations'];
+const URGENCY = ['Low','Medium','High','Urgent'];
+const ADMINS = ['Abdelrhman.Elagan','Nour.Hassan','Omar.Fathy','Salma.Adel'];
+const RESPONDERS = ['Mai.Kamal','Youssef.Samir','Hana.Mostafa','Karim.Lotfy'];
+const LABELS = ['Follow-up','Escalated','Parent request','Repeated','VIP'];
+const CANNED = ['Absence appeal received','Technical troubleshooting steps','Data updated confirmation','Session reschedule options'];
+const CANNED_TEXT = {
+  'Absence appeal received':'Thank you, we received the absence appeal and the attached document. Our academic team will review it shortly.',
+  'Technical troubleshooting steps':'Please log out, clear the browser cache, then sign in again using the latest version of Chrome. Let us know if the issue persists.',
+  'Data updated confirmation':'Your data has been updated successfully. Please check your profile and let us know if anything looks incorrect.',
+  'Session reschedule options':'We can offer the following make-up slots for the missed session. Please reply with the option that suits you.'
+};
+const REVIEW_LABEL = v => v === 'Valid' ? 'Valid' : v === 'Not Valid' ? 'Not Valid' : 'Blank';
+const REVIEW_CLS = v => v === 'Valid' ? 'ok' : v === 'Not Valid' ? 'no' : 'blank';
+const PHONE_RE = /^20(10|11|12|15)\d{8}$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/;
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+/* =====================================================================
+   Helpers
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2,'0');
+const fmtDate = ms => { const d = new Date(ms); return `${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}`; };
+const fmtTime = ms => { const d = new Date(ms); let h = d.getHours(); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return `${pad(h)}:${pad(d.getMinutes())} ${ap}`; };
+const fmtDT = ms => ms ? `${fmtDate(ms)}, ${fmtTime(ms)}` : '—';
+const isoLocal = ms => { const d = new Date(ms); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const dayKey = ms => { const d = new Date(ms); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const dtLocalVal = ms => { const d = new Date(ms); return `${dayKey(ms)}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+function fmtDur(min){ min = Math.max(0, Math.round(min)); if (min < 60) return `${min}m`; const h = Math.floor(min/60), m = min%60; if (h < 24) return m ? `${h}h ${m}m` : `${h}h`; const d = Math.floor(h/24), hh = h%24; return hh ? `${d}d ${hh}h` : `${d}d`; }
+function icon(n, style){ return `<svg class="i"${style?` style="${style}"`:''}><use href="#i-${n}"/></svg>`; }
+function mulberry32(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const clone = o => JSON.parse(JSON.stringify(o));
+
+function toast(msg, kind){
+  const el = document.createElement('div');
+  el.className = 'toast' + (kind ? ' ' + kind : '');
+  el.textContent = msg;
+  const box = $('#toasts'); box.appendChild(el);
+  while (box.children.length > 3) box.firstElementChild.remove();
+  setTimeout(() => el.remove(), 4200);
+}
+
+/* =====================================================================
+   Persistence (localStorage with safe in-memory fallback)
+   ===================================================================== */
+const storage = (function(){
+  let ok = false;
+  try { const k = '__t'; localStorage.setItem(k,'1'); localStorage.removeItem(k); ok = true; } catch(e) { ok = false; }
+  return {
+    ok,
+    load(){ if (!ok) return null; try { const r = localStorage.getItem(LS_KEY); return r ? JSON.parse(r) : null; } catch(e){ return null; } },
+    save(d){ if (!ok) return false; try { localStorage.setItem(LS_KEY, JSON.stringify(d)); return true; } catch(e){ return false; } },
+    clear(){ if (ok) try { localStorage.removeItem(LS_KEY); } catch(e){} }
+  };
+})();
+
+/* =====================================================================
+   Fictional seed data
+   ===================================================================== */
+const TUTORS = [
+  {name:'Hany Adel Saber Mohamed', code:21872, tl:'Dina Farouk Hassan'},
+  {name:'Mostafa Ibrahim Rashad', code:21909, tl:null},
+  {name:'Eman Fathy Abdelghany', code:18816, tl:'Mona Ashraf Galal'},
+  {name:'Sherif Kamal Elnaggar', code:21937, tl:'Mona Ashraf Galal'},
+  {name:'Aya Hassan Elsherbiny', code:14765, tl:'Tamer Nabil Fouad'},
+  {name:'Khaled Magdy Soliman', code:20114, tl:'Dina Farouk Hassan'}
+];
+const TL_CODES = {'Dina Farouk Hassan':118, 'Mona Ashraf Galal':246, 'Tamer Nabil Fouad':131};
+
+function seedStudents(){
+  const S = [
+    ['DEMI5-S-393192','مريم أحمد عبد الرحمن',6,'mariam.ahmed','201012345671','أحمد عبد الرحمن محمود','Father','201112345601'],
+    ['DEMI5-S-405368','يوسف خالد السيد',6,'youssef.khaled','201223456782','منى إبراهيم حسن','Mother','201523456702'],
+    ['DEMI4-S-212838','ليلى محمود فهمي',5,'laila.mahmoud','201534567893','محمود فهمي علي','Father','201034567803'],
+    ['DEMI4-S-207667','عمر حسام الدين نبيل',6,'omar.hossam','201145678904','هبة سامي رشاد','Mother','201245678904'],
+    ['DEMI5-S-396375','سلمى طارق منصور',6,'salma.tarek','201056789015','طارق منصور عادل','Father','201156789005'],
+    ['DEMI5-S-388410','آدم وليد شريف',4,'adam.walid','201267890126','وليد شريف كمال','Father','201567890106'],
+    ['DEMI4-S-219904','نور الهدى سمير عيسى',5,'nour.samir','201578901237','سمير عيسى جمال','Father','201078901207'],
+    ['DEMI5-S-401127','كريم أشرف زكي',6,'karim.ashraf','201189012348','داليا مصطفى أنور','Mother','201289012308'],
+    ['DEMI4-S-215530','جنى رامي عبد الله',4,'jana.ramy','201090123459','رامي عبد الله سعيد','Father','201190123409'],
+    ['DEMI5-S-399812','زياد هشام فتحي',5,'ziad.hesham','201201234560','إيمان صلاح الدين','Mother','201501234500'],
+    ['DEMI5-S-402276','فرح ياسر نجيب',6,'farah.yasser','201512340981','ياسر نجيب حلمي','Father','201012340911'],
+    ['DEMI4-S-210045','مالك عمرو الشناوي',5,'malek.amr','201123459872','عمرو الشناوي فؤاد','Father','201223459812']
+  ];
+  return S.map((r,i) => ({
+    id:r[0], name:r[1], grade:r[2], email:`${r[3]}@student-demo.example`, phone:r[4],
+    tutor:i % TUTORS.length,
+    guardian:{name:r[5], relation:r[6], email:`guardian.${r[3]}@family-demo.example`, phone:r[7]}
+  }));
+}
+
+function buildSeed(){
+  const rnd = mulberry32(20261020);
+  const pick = a => a[Math.floor(rnd()*a.length)];
+  const students = seedStudents();
+  const sMap = Object.fromEntries(students.map(s => [s.id, s]));
+  // Chronological plan (oldest → newest). P = problem, C = change info, A = absence, E/H = email/phone change (-S student, -G guardian)
+  const plan = ['P','A','C','P','E-S','A','P','H-G','A','C','P','A','E-G','P','A','P','C','H-S','A','P','A','C','P','E-G','A','P','H-G','A','P','C','A','P','E-S','A','P','A','P','H-S','A','P','A','P'];
+  const reviewCycle = ['Valid','','Not Valid','Valid','','Not Valid','','Valid','','Not Valid','Valid','','','Valid','Not Valid','',''];
+  const start = Date.parse('2026-10-08T08:40:00+03:00');
+  const end = Date.parse('2026-10-20T12:35:00+03:00');
+  const N = plan.length;
+  let absIdx = 0;
+  const ids = []; { let v = 531332; for (let k = 0; k < N; k++) { ids.unshift(v); v -= 6 + Math.floor(rnd()*28); } }
+  const tickets = [];
+  const tookPool = [5,9,17,22,34,48,75,118,180,302,617,1460];
+  const probSubs = ['Not session-related','Session-related','Technical issue','Platform access'];
+  const probDetails = [
+    'The student cannot join the live session; the classroom page keeps loading.',
+    'Session recording is not available on the student portal.',
+    'The student cannot see the homework assigned last week.',
+    'Login page shows "account not found" although the student logged in before.',
+    'Audio drops repeatedly during the live session.',
+    'Grades in the report do not match the quiz results.'
+  ];
+  const changeSubs = ['Name correction','Grade change','School change'];
+  const absDetails = [
+    'The student was sick and could not attend the session. A medical note is attached.',
+    'Family emergency — the student had to travel. Supporting letter attached.',
+    'The student had an official school exam at the same time as the session.',
+    'Internet outage in our area during the session time; provider notice attached.'
+  ];
+  let phoneSerial = 3100, mailSerial = 2;
+
+  plan.forEach((code, i) => {
+    const frac = i / (N - 1);
+    let created = Math.round(start + frac * (end - start) + (i === N-1 ? 0 : (rnd() - 0.5) * 3 * 3600e3));
+    created = Math.floor(created / 60000) * 60000;
+    const id = ids[i];
+    const stu = students[(i * 5 + 3) % students.length];
+    const tutor = TUTORS[stu.tutor];
+    const age = end - created;
+    const t = {
+      id, studentId: stu.id, contactType: 'Student', tutorName: tutor.name, tutorCode: tutor.code,
+      teamLeader: tutor.tl, teamLeaderCode: tutor.tl ? TL_CODES[tutor.tl] : null,
+      sessionDate: null, createdAt: created, resolvedAt: null, resolvedBy: null,
+      topic: '', subtopic: '', details: '', labels: [], department: '', status: 'Open',
+      assignee: null, responder: null, urgency: 'Medium', attachments: [], cannedResponse: null,
+      excuseReview: null, change: null, conversation: [], notes: [], history: []
+    };
+    const contactName = () => t.contactType === 'Guardian' ? stu.guardian.name : stu.name;
+
+    if (code === 'P' || code === 'C' || code === 'A') {
+      t.contactType = (code === 'A' ? rnd() < 0.75 : rnd() < 0.4) ? 'Guardian' : 'Student';
+      t.assignee = pick(ADMINS); t.responder = pick(RESPONDERS);
+      t.urgency = pick(URGENCY);
+      if (rnd() < 0.3) t.labels.push(pick(LABELS));
+      if (rnd() < 0.12) t.labels.push(pick(LABELS));
+      t.labels = Array.from(new Set(t.labels));
+      if (code === 'P') {
+        t.topic = TOPICS[0]; t.subtopic = pick(probSubs); t.details = pick(probDetails);
+        t.department = pick(['Technical Support','Customer Support','Technical Support']);
+        if (t.subtopic === 'Session-related') t.sessionDate = created - (1 + Math.floor(rnd()*3)) * 3600e3;
+        if (rnd() < 0.35) t.attachments.push({name:`screenshot_${id}.png`, ref:`demo://tickets/${id}/screenshot.png`});
+      } else if (code === 'C') {
+        t.topic = TOPICS[1]; t.subtopic = pick(changeSubs); t.department = 'Operations';
+        t.details = t.subtopic === 'Name correction' ? 'Please correct the student name spelling on the certificate.' : t.subtopic === 'Grade change' ? 'The student moved to the next grade; please update the grade.' : 'The student transferred to a new school.';
+        if (rnd() < 0.5) t.attachments.push({name:`birth_certificate_${id}.pdf`, ref:`demo://tickets/${id}/birth_certificate.pdf`});
+      } else {
+        t.topic = absIdx % 2 ? VIRTUAL : PRACTICAL; t.subtopic = t.topic === PRACTICAL ? 'Missed practical session' : 'Missed virtual session'; t.department = 'Academic Affairs';
+        t.details = pick(absDetails);
+        const sd = new Date(created - (1 + Math.floor(rnd()*3)) * 86400e3); sd.setHours(pick([16,17,18,19]), pick([0,30]), 0, 0);
+        t.sessionDate = sd.getTime();
+        t.excuseReview = reviewCycle[absIdx % reviewCycle.length]; absIdx++;
+        t.attachments.push({name: pick(['medical_note','excuse_letter','school_exam_schedule']) + `_${id}.pdf`, ref:`demo://tickets/${id}/excuse.pdf`});
+        if (rnd() < 0.3) t.attachments.push({name:`supporting_photo_${id}.jpg`, ref:`demo://tickets/${id}/photo.jpg`});
+      }
+      // status
+      const openChance = age < 30*3600e3 ? 0.5 : 0.12;
+      if (rnd() < openChance) {
+        t.status = pick(['Open','In Progress','Pending']);
+        if (rnd() < 0.35) { t.assignee = null; }
+      } else {
+        t.status = rnd() < 0.85 ? 'Completed' : 'Closed';
+        let took = pick(tookPool);
+        if (i === N-1) took = 6;
+        t.resolvedAt = Math.min(created + took * 60000, end + 60000);
+        t.resolvedBy = t.assignee;
+      }
+      // absence decisions should be visibly independent of status:
+      if (code === 'A' && absIdx === 1) { t.status = 'Open'; t.resolvedAt = null; t.resolvedBy = null; t.assignee = t.assignee || ADMINS[1]; }
+      // conversation & notes
+      t.conversation.push({at: created, dir:'in', by: contactName(), text: t.details, attachments: []});
+      t.conversation.push({at: created + 60000, dir:'out', by: 'System', auto: true, text: 'We have received your request and will get back to you as soon as possible', attachments: []});
+      t.history.push({at: created, by: contactName(), text: `Ticket created by ${t.contactType.toLowerCase()}`});
+      if (t.assignee) t.history.push({at: created + 60000, by: 'System', text: `Assigned to ${t.assignee}`});
+      if (t.resolvedAt || rnd() < 0.4) {
+        t.cannedResponse = code === 'A' ? CANNED[0] : code === 'C' ? CANNED[2] : pick([CANNED[1], CANNED[3]]);
+        const ra = [];
+        if (rnd() < 0.3) ra.push({name:`reply_guide_${id}.pdf`, ref:`demo://tickets/${id}/reply_guide.pdf`});
+        t.conversation.push({at: created + 3*60000, dir:'out', by: t.responder, text: CANNED_TEXT[t.cannedResponse], attachments: ra});
+      }
+      if (rnd() < 0.45) {
+        const nt = code === 'A' ? pick(['Checked attendance log — session marked absent.','Document is readable; matches session date.','Waiting for academic team decision.']) : pick(['Escalated to tech team via Slack.','Called the guardian, no answer.','Duplicate of an older ticket — merged.','Verified with student records.']);
+        t.notes.push({at: created + 5*60000, by: t.assignee || CURRENT_USER, text: nt});
+      }
+      if (code === 'A' && t.excuseReview) t.history.push({at: created + 20*60000, by: t.assignee || CURRENT_USER, text: `Appeal review set to ${t.excuseReview}`});
+      if (t.resolvedAt) t.history.push({at: t.resolvedAt, by: t.resolvedBy || 'System', text: `Status changed to ${t.status}`});
+    } else {
+      // Contact change (email / phone) — apply to profile in chronological order so data stays consistent
+      const [kind, ownerCode] = code.split('-');
+      const owner = ownerCode === 'S' ? 'Student' : 'Guardian';
+      const field = kind === 'E' ? 'Email' : 'Phone';
+      const prof = owner === 'Student' ? stu : stu.guardian;
+      const oldV = field === 'Email' ? prof.email : prof.phone;
+      let newV;
+      if (field === 'Email') { const [lp, dom] = oldV.split('@'); newV = `${lp.replace(/\d+$/,'')}${mailSerial++}@${owner === 'Student' ? 'student-demo.example' : 'mail-demo.example'}`; }
+      else { newV = `20${pick(['10','11','12','15'])}${String(55000000 + (phoneSerial++) * 137).slice(0,8)}`; }
+      if (field === 'Email') prof.email = newV; else prof.phone = newV;
+      Object.assign(t, sysChangeTicket({owner, field, oldV, newV, at: created, stu}), {id, createdAt: created});
+    }
+    tickets.push(t);
+  });
+  return {version:1, students, tickets};
+}
+
+function sysChangeTicket({owner, field, oldV, newV, at, stu}){
+  const tutor = TUTORS[stu.tutor];
+  const topic = field === 'Email' ? EMAIL_T : PHONE_T;
+  const fieldLbl = field === 'Email' ? 'email address' : 'phone number';
+  return {
+    studentId: stu.id, contactType: owner, tutorName: tutor.name, tutorCode: tutor.code,
+    teamLeader: tutor.tl, teamLeaderCode: tutor.tl ? TL_CODES[tutor.tl] : null,
+    sessionDate: null, createdAt: at, resolvedAt: at, resolvedBy: 'System',
+    topic, subtopic: `${owner} ${field.toLowerCase()}`,
+    details: `${owner} ${fieldLbl} changed from ${oldV} to ${newV}.`,
+    labels: [], department: 'Customer Support', status: 'Completed', assignee: 'System', responder: 'System',
+    urgency: 'Low', attachments: [], cannedResponse: null, excuseReview: null,
+    change: {owner, field, oldValue: oldV, newValue: newV, changedAt: at},
+    conversation: [], notes: [],
+    history: [
+      {at, by: CURRENT_USER, text: `${owner} ${fieldLbl} updated from contact settings`},
+      {at, by: 'System', text: 'Ticket created automatically'},
+      {at, by: 'System', text: 'Status changed to Completed'}
+    ]
+  };
+}
+
+/* =====================================================================
+   State
+   ===================================================================== */
+
+/* migrate data saved by earlier versions of the prototype */
+function migrate(d){
+  if (!d || !Array.isArray(d.tickets)) return d;
+  const rv = {Approved:'Valid', Declined:'Not Valid'};
+  d.tickets.forEach(t => {
+    if (t.topic === 'Absence Excuse') { t.topic = t.id % 2 ? VIRTUAL : PRACTICAL; if (!t.subtopic || t.subtopic === 'Missed session') t.subtopic = t.topic === PRACTICAL ? 'Missed practical session' : 'Missed virtual session'; }
+    if (rv[t.excuseReview]) t.excuseReview = rv[t.excuseReview];
+    if (t.status === 'Resolved') t.status = 'Completed';
+    (t.history || []).forEach(h => { h.text = String(h.text).replace('Status changed to Resolved', 'Status changed to Completed'); });
+    if (t.cannedResponse === 'Absence excuse received') t.cannedResponse = 'Absence appeal received';
+  });
+  return d;
+}
+let db = migrate(storage.load());
+if (!db || db.version !== 1 || !Array.isArray(db.tickets)) { db = buildSeed(); storage.save(db); }
+let prefs = db.prefs || {compact:false, unavailable:false};
+const ui = {q:'', page:1, applied: emptyFilters()};
+
+function persist(){ db.prefs = prefs; const ok = storage.save(db); if (!ok && storage.ok) toast('Could not save to local storage — changes are kept for this session only.', 'err'); }
+const studentOf = t => db.students.find(s => s.id === t.studentId);
+const ticketById = id => db.tickets.find(t => t.id === id);
+
+function emptyFilters(){ return {topic:'', review:'all', from:'', to:'', status:'', dept:'', urgency:'', admin:'', responder:'', teamLead:'', unassigned:'', late:'', label:''}; }
+function isLate(t){
+  if (t.resolvedBy === 'System') return false;
+  const endT = t.resolvedAt || Date.now();
+  return (endT - t.createdAt) / 60000 > SLA_MIN;
+}
+function contactOf(t){
+  const s = studentOf(t);
+  if (!s) return {name:'—', phone:'', email:''};
+  return t.contactType === 'Guardian' ? {name:s.guardian.name, phone:s.guardian.phone, email:s.guardian.email} : {name:s.name, phone:s.phone, email:s.email};
+}
+
+/* =====================================================================
+   Filtering & search
+   ===================================================================== */
+function matchFilters(t, f){
+  if (f.topic && t.topic !== f.topic) return false;
+  if (isAppeal(f.topic) && f.review && f.review !== 'all') {
+    if (f.review === 'blank') { if (t.excuseReview) return false; }
+    else if (t.excuseReview !== f.review) return false;
+  }
+  const dk = dayKey(t.createdAt);
+  if (f.from && dk < f.from) return false;
+  if (f.to && dk > f.to) return false;
+  if (f.status && t.status !== f.status) return false;
+  if (f.dept && t.department !== f.dept) return false;
+  if (f.urgency && t.urgency !== f.urgency) return false;
+  if (f.admin && t.assignee !== f.admin) return false;
+  if (f.responder && t.responder !== f.responder) return false;
+  if (f.teamLead) { if (f.teamLead === '__none') { if (t.teamLeader) return false; } else if (t.teamLeader !== f.teamLead) return false; }
+  if (f.unassigned === 'only' && t.assignee) return false;
+  if (f.unassigned === 'assigned' && !t.assignee) return false;
+  if (f.late === 'yes' && !isLate(t)) return false;
+  if (f.late === 'no' && isLate(t)) return false;
+  if (f.label && !(t.labels || []).includes(f.label)) return false;
+  return true;
+}
+function haystack(t){
+  const s = studentOf(t) || {guardian:{}};
+  const c = contactOf(t);
+  const parts = [t.id, '#' + t.id, s.name, s.id, s.email, s.phone, '+' + s.phone, s.guardian.name, s.guardian.email, s.guardian.phone, '+' + s.guardian.phone,
+    c.name, t.topic, t.subtopic, t.status, t.contactType];
+  if (isAppeal(t.topic)) parts.push('appeal review ' + REVIEW_LABEL(t.excuseReview), 'absence appeal');
+  if (t.change) parts.push(t.change.oldValue, t.change.newValue, t.change.owner);
+  return parts.filter(Boolean).join(' \u0001 ').toLowerCase();
+}
+function matchSearch(t, raw){
+  const q = (raw || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  if (!q) return true;
+  const m = q.match(/^#\s*(\d+)$/);
+  if (m) return String(t.id) === m[1];
+  const h = haystack(t);
+  if (h.includes(q)) return true;
+  if (/^[+\d\s()-]+$/.test(q)) {               // phone-like query: compare digits only
+    const d = q.replace(/\D/g,'');
+    if (d.length >= 3 && h.replace(/[^\d\u0001]/g,'').includes(d)) return true;
+  }
+  return false;
+}
+function currentRows(){
+  return db.tickets.filter(t => matchFilters(t, ui.applied) && matchSearch(t, ui.q)).sort((a,b) => b.createdAt - a.createdAt || b.id - a.id);
+}
+
+/* =====================================================================
+   Table rendering
+   ===================================================================== */
+function attLinks(list){
+  if (!list || !list.length) return '<span class="na">—</span>';
+  return list.map(a => `<button class="att" data-ref="${esc(a.ref)}" data-name="${esc(a.name)}" title="${esc(a.name)} — ${esc(a.ref)}">${icon('attach')}<span>${esc(a.name)}</span></button>`).join('<br>');
+}
+function responseAtts(t){ return (t.conversation || []).filter(m => m.dir === 'out').flatMap(m => m.attachments || []); }
+function reviewCell(t){
+  if (!isAppeal(t.topic)) return '<span class="na">Not applicable</span>';
+  const v = t.excuseReview || '';
+  return `<select class="rev ${REVIEW_CLS(v)}" data-review="${t.id}" aria-label="Appeal review for ticket ${t.id}">
+    <option value=""${v===''?' selected':''}>Blank</option>
+    <option value="Valid"${v==='Valid'?' selected':''}>Valid</option>
+    <option value="Not Valid"${v==='Not Valid'?' selected':''}>Not Valid</option></select>`;
+}
+function rowHTML(t){
+  const s = studentOf(t) || {id:'—', grade:'—'};
+  const c = contactOf(t);
+  const took = t.resolvedAt ? (t.resolvedAt - t.createdAt) / 60000 : null;
+  const late = isLate(t);
+  const lastNote = (t.notes || []).length ? t.notes[t.notes.length-1].text : '';
+  const chip = t.change ? `<span class="chip own" title="${esc(t.change.owner)}'s ${t.change.field === 'Email' ? 'email' : 'phone'} changed">${esc(t.change.owner)} · ${t.change.field === 'Email' ? 'Email' : 'Phone'}</span>`
+                        : (t.subtopic ? `<span class="chip" title="${esc(t.subtopic)}">${esc(t.subtopic)}</span>` : '');
+  return `<tr data-id="${t.id}">
+  <td class="c-edit"><button class="editbtn" data-edit="${t.id}" aria-label="Edit ticket ${t.id}">${icon('edit')}</button></td>
+  <td class="c-id">${t.id}</td>
+  <td class="c-contact"><div class="nm" dir="auto">${esc(c.name)}<span class="who ${t.contactType==='Student'?'st':''}">${esc(t.contactType)}</span></div>
+     <div>${c.phone ? '+' + esc(c.phone) : ''}</div><div>${esc(c.email)}</div><div>${esc(s.id)}</div><div class="gr">Grade ${esc(s.grade)}</div></td>
+  <td class="c-tutor"><div class="big">${esc(t.tutorName)}</div><div class="sub">${esc(t.tutorCode)}</div></td>
+  <td class="c-tl">${t.teamLeader ? `<div class="big">${esc(t.teamLeader)}</div><div class="sub">${esc(t.teamLeaderCode)}</div>` : '<span class="big">—</span>'}</td>
+  <td class="c-sd">${t.sessionDate ? `<div class="dt">${fmtDate(t.sessionDate)}</div><div class="tm">${icon('clock')}${fmtTime(t.sessionDate)}</div>` : '<span class="big">—</span>'}</td>
+  <td class="c-cd"><div class="dt">${icon('cal')}${fmtDate(t.createdAt)}</div><div class="tm">${icon('clock')}${fmtTime(t.createdAt)}</div></td>
+  <td class="c-rd">${t.resolvedAt ? `<div class="dt">${icon('check')}${fmtDate(t.resolvedAt)}</div><div class="tm">${icon('clock')}${fmtTime(t.resolvedAt)}</div>
+       <div class="took">${icon('clock')}${t.resolvedBy === 'System' ? 'Instant · System' : 'Took ' + fmtDur(took)}</div>${late ? '<span class="late">Late</span>' : ''}` : `<span class="big">—</span>${late ? '<div><span class="late" style="margin:10px 0 0">Late</span></div>' : ''}`}</td>
+  <td class="c-topic"><div class="topic" title="${esc(t.topic)}">${esc(t.topic)}</div>${chip}</td>
+  <td class="c-rev">${reviewCell(t)}</td>
+  <td>${esc(t.department)}</td>
+  <td><span class="pill st-${esc(t.status.replace(/\s/g,''))}">${esc(t.status)}</span>${t.resolvedBy === 'System' ? '<div class="sub" style="font-size:12.5px">by System</div>' : ''}</td>
+  <td>${t.assignee ? esc(t.assignee) : '<span class="na">Unassigned</span>'}</td>
+  <td>${t.responder ? esc(t.responder) : '<span class="na">—</span>'}</td>
+  <td><span class="pill ur-${esc(t.urgency)}">${esc(t.urgency)}</span></td>
+  <td>${attLinks(t.attachments)}</td>
+  <td>${t.cannedResponse ? `<div class="clip">${esc(t.cannedResponse)}</div>` : '<span class="na">—</span>'}</td>
+  <td>${lastNote ? `<div class="clip" title="${esc(lastNote)}">${esc(lastNote)}</div>` : (t.change ? `<div class="clip">${esc(t.change.oldValue)} → ${esc(t.change.newValue)}</div>` : '<span class="na">—</span>')}</td>
+  <td>${attLinks(responseAtts(t))}</td>
+  </tr>`;
+}
+function render(){
+  const rows = currentRows();
+  const total = rows.length;
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (ui.page > pages) ui.page = pages;
+  if (ui.page < 1) ui.page = 1;
+  const startI = (ui.page - 1) * PAGE_SIZE;
+  const pageRows = rows.slice(startI, startI + PAGE_SIZE);
+  $('#tbody').innerHTML = pageRows.map(rowHTML).join('');
+  $('#empty').hidden = total > 0;
+  $('#grid thead').style.visibility = total ? '' : 'hidden';
+  $('#rangeLbl').textContent = total ? `${startI + 1} - ${startI + pageRows.length} of ${total}` : '0 of 0';
+  $('#pgInput').value = ui.page; $('#pgTotal').textContent = `/ ${pages}`;
+  $('#pgPrev').disabled = ui.page <= 1; $('#pgNext').disabled = ui.page >= pages;
+  renderActiveFilters();
+  $('#main').classList.toggle('compact', !!prefs.compact);
+}
+function activeFilterList(f){
+  const out = [];
+  if (f.topic) out.push(['topic', 'Topic: ' + f.topic]);
+  if (isAppeal(f.topic) && f.review !== 'all') out.push(['review', 'Appeal review: ' + (f.review === 'blank' ? 'Blank' : f.review)]);
+  if (f.from) out.push(['from', 'From: ' + f.from]);
+  if (f.to) out.push(['to', 'To: ' + f.to]);
+  if (f.status) out.push(['status', 'Status: ' + f.status]);
+  if (f.dept) out.push(['dept', 'Department: ' + f.dept]);
+  if (f.urgency) out.push(['urgency', 'Urgency: ' + f.urgency]);
+  if (f.admin) out.push(['admin', 'Admin: ' + f.admin]);
+  if (f.responder) out.push(['responder', 'Responder: ' + f.responder]);
+  if (f.teamLead) out.push(['teamLead', 'Team lead: ' + (f.teamLead === '__none' ? 'None' : f.teamLead)]);
+  if (f.unassigned) out.push(['unassigned', f.unassigned === 'only' ? 'Unassigned only' : 'Assigned only']);
+  if (f.late) out.push(['late', f.late === 'yes' ? 'Late' : 'Not late']);
+  if (f.label) out.push(['label', 'Label: ' + f.label]);
+  return out;
+}
+function renderActiveFilters(){
+  const list = activeFilterList(ui.applied);
+  $('#filterDot').hidden = !list.length; $('#filterDot').textContent = list.length;
+  $('#activeFilters').innerHTML = list.map(([, l]) => `<span class="af">${esc(l)}</span>`).join('') + (list.length ? '<button class="af clear" id="afClear">Clear filters</button>' : '');
+}
+
+/* =====================================================================
+   Filter modal
+   ===================================================================== */
+function fillSelect(sel, placeholder, opts){
+  sel.innerHTML = `<option value="">${esc(placeholder)}</option>` + opts.map(o => Array.isArray(o) ? `<option value="${esc(o[0])}">${esc(o[1])}</option>` : `<option value="${esc(o)}">${esc(o)}</option>`).join('');
+}
+function initFilterOptions(){
+  const uniq = arr => Array.from(new Set(arr.filter(Boolean))).sort((a,b) => a.localeCompare(b));
+  fillSelect($('#fTopic'), 'Select', TOPICS);
+  fillSelect($('#fStatus'), 'Status', STATUSES);
+  fillSelect($('#fDept'), 'Department', uniq([...DEPTS, ...db.tickets.map(t => t.department)]));
+  fillSelect($('#fUrg'), 'Urgency', URGENCY);
+  fillSelect($('#fAdmin'), 'Admin', uniq([...ADMINS, ...db.tickets.map(t => t.assignee)]));
+  fillSelect($('#fResp'), 'Responder', uniq([...RESPONDERS, ...db.tickets.map(t => t.responder)]));
+  fillSelect($('#fTL'), 'Team Lead', [...uniq(db.tickets.map(t => t.teamLeader)), ['__none','No team leader']]);
+  fillSelect($('#fUnassigned'), 'Show Unassigned Tickets', [['only','Yes — unassigned only'],['assigned','No — assigned only']]);
+  fillSelect($('#fLate'), 'Is Late', [['yes','Yes'],['no','No']]);
+  fillSelect($('#fLabel'), 'Label', LABELS);
+  const r = $('#fReview');
+  r.innerHTML = '<option value="all">All review statuses</option><option value="Valid">Valid</option><option value="Not Valid">Not Valid</option><option value="blank">Blank</option>';
+}
+const FMAP = {topic:'#fTopic', review:'#fReview', from:'#fFrom', to:'#fTo', status:'#fStatus', dept:'#fDept', urgency:'#fUrg', admin:'#fAdmin', responder:'#fResp', teamLead:'#fTL', unassigned:'#fUnassigned', late:'#fLate', label:'#fLabel'};
+function syncFieldLooks(){
+  $$('#fgrid select').forEach(s => s.classList.toggle('ph', s.value === '' ));
+  $$('#fgrid .ff.date').forEach(w => w.classList.toggle('is-empty', !w.querySelector('input').value));
+  const isAbs = isAppeal($('#fTopic').value);
+  $('#fReviewWrap').hidden = !isAbs;
+  if (!isAbs) $('#fReview').value = 'all';
+}
+function writeFilterForm(f){
+  Object.entries(FMAP).forEach(([k, sel]) => { $(sel).value = f[k] == null ? '' : f[k]; });
+  if (!$('#fReview').value) $('#fReview').value = 'all';
+  $('#fErr').textContent = '';
+  syncFieldLooks();
+}
+function readFilterForm(){
+  const f = emptyFilters();
+  Object.entries(FMAP).forEach(([k, sel]) => { f[k] = $(sel).value; });
+  if (!isAppeal(f.topic)) f.review = 'all';
+  if (!f.review) f.review = 'all';
+  return f;
+}
+function openFilter(){ writeFilterForm(ui.applied); openOv('filterOv'); setTimeout(() => $('#fTopic').focus(), 30); }
+function applyFilterFromModal(){
+  const f = readFilterForm();
+  if (f.from && f.to && f.to < f.from) { $('#fErr').textContent = 'End Date cannot be earlier than From Date.'; $('#fTo').closest('.ff').style.borderColor = 'var(--bad)'; return; }
+  $('#fTo').closest('.ff').style.borderColor = '';
+  ui.applied = f; ui.page = 1;
+  closeOv('filterOv'); render();
+  const n = currentRows().length;
+  toast(`${n} ticket${n === 1 ? '' : 's'} match the selected filters.`);
+}
+
+/* =====================================================================
+   Overlays
+   ===================================================================== */
+const ovStack = [];
+function openOv(id){ const o = document.getElementById(id); o.hidden = false; if (!ovStack.includes(id)) ovStack.push(id); }
+function closeOv(id){ const o = document.getElementById(id); o.hidden = true; const i = ovStack.indexOf(id); if (i >= 0) ovStack.splice(i,1); if (id === 'confirmOv' && confirmCb) { const cb = confirmCb; confirmCb = null; cb(false); } }
+let confirmCb = null;
+function confirmBox(title, html, okLabel, cb){
+  $('#kTitle').textContent = title; $('#kBody').innerHTML = html; $('#kOk').textContent = okLabel || 'Confirm';
+  confirmCb = cb; openOv('confirmOv'); setTimeout(() => $('#kOk').focus(), 30);
+}
+
+/* =====================================================================
+   Excuse review (table)
+   ===================================================================== */
+function setReview(id, val, by){
+  const t = ticketById(id); if (!t || !isAppeal(t.topic)) return;
+  const prev = t.excuseReview || '';
+  if (prev === val) return;
+  t.excuseReview = val;
+  t.history.push({at: Date.now(), by: by || CURRENT_USER, text: `Appeal review changed from ${REVIEW_LABEL(prev)} to ${REVIEW_LABEL(val)} (ticket status unchanged: ${t.status})`});
+  persist();
+}
+
+/* =====================================================================
+   Export (CSV)
+   ===================================================================== */
+function csvCell(v){ const s = v == null ? '' : String(v); return /[",\r\n]/.test(s) || /^\s|\s$/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+function exportCSV(){
+  const rows = currentRows();
+  if (!rows.length) { toast('Nothing to export — no tickets match the current search and filters.', 'err'); return; }
+  const head = ['Ticket ID','Student Name','Student ID','Grade','Contact Type (opened by)','Contact Name','Contact Phone','Contact Email','Topic','Subtopic','Ticket Status','Appeal Review Status','Session Date',
+    'Contact Owner (changed)','Changed Field','Old Value','New Value','Created At','Resolved At','Resolved By','Assignee','Responder','Department','Urgency','Is Late','Labels','Supporting Attachments','Attachment References','Response Attachments','Response Attachment References'];
+  const lines = [head.map(csvCell).join(',')];
+  rows.forEach(t => {
+    const s = studentOf(t) || {name:'', id:'', grade:''};
+    const c = contactOf(t);
+    const ra = responseAtts(t);
+    lines.push([
+      t.id, s.name, s.id, s.grade, t.contactType, c.name, c.phone, c.email, t.topic, t.subtopic, t.status,
+      isAppeal(t.topic) ? REVIEW_LABEL(t.excuseReview) : 'Not applicable',
+      t.sessionDate ? isoLocal(t.sessionDate) : '',
+      t.change ? t.change.owner : '', t.change ? (t.change.field === 'Email' ? 'Email address' : 'Phone number') : '',
+      t.change ? t.change.oldValue : '', t.change ? t.change.newValue : '',
+      isoLocal(t.createdAt), t.resolvedAt ? isoLocal(t.resolvedAt) : '', t.resolvedBy || '',
+      t.assignee || 'Unassigned', t.responder || '', t.department, t.urgency, isLate(t) ? 'Yes' : 'No', (t.labels || []).join('; '),
+      t.attachments.map(a => a.name).join('; '), t.attachments.map(a => a.ref).join('; '),
+      ra.map(a => a.name).join('; '), ra.map(a => a.ref).join('; ')
+    ].map(csvCell).join(','));
+  });
+  const csv = '﻿' + lines.join('\r\n') + '\r\n';
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const d = new Date();
+  const fn = `ischool_tickets_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}.csv`;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = fn; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  window.__lastExport = {filename: fn, csv, count: rows.length};
+  toast(`Exported ${rows.length} ticket${rows.length === 1 ? '' : 's'} to ${fn}`, 'ok');
+}
+
+/* =====================================================================
+   Contact update (student / guardian, email / phone)
+   ===================================================================== */
+const cState = {owner:'Student', field:'Email'};
+function openContact(prefStudentId){
+  const sel = $('#cStudent');
+  sel.innerHTML = db.students.map(s => `<option value="${esc(s.id)}">${esc(s.name)} — ${esc(s.id)}</option>`).join('');
+  if (prefStudentId) sel.value = prefStudentId;
+  $('#cNew').value = ''; $('#cErr').textContent = ''; $('#cNew').classList.remove('err');
+  syncContact(); openOv('contactOv'); setTimeout(() => $('#cNew').focus(), 30);
+}
+function syncContact(){
+  const s = db.students.find(x => x.id === $('#cStudent').value);
+  const p = cState.owner === 'Student' ? s : s.guardian;
+  const isEmail = cState.field === 'Email';
+  $$('#cOwner button').forEach(b => b.classList.toggle('on', b.dataset.v === cState.owner));
+  $$('#cField button').forEach(b => b.classList.toggle('on', b.dataset.v === cState.field));
+  $('#cCurLbl').textContent = `Current ${cState.owner.toLowerCase()} ${isEmail ? 'email' : 'phone number'}`;
+  $('#cNewLbl').textContent = `New ${cState.owner.toLowerCase()} ${isEmail ? 'email' : 'phone number'}`;
+  $('#cCurrent').value = isEmail ? p.email : p.phone;
+  $('#cOwnerName').textContent = cState.owner === 'Guardian' ? `Guardian: ${s.guardian.name} (${s.guardian.relation})` : `Student: ${s.name}`;
+  const n = $('#cNew');
+  n.type = isEmail ? 'email' : 'text';
+  n.setAttribute('inputmode', isEmail ? 'email' : 'numeric');
+  n.maxLength = isEmail ? 120 : 12;
+  n.placeholder = isEmail ? 'name@example.com' : '201012345678';
+  $('#cHint').textContent = isEmail ? (cState.owner === 'Student' ? 'Changing the student email also changes the student’s login email. You will be asked to confirm.' : 'Enter a valid email address.') : 'Digits only, 12 digits, no “+”: starts with 2010, 2011, 2012 or 2015 — e.g. 201012345678. No OTP is required.';
+  $('#cInfo').innerHTML = `A completed ticket “<b>${isEmail ? EMAIL_T : PHONE_T}</b>” will be created automatically for the <b>${cState.owner}</b> and marked <b>Completed</b> by <b>System</b>.`;
+}
+function contactError(msg){ $('#cErr').textContent = msg; $('#cNew').classList.toggle('err', !!msg); if (msg) $('#cNew').focus(); }
+function submitContact(){
+  const s = db.students.find(x => x.id === $('#cStudent').value);
+  const p = cState.owner === 'Student' ? s : s.guardian;
+  const isEmail = cState.field === 'Email';
+  const cur = isEmail ? p.email : p.phone;
+  let v = $('#cNew').value.trim();
+  if (!v) return contactError(`Please enter the new ${isEmail ? 'email address' : 'phone number'}.`);
+  if (isEmail) {
+    if (!EMAIL_RE.test(v)) return contactError('Please enter a valid email address (e.g. name@example.com).');
+    if (v.toLowerCase() === cur.toLowerCase()) return contactError('The new email is the same as the current email.');
+  } else {
+    if (!/^\d+$/.test(v)) return contactError('Digits only — remove spaces, “+” or other characters.');
+    if (!PHONE_RE.test(v)) return contactError('Invalid number. Use 12 digits starting with 2010, 2011, 2012 or 2015 (e.g. 201012345678).');
+    if (v === cur) return contactError('The new phone number is the same as the current number.');
+  }
+  contactError('');
+  const apply = () => {
+    if (isEmail) p.email = v; else p.phone = v;
+    const now = Date.now();
+    const id = Math.max(...db.tickets.map(t => t.id)) + 1;
+    const t = Object.assign({id}, sysChangeTicket({owner: cState.owner, field: cState.field, oldV: cur, newV: v, at: now, stu: s}));
+    db.tickets.push(t); persist();
+    closeOv('contactOv');
+    ui.page = 1; render();
+    const visible = currentRows().some(x => x.id === id);
+    toast(`${cState.owner} ${isEmail ? 'email' : 'phone'} updated. Ticket #${id} “${t.topic}” created and completed by System.${visible ? '' : ' (Hidden by current search/filters.)'}`, 'ok');
+    flashRow(id);
+  };
+  if (isEmail && cState.owner === 'Student') {
+    confirmBox('Change student login email?', `<div class="note-box"><b>This changes the student’s login credentials.</b><br>${esc(s.name)} will have to sign in with the new email address from now on. The old email will no longer work for login.</div>
+      <div class="kv"><span>Student</span><b dir="auto">${esc(s.name)} (${esc(s.id)})</b><span>Current email</span><b>${esc(cur)}</b><span>New email</span><b>${esc(v)}</b></div>`, 'Yes, change login email', ok => { if (ok) apply(); });
+  } else apply();
+}
+function flashRow(id){ const tr = document.querySelector(`tr[data-id="${id}"]`); if (tr) { tr.classList.add('flash'); tr.scrollIntoView({block:'nearest'}); setTimeout(() => tr.classList.remove('flash'), 2600); } }
+
+/* =====================================================================
+   Edit ticket modal — original iSchool layout
+   (left: ticket info + routing fields · right: threads + conversation)
+   ===================================================================== */
+let edit = null;   // {id, pendingReplyAtts:[], histOpen:false}
+const ADMIN_CODES = {'Abdelrhman.Elagan':5121,'Nour.Hassan':5310,'Omar.Fathy':5478,'Salma.Adel':5502,'System':'SYS'};
+const EDIT_LABELS = [...LABELS, 'Other'];
+function opt(list, val, blankLabel){
+  return (blankLabel != null ? `<option value="">${esc(blankLabel)}</option>` : '') + list.map(o => `<option value="${esc(o)}"${o === val ? ' selected' : ''}>${esc(o)}</option>`).join('');
+}
+function openEdit(id){
+  const t = ticketById(id); if (!t) return;
+  edit = {id, pendingReplyAtts: [], histOpen: false};
+  renderEdit(); openOv('editOv');
+  $('#editOv').scrollTop = 0;
+}
+function ki(k, v, cls){ return `<div class="tk-i${cls ? ' ' + cls : ''}"><div class="tk-k">${k}</div><div class="tk-v" dir="auto">${v}</div></div>`; }
+// select styled like the original: clearable fields show "×", others show a chevron
+function tkSelect(id, list, val, placeholder, clearable, extraCls){
+  const has = !!val;
+  return `<div class="tk-sel${clearable && has ? ' clr' : ''}${has ? '' : ' ph'}${extraCls ? ' ' + extraCls : ''}" data-wrap="${id}">
+    <select id="${id}">${opt(list, val, placeholder)}</select>
+    ${clearable ? `<button type="button" class="tk-x" data-clear="${id}" aria-label="Clear">${icon('close')}</button>` : ''}
+    <span class="tk-chev">${icon('chev')}</span></div>`;
+}
+function renderEdit(){
+  const t = ticketById(edit.id); const s = studentOf(t);
+  const isAbs = isAppeal(t.topic), ch = t.change;
+  const label = (t.labels || [])[0] || '';
+  const asg = t.assignee || '';
+  $('#editModal').innerHTML = `
+  <div class="tk-head"><h2 id="eTitle">Edit Ticket #${t.id}</h2>
+    <button class="tk-close" data-close="editOv" aria-label="Close">${icon('close')}</button></div>
+  <div class="tk-scroll">
+   <div class="tk-grid">
+    <div class="tk-left">
+      <div class="tk-info">
+        ${ki('Creation Date', fmtDT(t.createdAt))}
+        ${ki('Resolve Date', t.resolvedAt ? fmtDT(t.resolvedAt) : '—')}
+        ${ki('Resolved By', esc(t.resolvedBy || '—'))}
+        ${ki('Type', esc(t.contactType))}
+        ${ki('Sub-topic', t.subtopic ? `<span class="tk-chip">${esc(t.subtopic)}</span>` : '—')}
+        ${ki('Student ID', esc(s.id))}
+        ${ki('Student Name', esc(s.name))}
+        ${ki('Grade', 'Grade ' + esc(s.grade))}
+        ${ki('Timezone', '—')}
+        ${isAbs || t.sessionDate ? ki('Session Date', t.sessionDate ? fmtDT(t.sessionDate) : '—') : ''}
+        ${ch ? `<div class="tk-change full">
+            <div class="tk-info in">
+              ${ki('Contact Owner', `<b>${esc(ch.owner)}</b>`)}
+              ${ki('Changed Field', ch.field === 'Email' ? 'Email address' : 'Phone number')}
+              ${ki('Old ' + (ch.field === 'Email' ? 'Email' : 'Phone'), `<span class="tk-old">${esc(ch.oldValue)}</span>`)}
+              ${ki('New ' + (ch.field === 'Email' ? 'Email' : 'Phone'), `<span class="tk-new">${esc(ch.newValue)}</span>`)}
+            </div>
+            <div class="tk-sys">${icon('check')}Completed by System · ${fmtDT(t.resolvedAt)}</div></div>` : ''}
+        ${ki('Ticket Details', `Sub Topic: ${esc(t.subtopic || '—')}<br>Details: ${esc(t.details || '—')}`, 'full')}
+        ${ki('Labels', (t.labels || []).length ? t.labels.map(l => `<span class="tk-chip blue">${esc(l)}</span>`).join(' ') : '—', 'full')}
+      </div>
+      <div class="tk-sep"></div>
+
+      <label class="tk-f"><span>Topic</span>${ch ? `<div class="tk-sel" data-wrap="eTopic"><select id="eTopic" disabled>${opt(TOPICS, t.topic)}</select><span class="tk-chev">${icon('chev')}</span></div>` : tkSelect('eTopic', TOPICS.filter(x => x !== EMAIL_T && x !== PHONE_T), t.topic, null, false)}</label>
+      <label class="tk-f"><span>Department</span>${tkSelect('eDept', DEPTS, t.department, 'Select department', true)}</label>
+      <div class="tk-f">
+        <fieldset class="tk-asg${asg ? '' : ' ph'}" data-wrap="eAssignee"><legend>Assignee</legend>
+          ${icon('person')}<span class="tk-code" id="eAsgCode"${asg ? '' : ' hidden'}>${esc(ADMIN_CODES[asg] || '')}</span><span class="tk-asg-n" id="eAsgName">${esc(asg || 'Select assignee')}</span>
+          <select id="eAssignee" aria-label="Assignee">${opt(ch ? ['System', ...ADMINS] : ADMINS, asg, 'Unassigned')}</select>
+          <button type="button" class="tk-x" data-clear="eAssignee" aria-label="Clear assignee"${asg ? '' : ' hidden'}>${icon('close')}</button>
+        </fieldset></div>
+      <label class="tk-f"><span>Status</span>${tkSelect('eStatus', STATUSES, t.status, 'Select status', true)}</label>
+      <div class="tk-f" id="eAbsSec"${isAppeal(t.topic) ? '' : ' hidden'}><span>Appeal Review</span>
+        <div class="tk-sel ${t.excuseReview ? '' : 'ph'}" data-wrap="eReview"><select id="eReview">${['','Valid','Not Valid'].map(v => `<option value="${v}"${(t.excuseReview||'') === v ? ' selected' : ''}>${REVIEW_LABEL(v)}</option>`).join('')}</select><span class="tk-chev">${icon('chev')}</span></div>
+        <small class="tk-hint">Separate from the ticket status — approving or declining does not resolve the ticket.</small></div>
+      <label class="tk-f"><span>Priority</span>${tkSelect('eUrgency', URGENCY, t.urgency, 'Select priority', false)}</label>
+      <label class="tk-f"><span>Labels</span>${tkSelect('eLabel', EDIT_LABELS, label, 'Select label', false, 'gray')}</label>
+      <div class="tk-f"><span>Response Attachment</span>
+        <label class="tk-drop" data-drop="eRespAtt">${icon('upload')}<span>Choose File, or drag and drop</span><input type="file" id="eRespAtt" hidden multiple></label>
+        ${responseAtts(t).length ? `<div class="tk-files">${responseAtts(t).map(a => `<button class="att" data-ref="${esc(a.ref)}" data-name="${esc(a.name)}">${icon('attach')}<span>${esc(a.name)}</span></button>`).join('')}</div>` : ''}
+      </div>
+      ${t.attachments.length ? `<div class="tk-f"><span>Supporting Attachments</span><div class="tk-files">${t.attachments.map(a => `<button class="att" data-ref="${esc(a.ref)}" data-name="${esc(a.name)}">${icon('attach')}<span>${esc(a.name)}</span></button>`).join('')}</div></div>` : ''}
+      <details class="tk-hist"${edit.histOpen ? ' open' : ''}><summary>History (${t.history.length})</summary>
+        <ul class="hist">${t.history.slice().reverse().map(h => `<li><time>${fmtDT(h.at)}</time><div><b style="font-weight:500">${esc(h.by)}</b> — ${esc(h.text)}</div></li>`).join('')}</ul></details>
+      <div class="tk-actions"><button class="btn ghost sm" data-close="editOv">Cancel</button><button class="btn sm" id="eSave">Save</button></div>
+    </div>
+
+    <div class="tk-right">
+      <h3 class="tk-h">Threads</h3>
+      <div class="tk-threads">${t.notes.length ? t.notes.map(n => `<div class="tk-note"><div class="tk-mh"><span>${esc(n.by)}</span><span>${fmtShort(n.at)}</span></div><div dir="auto">${esc(n.text)}</div></div>`).join('')
+        : `<div class="tk-empty">${icon('chat')}<div>No threads yet</div></div>`}</div>
+      <div class="tk-k" style="margin-top:14px">Thread Note</div>
+      <textarea class="tk-ta" id="eNoteText" rows="3" placeholder="Add a note to Thread..." dir="auto"></textarea>
+      <button class="tk-addnote" id="eAddNote" disabled>Add Note</button>
+
+      <h3 class="tk-h" style="margin-top:22px">Conversation</h3>
+      <div class="tk-conv" id="eThread">${t.conversation.length ? t.conversation.map(m => m.dir === 'out'
+          ? `<div class="tk-msg out"><div class="tk-mh"><span>${m.auto ? 'Response' : esc(m.by || '')}</span><span>${fmtShort(m.at)}</span></div><div dir="auto">${esc(m.text)}</div>${(m.attachments||[]).length ? `<div class="tk-files">${attLinks(m.attachments)}</div>` : ''}</div>`
+          : `<div class="tk-msg in"><div class="tk-mh"><span>${esc(m.by || '')}</span><span>${fmtShort(m.at)}</span></div><div dir="auto">${esc(m.text)}</div></div>`).join('')
+        : `<div class="tk-empty">${icon('chat')}<div>No messages yet</div></div>`}</div>
+
+      <div class="tk-k" style="margin-top:14px">Reply to ${t.contactType === 'Guardian' ? 'guardian' : 'student'}</div>
+      <textarea class="tk-ta" id="eReplyText" rows="3" placeholder="Reply to ${esc(contactOf(t).name)}" dir="auto"></textarea>
+      <div class="tk-max">Maximum 5 images</div>
+      <label class="tk-drop sm">${icon('upload')}<span id="eReplyAttLbl">${edit.pendingReplyAtts.length ? esc(edit.pendingReplyAtts.map(a => a.name).join(', ')) : 'Add attachment'}</span><input type="file" id="eReplyAtt" hidden multiple accept="image/*"></label>
+      <div style="text-align:right"><button class="tk-send" id="eSendReply" disabled>Send reply</button></div>
+    </div>
+   </div>
+  </div>`;
+  syncSendState();
+}
+function fmtShort(ms){ const d = new Date(ms); return `${MON[d.getMonth()]} ${d.getDate()}, ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+function syncSendState(){
+  const n = $('#eNoteText'), r = $('#eReplyText');
+  if (n) $('#eAddNote').disabled = !n.value.trim();
+  if (r) $('#eSendReply').disabled = !r.value.trim() && !edit.pendingReplyAtts.length;
+}
+function syncSelLook(sel){
+  const w = sel.closest('[data-wrap]'); if (!w) return;
+  const has = !!sel.value;
+  w.classList.toggle('ph', !has);
+  if (w.querySelector('.tk-x') && w.classList.contains('tk-sel')) w.classList.toggle('clr', has);
+  if (sel.id === 'eAssignee') {
+    $('#eAsgName').textContent = sel.value || 'Select assignee';
+    $('#eAsgCode').textContent = ADMIN_CODES[sel.value] || ''; $('#eAsgCode').hidden = !sel.value;
+    w.querySelector('.tk-x').hidden = !sel.value;
+  }
+}
+function saveEdit(){
+  const t = ticketById(edit.id); const now = Date.now(); const changes = [];
+  const set = (key, val, label) => { const old = t[key]; if ((old || '') !== (val || '')) { changes.push(`${label}: ${old || '—'} → ${val || '—'}`); t[key] = val; } };
+  if (!t.change) {
+    const newTopic = $('#eTopic').value;
+    if (newTopic !== t.topic) {
+      changes.push(`Topic: ${t.topic} → ${newTopic}`);
+      t.topic = newTopic;
+      if (isAppeal(newTopic) && t.excuseReview == null) t.excuseReview = '';
+      if (!isAppeal(newTopic)) t.excuseReview = null;
+    }
+  }
+  if (isAppeal(t.topic)) {
+    const rv = $('#eReview').value;
+    if ((t.excuseReview || '') !== rv) { changes.push(`Appeal review: ${REVIEW_LABEL(t.excuseReview)} → ${REVIEW_LABEL(rv)} (status unchanged)`); t.excuseReview = rv; }
+  }
+  const lv = $('#eLabel').value; const newLabs = lv ? [lv] : [];
+  if ((t.labels || []).join('|') !== newLabs.join('|')) { changes.push(`Labels: ${(t.labels || []).join(', ') || '—'} → ${lv || '—'}`); t.labels = newLabs; }
+  set('department', $('#eDept').value, 'Department');
+  set('assignee', $('#eAssignee').value || null, 'Assignee');
+  set('urgency', $('#eUrgency').value || t.urgency, 'Priority');
+  const st = $('#eStatus').value || t.status;
+  if (st !== t.status) {
+    changes.push(`Status: ${t.status} → ${st}`);
+    const wasRes = RESOLVED.has(t.status); t.status = st;
+    if (RESOLVED.has(st) && !wasRes) { t.resolvedAt = now; t.resolvedBy = CURRENT_USER; }
+    if (!RESOLVED.has(st)) { t.resolvedAt = null; t.resolvedBy = null; }
+  }
+  changes.forEach(c => t.history.push({at: now, by: CURRENT_USER, text: c}));
+  persist(); closeOv('editOv'); edit = null; render(); flashRow(t.id);
+  toast(changes.length ? `Ticket #${t.id} saved (${changes.length} change${changes.length > 1 ? 's' : ''}).` : `No changes to ticket #${t.id}.`, changes.length ? 'ok' : '');
+}
+// re-render the edit modal without losing unsaved field edits
+function keepDraft(fn){
+  const ids = ['eTopic','eReview','eDept','eAssignee','eStatus','eUrgency','eLabel','eReplyText','eNoteText'];
+  const vals = {}; ids.forEach(i => { const el = document.getElementById(i); if (el) vals[i] = el.value; });
+  const sc0 = $('#editModal .tk-scroll'); const scroll = sc0 ? sc0.scrollTop : 0;
+  fn();
+  ids.forEach(i => { const el = document.getElementById(i); if (el && vals[i] != null) { el.value = vals[i]; if (el.tagName === 'SELECT') syncSelLook(el); } });
+  if ($('#eAbsSec') && $('#eTopic')) $('#eAbsSec').hidden = !isAppeal($('#eTopic').value);
+  syncSendState();
+  const sc = $('#editModal .tk-scroll'); if (sc) sc.scrollTop = scroll;
+}
+function bindEdit(){
+  const em = $('#editModal');
+  const addRespFiles = (t, files) => {
+    const now = Date.now(); const atts = Array.from(files).map(f => ({name: f.name, ref: `local-file://${f.name} (demo reference — not uploaded)`}));
+    t.conversation.push({at: now, dir: 'out', by: CURRENT_USER, text: '', attachments: atts, demo: true});
+    t.history.push({at: now, by: CURRENT_USER, text: `Response attachment added: ${atts.map(a => a.name).join(', ')}`});
+    persist(); keepDraft(() => renderEdit()); render(); toast('Response attachment reference added (demo — not uploaded).', 'ok');
+  };
+  em.addEventListener('click', e => {
+    if (!edit) return;
+    const t = ticketById(edit.id);
+    const clr = e.target.closest('[data-clear]'); if (clr) { e.preventDefault(); const s = document.getElementById(clr.dataset.clear); s.value = ''; syncSelLook(s); return; }
+    const at = e.target.closest('.att'); if (at) { e.preventDefault(); toast(`Sample attachment reference: ${at.dataset.name} → ${at.dataset.ref} (not a real document).`); return; }
+    if (e.target.closest('summary')) { edit.histOpen = !e.target.closest('details').open; return; }
+    if (e.target.closest('#eSave')) return saveEdit();
+    if (e.target.closest('#eAddNote')) {
+      const txt = $('#eNoteText').value.trim(); if (!txt) return;
+      const now = Date.now(); t.notes.push({at: now, by: CURRENT_USER, text: txt}); t.history.push({at: now, by: CURRENT_USER, text: 'Thread note added (internal)'});
+      $('#eNoteText').value = ''; persist(); keepDraft(() => renderEdit()); render(); toast('Internal thread note added — not visible to the student/guardian.', 'ok'); return;
+    }
+    if (e.target.closest('#eSendReply')) {
+      const txt = $('#eReplyText').value.trim(); if (!txt && !edit.pendingReplyAtts.length) return;
+      const now = Date.now(); const atts = edit.pendingReplyAtts.splice(0);
+      t.conversation.push({at: now, dir: 'out', by: CURRENT_USER, text: txt, attachments: atts, demo: true});
+      if (!t.responder) t.responder = CURRENT_USER;
+      t.history.push({at: now, by: CURRENT_USER, text: `Reply added to conversation${atts.length ? ` with ${atts.length} attachment(s)` : ''} (demo — not sent)`});
+      $('#eReplyText').value = ''; persist(); keepDraft(() => renderEdit()); render();
+      const th = $('#eThread'); if (th) th.scrollTop = th.scrollHeight;
+      toast('Reply added to the conversation (demo — no real message was sent).', 'ok'); return;
+    }
+  });
+  em.addEventListener('input', e => { if (e.target.id === 'eNoteText' || e.target.id === 'eReplyText') syncSendState(); });
+  em.addEventListener('change', e => {
+    if (!edit) return;
+    const t = ticketById(edit.id);
+    if (e.target.tagName === 'SELECT') syncSelLook(e.target);
+    if (e.target.id === 'eTopic') { $('#eAbsSec').hidden = !isAppeal(e.target.value); }
+    if (e.target.id === 'eRespAtt' && e.target.files.length) addRespFiles(t, e.target.files);
+    if (e.target.id === 'eReplyAtt' && e.target.files.length) {
+      const files = Array.from(e.target.files);
+      if (edit.pendingReplyAtts.length + files.length > 5) { toast('Maximum 5 images per reply.', 'err'); e.target.value = ''; return; }
+      files.forEach(f => edit.pendingReplyAtts.push({name: f.name, ref: `local-file://${f.name} (demo reference — not uploaded)`}));
+      $('#eReplyAttLbl').textContent = edit.pendingReplyAtts.map(a => a.name).join(', ');
+      syncSendState();
+    }
+  });
+  // drag & drop on the Response Attachment zone
+  em.addEventListener('dragover', e => { const d = e.target.closest('.tk-drop'); if (d) { e.preventDefault(); d.classList.add('over'); } });
+  em.addEventListener('dragleave', e => { const d = e.target.closest('.tk-drop'); if (d) d.classList.remove('over'); });
+  em.addEventListener('drop', e => { const d = e.target.closest('[data-drop]'); if (!d || !edit) return; e.preventDefault(); d.classList.remove('over'); if (e.dataTransfer.files.length) addRespFiles(ticketById(edit.id), e.dataTransfer.files); });
+}
+
+/* =====================================================================
+   Events
+   ===================================================================== */
+function bind(){
+  // menus
+  document.addEventListener('click', e => {
+    const mb = e.target.closest('[data-menu]');
+    $$('.menu').forEach(m => { if (!mb || m.id !== mb.dataset.menu) m.hidden = true; });
+    if (mb) { const m = document.getElementById(mb.dataset.menu); m.hidden = !m.hidden; e.stopPropagation(); return; }
+  });
+  $$('[data-org]').forEach(b => b.onclick = () => { $('#orgLbl').textContent = b.dataset.org; toast(`Organization switched to ${b.dataset.org} (demo).`); });
+  $$('[data-intake]').forEach(b => b.onclick = () => { $('#intakeLbl').textContent = b.dataset.intake; toast(`Intake switched to ${b.dataset.intake} (demo).`); });
+  $$('[data-act="contact"]').forEach(b => b.addEventListener('click', () => openContact()));
+  $$('[data-act="resetdemo"]').forEach(b => b.addEventListener('click', () => confirmBox('Reset demo data?', '<p style="margin:0">This restores the original fictional sample tickets and contacts and removes your changes in this browser.</p>', 'Reset', ok => {
+    if (!ok) return; storage.clear(); db = buildSeed(); prefs = {compact:false, unavailable:false}; persist(); ui.q = ''; $('#q').value = ''; ui.applied = emptyFilters(); ui.page = 1; initFilterOptions(); applyPrefs(); render(); toast('Demo data reset.', 'ok'); })));
+  // sidebar
+  $$('.nav-h').forEach(h => h.onclick = () => h.parentElement.classList.toggle('open'));
+  $$('.nav-sub button').forEach(b => { if (!b.dataset.nav && !b.dataset.act) b.onclick = () => toast(`“${b.textContent}” is outside the scope of this prototype.`); });
+  $$('[data-nav="Support"]').forEach(b => b.addEventListener('click', () => { $('#tableWrap').scrollTo({top:0,left:0}); }));
+  $('#btnBack').onclick = () => $('#body').classList.toggle('collapsed');
+  $('#btnHome').onclick = () => toast('Home is outside the scope of this prototype.');
+  $('#logoLink').onclick = e => { e.preventDefault(); $('#tableWrap').scrollTo({top:0,left:0}); };
+  $('#btnBell').onclick = () => toast('1354 unread notifications (demo).');
+  // toolbar
+  $('#btnContact').onclick = () => openContact();
+  $('#btnImport').onclick = () => toast('Import is disabled in this prototype. Use Export to download the filtered tickets.');
+  $('#pgPrev').onclick = () => { ui.page--; render(); $('#tableWrap').scrollTop = 0; };
+  $('#pgNext').onclick = () => { ui.page++; render(); $('#tableWrap').scrollTop = 0; };
+  $('#pgInput').onchange = () => { const n = parseInt($('#pgInput').value, 10); if (!isNaN(n)) ui.page = n; render(); };
+  $('#pgInput').onkeydown = e => { if (e.key === 'Enter') $('#pgInput').onchange(); };
+  $('#btnRefresh').onclick = () => { const d = storage.load(); if (d && d.version === 1) db = d; initFilterOptions(); render(); toast('Tickets refreshed.'); };
+  $('#btnExport').onclick = exportCSV;
+  $('#btnDensity').onclick = () => { prefs.compact = !prefs.compact; persist(); render(); };
+  $('#btnFilter').onclick = openFilter;
+  $('#emptyClear').onclick = () => { ui.q = ''; $('#q').value = ''; $('#searchBox').classList.remove('has'); ui.applied = emptyFilters(); ui.page = 1; render(); };
+  $('#activeFilters').addEventListener('click', e => { if (e.target.id === 'afClear') { ui.applied = emptyFilters(); ui.page = 1; render(); toast('Filters cleared.'); } });
+  // search
+  let qt;
+  const runSearch = () => { ui.q = $('#q').value; ui.page = 1; render(); };
+  $('#q').addEventListener('input', () => { $('#searchBox').classList.toggle('has', !!$('#q').value); clearTimeout(qt); qt = setTimeout(runSearch, 150); });
+  $('#q').addEventListener('keydown', e => { if (e.key === 'Enter') { clearTimeout(qt); runSearch(); } });
+  $('#q').addEventListener('search', () => { clearTimeout(qt); runSearch(); });
+  $('#qClear').onclick = e => { e.preventDefault(); $('#q').value = ''; $('#searchBox').classList.remove('has'); runSearch(); $('#q').focus(); };
+  // availability
+  $('#unavail').onchange = () => { prefs.unavailable = $('#unavail').checked; persist(); applyPrefs(); toast(prefs.unavailable ? 'You are now Unavailable — new tickets will not be routed to you (demo).' : 'You are Available again.'); };
+  // table delegation
+  $('#tbody').addEventListener('click', e => {
+    const eb = e.target.closest('[data-edit]'); if (eb) return openEdit(+eb.dataset.edit);
+    const at = e.target.closest('.att'); if (at) return toast(`Sample attachment reference: ${at.dataset.name} → ${at.dataset.ref} (not a real document).`);
+  });
+  $('#tbody').addEventListener('change', e => {
+    const s = e.target.closest('[data-review]'); if (!s) return;
+    const id = +s.dataset.review; setReview(id, s.value);
+    s.className = 'rev ' + REVIEW_CLS(s.value);
+    toast(`Ticket #${id}: appeal review set to ${REVIEW_LABEL(s.value)}. Ticket status unchanged.`, 'ok');
+    // re-render only if active filters/search could now exclude the row
+    if (isAppeal(ui.applied.topic) && ui.applied.review !== 'all' || ui.q.trim()) render();
+  });
+  // filter modal
+  $('#fgrid').addEventListener('change', e => { if (e.target.id === 'fTopic') { /* hide & clear review when leaving Absence Excuse */ } syncFieldLooks(); $('#fErr').textContent = ''; $('#fTo').closest('.ff').style.borderColor = ''; });
+  $('#fgrid').addEventListener('input', syncFieldLooks);
+  $$('#fgrid .ff.date .chev').forEach(c => { c.style.pointerEvents = 'auto'; c.style.cursor = 'pointer'; c.onclick = () => { const i = c.parentElement.querySelector('input'); try { i.showPicker(); } catch(_) { i.focus(); } }; });
+  $('#fSearch').onclick = applyFilterFromModal;
+  $('#fReset').onclick = () => { writeFilterForm(emptyFilters()); ui.applied = emptyFilters(); ui.page = 1; render(); toast('All filters cleared.'); };
+  // contact modal
+  $('#cStudent').onchange = () => { contactError(''); syncContact(); };
+  $('#cOwner').onclick = e => { const b = e.target.closest('button'); if (!b) return; cState.owner = b.dataset.v; $('#cNew').value = ''; contactError(''); syncContact(); };
+  $('#cField').onclick = e => { const b = e.target.closest('button'); if (!b) return; cState.field = b.dataset.v; $('#cNew').value = ''; contactError(''); syncContact(); };
+  $('#cNew').addEventListener('input', () => { if (cState.field === 'Phone') { const d = $('#cNew').value.replace(/\D/g,'').slice(0,12); if (d !== $('#cNew').value) $('#cNew').value = d; } if ($('#cErr').textContent) contactError(''); });
+  $('#cNew').addEventListener('keydown', e => { if (e.key === 'Enter') submitContact(); });
+  $('#cSubmit').onclick = submitContact;
+  // confirm
+  $('#kOk').onclick = () => { const cb = confirmCb; confirmCb = null; closeOv('confirmOv'); if (cb) cb(true); };
+  $('#kCancel').onclick = () => closeOv('confirmOv');
+  // generic close
+  document.addEventListener('click', e => { const c = e.target.closest('[data-close]'); if (c) { const id = c.dataset.close; closeOv(id); if (id === 'editOv') edit = null; } });
+  $$('.overlay').forEach(o => o.addEventListener('mousedown', e => { if (e.target === o) { closeOv(o.id); if (o.id === 'editOv') edit = null; } }));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && ovStack.length) { const id = ovStack[ovStack.length-1]; closeOv(id); if (id === 'editOv') edit = null; } });
+  bindEdit();
+}
+function applyPrefs(){
+  $('#unavail').checked = !!prefs.unavailable;
+  const p = $('#availPill'); p.textContent = prefs.unavailable ? 'Unavailable' : 'Available'; p.classList.toggle('off', !!prefs.unavailable);
+}
+
+/* =====================================================================
+   Boot
+   ===================================================================== */
+initFilterOptions(); bind(); applyPrefs(); render();
+if (!storage.ok) toast('Browser storage is unavailable — changes will last until the page is closed.');
+// test hook (read-only helpers for QA)
+window.__demo = {get db(){ return db; }, currentRows, matchSearch, ui};
+})();
+
+</script>
+</body>
+</html>
