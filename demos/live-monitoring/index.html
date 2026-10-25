@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Monitoring · iSchool (Prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#056FEC; --blue-d:#0459c0; --blue-l:#eaf3ff; --yellow:#FFD700; --orange:#FF7F1C; --orange-btn:#ff9a3c;
+  --ink:#1d2b3a; --ink2:#3d4d5c; --muted:#6b7b8b; --muted2:#8c9aa8; --line:#e6ebf0; --line2:#d9e0e7;
+  --bg:#ffffff; --top:#f7f9fb; --chip:#eef1f4; --took-bg:#fff4a8; --took-ink:#e08a00;
+  --ok:#0eaa3a; --ok-l:#e6f7ec; --bad:#de1f1f; --bad-l:#fdeaea; --warn-l:#fff6e5; --warn:#b26a00;
+  --font:'Outfit',"Segoe UI",system-ui,-apple-system,Roboto,"Noto Sans Arabic",Tahoma,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:var(--font);color:var(--ink);background:var(--bg);font-size:14px;-webkit-font-smoothing:antialiased;overflow:hidden}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+svg.i{width:20px;height:20px;fill:currentColor;flex:none;display:inline-block;vertical-align:middle}
+[hidden]{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ---------- top bar ---------- */
+.app{display:grid;grid-template-rows:66px 1fr;height:100vh;border-top:3px solid #34393f}
+.topbar{display:flex;align-items:stretch;background:var(--top);border-bottom:1px solid var(--line);min-width:0}
+.tb-seg{display:flex;align-items:center;padding:0 28px;border-right:1px solid var(--line);gap:10px;white-space:nowrap}
+.tb-seg.first{padding:0 22px 0 30px;gap:18px}
+.tb-btn{background:none;border:0;display:flex;align-items:center;gap:8px;padding:6px 4px;color:var(--ink);font-size:16px;font-weight:400;border-radius:6px}
+.tb-btn:hover{background:#eef3f9}
+.tb-btn .chev{width:18px;height:18px}
+.tb-home{color:var(--blue)} .tb-home svg{width:26px;height:26px}
+.tb-back svg{width:24px;height:24px}
+.logo svg{height:27px;width:auto;display:block}
+.tb-support{color:var(--blue);font-weight:500}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:18px;padding-right:44px}
+.avail{border:1px solid var(--line2);background:#fff;border-radius:20px;padding:4px 32px;font-size:16px}
+.avail.off{color:var(--bad);border-color:#f3b9b9;background:#fff6f6}
+.bell{color:var(--blue);background:none;border:0;padding:2px;position:relative}
+.bell svg{width:24px;height:24px}
+.badge{background:var(--orange);color:#fff;border-radius:12px;padding:2px 6px;font-size:15px;font-weight:500;margin-left:-6px}
+.user{display:flex;align-items:center;gap:10px;color:var(--blue);font-size:17px;background:none;border:0;position:relative}
+.avatar{width:44px;height:44px;border-radius:50%;background:#cfe3ff;display:grid;place-items:center;color:var(--blue);overflow:hidden}
+.avatar svg{width:38px;height:38px;margin-top:8px}
+.menu{position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(20,40,70,.14);min-width:230px;padding:6px;z-index:40;color:var(--ink);font-size:14px;text-align:left}
+.menu button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 12px;border-radius:6px}
+.menu button:hover{background:var(--blue-l)}
+.menu .sep{height:1px;background:var(--line);margin:4px 0}
+
+/* ---------- layout ---------- */
+.body{display:grid;grid-template-columns:270px 1fr;min-height:0}
+.body.collapsed{grid-template-columns:minmax(0,1fr)}
+.body.collapsed .side{display:none}
+.side{border-right:1px solid var(--line);overflow-y:auto;padding:28px 12px 30px 10px;background:#fff}
+.side::-webkit-scrollbar{width:8px}.side::-webkit-scrollbar-thumb{background:#c9d0d6;border-radius:6px}
+.nav-g{margin-bottom:22px}
+.nav-h{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;padding:10px 18px;font-size:15.5px;font-weight:500;color:var(--ink);border-radius:8px}
+.nav-h:hover{background:#f4f7fa}
+.nav-h .i{color:#8193a5;width:19px;height:19px}
+.nav-h .chev{margin-left:auto;color:#8193a5;transition:transform .15s}
+.nav-g.open .nav-h .chev{transform:rotate(180deg)}
+.nav-sub{display:none;padding:6px 0 0}
+.nav-g.open .nav-sub{display:block}
+.nav-sub button{display:block;width:100%;text-align:left;background:none;border:0;padding:10px 14px 10px 34px;font-size:15px;color:var(--ink2);line-height:1.45;border-left:3px solid transparent;border-radius:0 6px 6px 0}
+.nav-sub button:hover{background:#f4f7fa}
+.nav-sub button.active{background:#eef4fd;color:var(--blue);border-left-color:var(--blue)}
+
+/* ---------- main ---------- */
+.main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.toolbar{display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:12px 38px 12px 20px;border-bottom:1px solid var(--line);min-height:58px;flex-wrap:wrap}
+.tool{background:none;border:0;color:#5b6f82;display:inline-flex;align-items:center;gap:6px;padding:7px 9px;border-radius:6px;font-size:16px;position:relative}
+.tool:hover{background:#f1f5f9}
+.tool.blue{color:var(--blue)}
+.tool .dot{position:absolute;top:2px;right:2px;min-width:16px;height:16px;border-radius:8px;background:var(--orange);color:#fff;font-size:10.5px;display:grid;place-items:center;padding:0 4px;font-weight:600}
+.range{color:#5b6f82;font-size:14.5px;margin:0 8px 0 14px;white-space:nowrap}
+.pager{display:flex;align-items:center;gap:6px;color:#5b6f82;font-size:14.5px;margin-right:14px}
+.pager input{width:50px;height:32px;border:1px solid var(--line2);border-radius:4px;text-align:center;color:#8d9bab}
+.pager .tool{padding:4px}
+.tool:disabled{opacity:.35;cursor:default}
+.tsep{width:14px}
+.searchbar{display:flex;align-items:center;gap:22px;padding:14px 18px}
+.search{display:flex;align-items:center;border:1px solid var(--line2);height:50px;width:236px;padding:0 14px;gap:14px;border-radius:2px;background:#fff}
+.search:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(5,111,236,.12)}
+.search input{border:0;outline:0;width:100%;font-size:16px;background:transparent}
+.search input::placeholder{color:#b3c0cc}
+.search .clr{border:0;background:none;color:var(--muted2);padding:2px;display:none}
+.search.has .clr{display:block}
+.toggle{display:flex;align-items:center;gap:12px;color:var(--ink2);font-size:16px;cursor:pointer;user-select:none}
+.toggle input{position:absolute;opacity:0}
+.toggle .tr{width:42px;height:22px;border-radius:12px;background:#e5e9ee;position:relative;transition:.15s}
+.toggle .tr::after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:.15s}
+.toggle input:checked + .tr{background:var(--bad)}
+.toggle input:checked + .tr::after{left:22px}
+.toggle input:focus-visible + .tr{outline:2px solid var(--blue);outline-offset:2px}
+.active-filters{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:60%}
+.af{background:var(--blue-l);color:var(--blue);border-radius:14px;padding:4px 10px;font-size:12.5px;white-space:nowrap}
+.af.clear{background:none;border:0;color:var(--muted);text-decoration:underline}
+
+.tablewrap{flex:1;min-height:0;overflow:auto;border-top:1px solid var(--line)}
+.tablewrap::-webkit-scrollbar{height:10px;width:10px}.tablewrap::-webkit-scrollbar-thumb{background:#c9d0d6;border-radius:6px}.tablewrap::-webkit-scrollbar-track{background:#f1f3f5}
+table.grid{border-collapse:separate;border-spacing:0;min-width:3260px;width:100%}
+.grid th{position:sticky;top:0;background:#fff;z-index:2;text-align:left;font-weight:500;font-size:13px;letter-spacing:.06em;color:#5f7183;text-transform:uppercase;padding:14px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+.grid td{vertical-align:top;padding:20px 14px 14px;border-bottom:1px solid var(--line);color:var(--ink2)}
+.grid tr:hover td{background:#fbfcfe}
+.grid tr.flash td{animation:flash 2.4s ease}
+@keyframes flash{0%,40%{background:#fff8d6}100%{background:transparent}}
+.c-edit{width:58px;padding-left:24px!important}
+.editbtn{background:none;border:0;color:var(--blue);padding:4px;border-radius:6px}
+.editbtn:hover{background:var(--blue-l)}
+.editbtn svg{width:22px;height:22px}
+.c-id{font-size:19px;color:var(--ink);width:106px}
+.c-contact{width:280px;font-size:14px;line-height:1.3;color:#4f6072}
+.c-contact .nm{color:var(--ink);font-size:14px;unicode-bidi:plaintext}
+.c-contact .gr{margin-top:6px}
+.who{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;background:#f2eefe;color:#6a4fc9;margin-left:6px;vertical-align:1px}
+.who.st{background:#e9f4ff;color:#0b63c9}
+.big{font-size:16px;color:var(--ink)}
+.sub{font-size:14px;color:#6c7d8e;margin-top:3px}
+.c-tutor{width:350px}.c-tl{width:262px}.c-sd{width:132px}.c-cd{width:150px}.c-rd{width:162px}.c-topic{width:290px}.c-rev{width:200px}
+.dt{display:flex;align-items:center;gap:6px;font-size:16px;color:var(--ink);white-space:nowrap}
+.dt svg{width:14px;height:14px;color:#4b5d6e}
+.tm{display:flex;align-items:center;gap:6px;font-size:14px;color:#5b6c7d;margin-top:14px;white-space:nowrap}
+.tm svg{width:13px;height:13px;color:#4b5d6e}
+.took{display:inline-flex;align-items:center;gap:6px;background:var(--took-bg);color:var(--took-ink);border-radius:6px;padding:8px 10px;margin-top:12px;font-size:14px;min-width:126px;white-space:nowrap}
+.took svg{width:13px;height:13px}
+.late{display:inline-block;margin-left:6px;font-size:11px;color:var(--bad);background:var(--bad-l);border-radius:8px;padding:1px 6px}
+.topic{font-size:16px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px}
+.chip{display:inline-block;background:var(--chip);color:#6c7d8e;border-radius:6px;padding:3px 10px;font-size:13.5px;margin-top:6px;max-width:210px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:top}
+.chip.own{background:#f2eefe;color:#6a4fc9}
+.na{color:var(--muted2);font-size:13.5px}
+.rev{appearance:none;-webkit-appearance:none;border:1px solid var(--line2);border-radius:6px;padding:8px 32px 8px 10px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23597587'%3E%3Cpath d='M7.4 8.6 12 13.2l4.6-4.6L18 10l-6 6-6-6z'/%3E%3C/svg%3E") no-repeat right 8px center/18px;min-width:184px;font-size:14px;color:var(--ink2)}
+.rev:focus{outline:2px solid rgba(5,111,236,.35);outline-offset:1px}
+.rev.ok{border-color:#9fd9b1;background-color:var(--ok-l);color:#0b7a2c}
+.rev.no{border-color:#f1aaaa;background-color:var(--bad-l);color:#b01818}
+.rev.blank{border-color:#f0d08a;background-color:var(--warn-l);color:var(--warn)}
+.pill{display:inline-block;border-radius:14px;padding:4px 12px;font-size:13.5px;white-space:nowrap}
+.st-Open{background:#e9f2ff;color:#0b5fc8}.st-In.Progress,.st-InProgress{background:#efe9ff;color:#5b3fc4}
+.st-Pending{background:#fff3df;color:#a35d00}.st-Completed{background:var(--ok-l);color:#0b7a2c}.st-Closed{background:#eceff2;color:#4f5f6f}
+.ur-Low{background:#eef1f4;color:#5b6c7d}.ur-Medium{background:#e9f2ff;color:#0b5fc8}.ur-High{background:#fff0e2;color:#c25a00}.ur-Urgent{background:var(--bad-l);color:#b01818}
+.att{display:inline-flex;align-items:center;gap:4px;color:var(--blue);background:none;border:0;padding:2px 0;font-size:13.5px;max-width:230px;text-align:left}
+.att svg{width:15px;height:15px;flex:none}
+.att span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clip{max-width:230px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:14px;line-height:1.35}
+.compact .grid td{padding-top:10px;padding-bottom:8px}
+.compact .tm{margin-top:4px}.compact .took{margin-top:6px;padding:4px 8px}
+.empty{padding:70px 20px;text-align:center;color:var(--muted)}
+.empty h3{color:var(--ink);font-weight:500;margin:10px 0 6px;font-size:18px}
+.empty svg{width:46px;height:46px;color:#b8c4cf}
+.linkbtn{background:none;border:0;color:var(--blue);text-decoration:underline;padding:4px}
+
+/* ---------- modals ---------- */
+.overlay{position:fixed;inset:0;background:rgba(40,46,54,.55);display:flex;align-items:flex-start;justify-content:center;padding:4vh 16px;z-index:50;overflow:auto}
+.overlay.center{align-items:center}
+.modal{background:#fff;border-radius:22px;width:min(872px,100%);box-shadow:0 20px 60px rgba(0,0,0,.25);display:flex;flex-direction:column;max-height:92vh}
+.m-head{display:flex;align-items:center;gap:12px;padding:20px 26px 18px 42px;border-bottom:1px solid var(--line)}
+.m-head h2{margin:0;font-size:21px;font-weight:400;color:var(--ink)}
+.m-head .ic{color:var(--blue)}
+.m-close{margin-left:auto;background:none;border:0;color:var(--ink);padding:4px;border-radius:6px}
+.m-close:hover{background:#f1f4f7}
+.m-close svg{width:24px;height:24px}
+.m-body{padding:28px 26px 10px 48px;overflow:auto}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px 18px}
+.ff{position:relative;display:flex;align-items:center;height:48px;border:1px solid var(--line2);border-radius:4px;background:#fff}
+.ff:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(5,111,236,.1)}
+.ff .fi{position:absolute;left:46px;color:#5d7083;width:18px;height:18px;pointer-events:none}
+.ff select,.ff input{appearance:none;-webkit-appearance:none;border:0;outline:0;background:transparent;align-self:stretch;height:auto;min-height:46px;width:100%;padding:0 52px 0 56px;font-size:16px;color:var(--ink);cursor:pointer}
+.ff.has-ic select,.ff.has-ic input{padding-left:88px}
+.ff select.ph{color:#5d6f80}
+.ff .chev{position:absolute;right:0;top:0;bottom:0;width:34px;border-left:1px solid var(--line2);display:grid;place-items:center;color:#4b5d6e;pointer-events:none}
+.ff .chev svg{width:22px;height:22px}
+.ff.date .chevbtn{pointer-events:auto;background:none;border:0;border-left:1px solid var(--line2)}
+.ff.date input::-webkit-calendar-picker-indicator{opacity:0;position:absolute;right:0;width:34px;height:100%;cursor:pointer}
+.ff.date .phl{position:absolute;left:76px;color:#5d6f80;font-size:16px;pointer-events:none}
+.ff.date.is-empty input{color:transparent}
+.ff.date.is-empty:focus-within input{color:var(--ink)}
+.ff.date.is-empty:focus-within .phl{display:none}
+.ff.date:not(.is-empty) .phl{display:none}
+.ff.date .fi{left:46px}
+.ff.date input{padding-left:76px}
+.ff.review{grid-column:1 / -1;border-color:#f0d08a;background:#fffdf6}
+.ff .tag{position:absolute;top:-9px;left:12px;background:#fff;padding:0 6px;font-size:12px;color:var(--warn)}
+.ferr{color:var(--bad);font-size:13.5px;margin:12px 2px 0;min-height:18px}
+.m-foot{display:flex;justify-content:center;gap:18px;padding:16px 26px 30px}
+.btn{border:0;border-radius:20px;padding:8px 34px;font-size:15px;font-weight:500;color:#fff;background:var(--blue);min-height:34px}
+.btn:hover{background:var(--blue-d)}
+.btn.orange{background:var(--orange-btn)}.btn.orange:hover{background:#f08a25}
+.btn.ghost{background:#fff;color:var(--ink2);border:1px solid var(--line2)}.btn.ghost:hover{background:#f4f7fa}
+.btn.danger{background:var(--bad)}
+.btn.sm{padding:6px 16px;font-size:13.5px;min-height:30px}
+.btn:disabled{opacity:.5;cursor:default}
+
+/* contact update + confirm */
+.modal.sm{width:min(560px,100%)}
+.frm{display:grid;gap:16px}
+.frm label.l{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:500}
+.inp{width:100%;height:42px;border:1px solid var(--line2);border-radius:6px;padding:0 12px;font-size:15px;background:#fff;outline:0}
+.inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(5,111,236,.1)}
+.inp[readonly]{background:#f4f6f8;color:var(--ink2)}
+.inp.err{border-color:var(--bad)}
+textarea.inp{height:auto;padding:10px 12px;resize:vertical;min-height:80px;line-height:1.4}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:#fff;padding:8px 18px;font-size:14px;color:var(--ink2)}
+.seg button+button{border-left:1px solid var(--line2)}
+.seg button.on{background:var(--blue);color:#fff}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.hint{font-size:12.5px;color:var(--muted);margin-top:5px}
+.msg-err{color:var(--bad);font-size:13px;margin-top:6px}
+.note-box{background:var(--warn-l);border:1px solid #f3d79c;color:#7a4a00;border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.45}
+.note-box.blue{background:var(--blue-l);border-color:#bcd8fb;color:#0b4c9a}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:6px 10px;font-size:14px;margin-top:10px}
+.kv b{font-weight:500;color:var(--ink);word-break:break-all}
+
+/* edit ticket */
+.modal.xl{width:min(1180px,100%)}
+.m-head .meta{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--muted)}
+.ed{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:22px;padding:22px 26px 6px 34px}
+.sec{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:16px;background:#fff}
+.sec h3{margin:0 0 12px;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:#5f7183;font-weight:500;display:flex;align-items:center;gap:8px}
+.sec h3 .cnt{background:var(--chip);border-radius:10px;padding:0 8px;font-size:12px;letter-spacing:0}
+.sec.hl{border-color:#bcd8fb;background:#f7fbff}
+.sec.abs{border-color:#f0d08a;background:#fffdf5}
+.info{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 16px}
+.info .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.info .v{font-size:14.5px;color:var(--ink);margin-top:3px;word-break:break-word;unicode-bidi:plaintext}
+.info .full{grid-column:1/-1}
+.fld{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.fld>span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+select.inp{appearance:none;-webkit-appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23597587'%3E%3Cpath d='M7.4 8.6 12 13.2l4.6-4.6L18 10l-6 6-6-6z'/%3E%3C/svg%3E") no-repeat right 8px center/18px;padding-right:32px}
+.labels{display:flex;flex-wrap:wrap;gap:6px}
+.lab{border:1px solid var(--line2);background:#fff;border-radius:14px;padding:4px 12px;font-size:13px;color:var(--ink2)}
+.lab.on{background:var(--blue-l);border-color:#a9cdfa;color:var(--blue)}
+.change{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-top:12px}
+.change .box{border-radius:10px;padding:12px 14px;border:1px solid var(--line)}
+.change .old{background:#fbf3f3;border-color:#f1cfcf}
+.change .new{background:#f1faf4;border-color:#bfe6cc}
+.change .box small{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px}
+.change .box b{font-weight:500;font-size:15.5px;word-break:break-all}
+.change .old b{text-decoration:line-through;text-decoration-color:rgba(176,24,24,.45)}
+.arrow{color:var(--muted2);font-size:22px}
+.files{display:flex;flex-direction:column;gap:6px}
+.file{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13.5px}
+.file .att{max-width:none;flex:1}
+.file small{color:var(--muted2)}
+.file .x{background:none;border:0;color:var(--muted2);padding:2px}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:-4px -18px 14px;padding:0 14px}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 12px;font-size:14px;color:var(--muted)}
+.tabs button.on{color:var(--blue);border-bottom-color:var(--blue);font-weight:500}
+.thread{display:flex;flex-direction:column;gap:10px;max-height:300px;overflow:auto;padding-right:4px}
+.bub{border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.45;max-width:88%;white-space:pre-wrap;unicode-bidi:plaintext}
+.bub .mh{font-size:12px;color:var(--muted);margin-bottom:4px;display:flex;gap:8px;flex-wrap:wrap}
+.bub.in{background:#f3f5f8;align-self:flex-start}
+.bub.out{background:#eaf3ff;align-self:flex-end}
+.bub.note{background:#fff8dc;border:1px dashed #e6c35a;align-self:stretch;max-width:none}
+.vis{font-size:11px;border-radius:8px;padding:0 6px}
+.vis.pub{background:#d8ebff;color:#0b5fc8}.vis.int{background:#ffe9a8;color:#7a5600}
+.compose{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+.compose .acts{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.compose .acts .sp{flex:1}
+.hist{list-style:none;margin:0;padding:0;max-height:300px;overflow:auto}
+.hist li{display:grid;grid-template-columns:150px 1fr;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.hist time{color:var(--muted)}
+.ed-foot{display:flex;justify-content:flex-end;gap:12px;padding:14px 26px 22px;border-top:1px solid var(--line)}
+.tl{display:grid;gap:10px;font-size:14px}
+.tl div{display:flex;justify-content:space-between;gap:10px}
+.tl span{color:var(--muted)}
+.tl b{font-weight:500;text-align:right}
+.sysbadge{display:inline-flex;align-items:center;gap:6px;background:#e7f7ec;color:#0b7a2c;border-radius:14px;padding:3px 10px;font-size:12.5px}
+.sysbadge svg{width:14px;height:14px}
+
+
+/* edit ticket — original layout */
+.modal.tk{width:min(940px,100%);border-radius:14px;max-height:94vh;overflow:hidden}
+.tk-head{position:relative;display:flex;align-items:center;justify-content:center;padding:18px 48px;border-bottom:1px solid var(--line)}
+.tk-head h2{margin:0;font-size:18px;font-weight:600;color:#1d3150}
+.tk-close{position:absolute;right:16px;top:50%;transform:translateY(-50%);background:none;border:0;color:#1d3150;padding:4px;border-radius:6px}
+.tk-close:hover{background:#f1f4f7}.tk-close svg{width:20px;height:20px}
+.tk-scroll{overflow:auto;flex:1;min-height:0}
+.tk-scroll::-webkit-scrollbar{width:10px}.tk-scroll::-webkit-scrollbar-thumb{background:#c9d0d6;border-radius:6px}.tk-scroll::-webkit-scrollbar-track{background:#f1f3f5}
+.tk-grid{display:grid;grid-template-columns:1fr 1fr}
+.tk-left{padding:22px 18px 22px 22px;border-right:1px solid #dfe8f2;min-width:0}
+.tk-right{padding:22px 22px 22px 16px;min-width:0}
+.tk-info{display:grid;grid-template-columns:1fr 1fr;gap:16px 18px}
+.tk-info .full{grid-column:1/-1}
+.tk-k{font-size:11.5px;color:#5f7d9c;font-weight:500;margin-bottom:5px}
+.tk-v{text-align:left;font-size:14px;color:#1d2b3a;line-height:1.45;word-break:break-word;unicode-bidi:plaintext}
+.tk-chip{display:inline-block;background:#e9eef3;color:#4c5e70;border-radius:10px;padding:2px 10px;font-size:12px}
+.tk-chip.blue{background:#e3effd;color:#0b5fc8}
+.tk-change{border:1px solid #bcd8fb;background:#f5f9ff;border-radius:10px;padding:12px 14px}
+.tk-info.in{gap:10px 18px}
+.tk-old{color:#b01818;text-decoration:line-through;text-decoration-color:rgba(176,24,24,.4);word-break:break-all}
+.tk-new{color:#0b7a2c;font-weight:500;word-break:break-all}
+.tk-sys{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:12.5px;color:#0b7a2c}.tk-sys svg{width:14px;height:14px}
+.tk-sep{height:1px;background:var(--line);margin:22px 0 18px}
+.tk-f{display:block;margin-bottom:16px}
+.tk-f>span{display:block;font-size:13.5px;color:#2b3b4c;margin-bottom:7px}
+.tk-sel{position:relative;display:flex;align-items:center;height:40px;border:1px solid #c7d6e6;border-radius:8px;background:#fff}
+.tk-sel:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(5,111,236,.1)}
+.tk-sel select{appearance:none;-webkit-appearance:none;border:0;outline:0;background:transparent;width:100%;height:100%;padding:0 40px 0 12px;font-size:14.5px;color:#1d2b3a;cursor:pointer}
+.tk-sel select:disabled{cursor:default;color:#4f6072}
+.tk-sel.ph select{color:#9fb6cc}
+.tk-sel.gray{background:#e9eff4;border-color:#cad7e3}
+.tk-chev{position:absolute;right:10px;color:#3d4d5c;pointer-events:none;display:grid}.tk-chev svg{width:20px;height:20px}
+.tk-x{position:absolute;right:8px;background:none;border:0;color:#3d4d5c;padding:3px;display:none;border-radius:4px}
+.tk-x:hover{background:#eef2f6}.tk-x svg{width:16px;height:16px}
+.tk-sel.clr .tk-x{display:grid}.tk-sel.clr .tk-chev{display:none}
+.tk-asg{position:relative;margin:0;display:flex;align-items:center;gap:8px;height:42px;border:1px solid #c7d6e6;border-radius:4px;padding:0 40px 0 26px;min-width:0}
+.tk-asg:focus-within{border-color:var(--blue)}
+.tk-asg legend{font-size:11.5px;color:#2b3b4c;padding:0 4px;margin-left:-2px}
+.tk-asg>svg{width:15px;height:15px;color:#4f6072}
+.tk-code{background:#e9eef3;color:#4c5e70;font-size:11px;border-radius:4px;padding:1px 5px}
+.tk-asg-n{font-size:14px;color:#1d2b3a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tk-asg.ph .tk-asg-n{color:#9fb6cc}
+.tk-asg select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.tk-asg .tk-x{display:grid;z-index:1;border-left:1px solid #c7d6e6;border-radius:0;right:0;top:-6px;bottom:0;width:34px;place-items:center}
+.tk-asg .tk-x[hidden]{display:none}
+.tk-hint{display:block;font-size:12px;color:var(--muted);margin-top:5px}
+.tk-drop{display:flex;align-items:center;gap:14px;border:1px solid #c7d6e6;border-radius:8px;padding:0 16px;height:46px;cursor:pointer;color:#3d5a78;font-size:12.5px;background:#fff}
+.tk-drop svg{width:20px;height:20px;color:var(--blue)}
+.tk-drop:hover,.tk-drop.over{border-color:var(--blue);background:#f6faff}
+.tk-drop span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tk-files{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px}
+.tk-hist{margin:4px 0 14px;font-size:13.5px}.tk-hist summary{cursor:pointer;color:#2b3b4c;padding:6px 0}
+.tk-actions{display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--line);padding-top:14px}
+.tk-h{margin:0 0 10px;font-size:15px;font-weight:500;color:#1d2b3a}
+.tk-threads{display:flex;flex-direction:column;gap:8px;max-height:220px;overflow:auto}
+.tk-empty{display:flex;flex-direction:column;align-items:center;gap:6px;color:#8aa4bf;font-size:14px;padding:14px 0}
+.tk-empty svg{width:20px;height:20px;color:#5f7d9c}
+.tk-note{background:#fff8e1;border:1px solid #f3dfa0;border-radius:8px;padding:8px 10px;font-size:13.5px;white-space:pre-wrap}
+.tk-mh{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;color:#5f7d9c;margin-bottom:4px}
+.tk-msg.out .tk-mh span:last-child{color:#4a8fe0}
+.tk-ta{width:100%;border:1px solid #c7d6e6;border-radius:8px;padding:10px 12px;font-size:14px;min-height:76px;resize:vertical;outline:0;line-height:1.4}
+.tk-ta:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(5,111,236,.1)}
+.tk-ta::placeholder{color:#9fb6cc}
+.tk-addnote{display:block;width:100%;margin-top:6px;border:0;border-radius:10px;background:#ff9a3c;color:#fff;font-size:13px;font-weight:500;padding:5px}
+.tk-addnote:disabled{background:#ffe6d3;cursor:default}
+.tk-conv{border:1px solid #e1e8f0;border-radius:4px;height:220px;overflow:auto;padding:12px 10px;display:flex;flex-direction:column;gap:10px;box-shadow:inset 0 1px 0 #e1e8f0}
+.tk-msg{border:1px solid #d9e7f7;border-radius:4px;padding:8px 10px;font-size:13.5px;line-height:1.55;white-space:pre-wrap;max-width:78%;unicode-bidi:plaintext}
+.tk-msg.out{align-self:flex-end;background:#eef5fd}
+.tk-msg.in{align-self:flex-start;background:#f6f7f9;border-color:#e3e8ee}
+.tk-max{text-align:right;font-size:12.5px;color:#3d4d5c;margin:6px 0}
+.tk-drop.sm{height:38px}
+.tk-send{border:0;border-radius:10px;background:var(--blue);color:#fff;font-size:13px;font-weight:500;padding:4px 14px;margin-top:8px}
+.tk-send:disabled{background:#b9d5f5;cursor:default}
+@media (max-width:820px){.tk-grid{grid-template-columns:1fr}.tk-left{border-right:0;border-bottom:1px solid var(--line)}}
+
+/* toasts */
+.toasts{position:fixed;right:22px;bottom:22px;display:flex;flex-direction:column;gap:8px;z-index:90}
+.toast{background:#1f2d3b;color:#fff;border-radius:10px;padding:11px 16px;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.2);max-width:420px;animation:tin .2s ease}
+.toast.ok{background:#0d6b2c}.toast.err{background:#a31616}
+@keyframes tin{from{transform:translateY(8px);opacity:0}}
+
+@media (max-width:1100px){
+  .tb-seg{padding:0 14px}.tb-right{padding-right:16px;gap:10px}.user .nm{display:none}
+  .ed{grid-template-columns:1fr}
+}
+@media (max-width:820px){
+  .body{grid-template-columns:minmax(0,1fr)}.side{display:none}
+  .topbar{overflow-x:auto}.toolbar{padding:10px 12px;justify-content:flex-start}.searchbar{flex-wrap:wrap;gap:12px}.search{width:100%}.active-filters{max-width:100%;margin-left:0;justify-content:flex-start}
+  .tb-seg.hide-sm{display:none}
+  .fgrid,.row2{grid-template-columns:1fr}.info{grid-template-columns:1fr 1fr}
+  .m-body{padding:20px}
+}
+
+/* ================= Live Monitoring additions ================= */
+.content{flex:1;min-height:0;overflow:auto}
+.content::-webkit-scrollbar{width:10px;height:10px}.content::-webkit-scrollbar-thumb{background:#c9d0d6;border-radius:6px}
+.pad{padding:18px 22px 40px}
+.role-sw{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.role-sw select{appearance:none;-webkit-appearance:none;border:1px solid #bcd8fb;background:#eef5fe url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23056FEC'%3E%3Cpath d='M7.4 8.6 12 13.2l4.6-4.6L18 10l-6 6-6-6z'/%3E%3C/svg%3E") no-repeat right 8px center/18px;color:var(--blue);border-radius:16px;padding:5px 30px 5px 12px;font-size:14px;font-weight:500;cursor:pointer}
+.bell-wrap{position:relative;display:flex;align-items:center}
+.notif{width:360px;max-height:420px;overflow:auto;padding:0}
+.notif h4{margin:0;padding:12px 14px;border-bottom:1px solid var(--line);font-weight:500;display:flex;justify-content:space-between;align-items:center}
+.notif .n{display:block;width:100%;text-align:left;border:0;background:none;padding:10px 14px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.4}
+.notif .n.unread{background:#f3f8ff}
+.notif .n small{display:block;color:var(--muted);margin-top:3px}
+.notif .none{padding:24px;text-align:center;color:var(--muted)}
+.tabbar{display:flex;gap:8px;flex-wrap:wrap}
+.slot{border:1px solid var(--line2);background:#fff;border-radius:10px;padding:8px 14px;text-align:left;min-width:170px;color:var(--ink2)}
+.slot b{display:block;font-weight:500;color:var(--ink);font-size:14.5px}
+.slot small{font-size:12px;color:var(--muted)}
+.slot.on{border-color:var(--blue);background:#f2f8ff;box-shadow:0 0 0 2px rgba(5,111,236,.12)}
+.tag{display:inline-flex;align-items:center;gap:5px;border-radius:10px;padding:1px 8px;font-size:11.5px;font-weight:500;vertical-align:1px}
+.tag.live{background:#fde8e8;color:#c21818}
+.tag.live::before{content:"";width:7px;height:7px;border-radius:50%;background:#e02424;animation:pulse 1.4s infinite}
+.tag.done{background:#eceff2;color:#4f5f6f}.tag.up{background:#e9f2ff;color:#0b5fc8}
+.tag.urgent{background:#e02424;color:#fff}
+.tag.demo{background:#fff3df;color:#a35d00}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(224,36,36,.5)}70%{box-shadow:0 0 0 6px rgba(224,36,36,0)}100%{box-shadow:0 0 0 0 rgba(224,36,36,0)}}
+.headrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.headrow .grow{flex:1}
+.h1{font-size:19px;font-weight:500;margin:0;color:var(--ink)}
+.subt{color:var(--muted);font-size:13.5px;margin-top:2px}
+.mini-prog{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--ink2)}
+.bar{height:8px;border-radius:6px;background:#e8edf2;overflow:hidden;min-width:120px;flex:1}
+.bar i{display:block;height:100%;border-radius:6px;background:var(--blue)}
+.bar.ok i{background:#0eaa3a}.bar.warn i{background:#f0a020}.bar.bad i{background:#e04a4a}
+.card{border:1px solid var(--line);border-radius:12px;background:#fff;padding:16px 18px}
+.card h3{margin:0 0 12px;font-size:14px;letter-spacing:.05em;text-transform:uppercase;color:#5f7183;font-weight:500;display:flex;align-items:center;gap:8px}
+.card h3 .r{margin-left:auto;text-transform:none;letter-spacing:0}
+.cards{display:grid;gap:14px}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fff}
+.kpi .k{font-size:12.5px;color:var(--muted)}
+.kpi .v{font-size:26px;font-weight:500;margin-top:4px;color:var(--ink)}
+.kpi .v small{font-size:14px;color:var(--muted);font-weight:400}
+.kpi .s{font-size:12.5px;color:var(--muted);margin-top:4px}
+.two{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
+.urgent-card{border:1px solid #f4b4b4;background:#fff7f7;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.urgent-card .uwho{font-weight:500;color:var(--ink)}
+.urgent-card .meta{font-size:13px;color:var(--ink2)}
+.urgent-card .acts{margin-left:auto;display:flex;gap:8px}
+.grid2 td{padding:14px 12px 12px;font-size:14px}
+.grid2 th{padding:12px}
+table.grid2{border-collapse:separate;border-spacing:0;width:100%;min-width:1000px}
+.grid2 th{position:sticky;top:0;background:#fff;z-index:1;text-align:left;font-weight:500;font-size:12.5px;letter-spacing:.06em;color:#5f7183;text-transform:uppercase;border-bottom:1px solid var(--line);white-space:nowrap}
+.grid2 td{vertical-align:middle;border-bottom:1px solid var(--line);color:var(--ink2)}
+.grid2 tr:hover td{background:#fbfcfe}
+.grid2 tr.urg td{background:#fff8f8}
+.tbl{border:1px solid var(--line);border-radius:12px;overflow:auto;background:#fff}
+.nm2{color:var(--ink);font-weight:500}
+.s2{font-size:12.5px;color:var(--muted);margin-top:2px}
+.mono{font-variant-numeric:tabular-nums}
+.btn.red{background:#e02424}.btn.red:hover{background:#c21818}
+.btn.redo{background:#fff;color:#c21818;border:1px solid #f1a5a5}.btn.redo:hover{background:#fff4f4}
+.btn.amber{background:#f08a25}.btn.amber:hover{background:#d97512}
+.btn.line{background:#fff;color:var(--blue);border:1px solid #a9cdfa}.btn.line:hover{background:#f2f8ff}
+.st{display:inline-flex;align-items:center;gap:6px;border-radius:14px;padding:3px 10px;font-size:12.5px;white-space:nowrap}
+.st.pending{background:#eef1f4;color:#4f5f6f}.st.inroom{background:#fde8e8;color:#c21818}.st.await{background:#fff3df;color:#a35d00}
+.st.completed{background:var(--ok-l);color:#0b7a2c}.st.missed{background:#f4f4f4;color:#8a96a3;text-decoration:line-through}
+.st.sent{background:#e9f2ff;color:#0b5fc8}.st.reviewed{background:var(--ok-l);color:#0b7a2c}
+.st.Pending{background:#fff3df;color:#a35d00}.st.Accepted{background:#e9f2ff;color:#0b5fc8}.st.Completed{background:var(--ok-l);color:#0b7a2c}.st.Declined{background:#f4f4f4;color:#6b7b8b}
+.st svg{width:13px;height:13px}
+.live-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#e02424;animation:pulse 1.4s infinite;margin-right:6px;vertical-align:1px}
+.idle-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#c4ced8;margin-right:6px;vertical-align:1px}
+.segc{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden;background:#fff}
+.segc button{border:0;background:#fff;padding:7px 16px;font-size:13.5px;color:var(--ink2)}
+.segc button+button{border-left:1px solid var(--line2)}
+.segc button.on{background:var(--blue);color:#fff}
+.sel{appearance:none;-webkit-appearance:none;border:1px solid var(--line2);border-radius:8px;padding:7px 32px 7px 12px;font-size:13.5px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23597587'%3E%3Cpath d='M7.4 8.6 12 13.2l4.6-4.6L18 10l-6 6-6-6z'/%3E%3C/svg%3E") no-repeat right 8px center/18px;color:var(--ink2)}
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart .tip{position:absolute;pointer-events:none;background:#1f2d3b;color:#fff;font-size:12.5px;border-radius:6px;padding:6px 9px;white-space:nowrap;transform:translate(-50%,-110%);opacity:0;transition:opacity .1s}
+.legend{display:flex;gap:16px;font-size:12.5px;color:var(--ink2);margin-bottom:6px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--blue)}
+.legend i.dash{height:0;border-top:2px dashed #8796a5;border-radius:0;width:16px;background:none}
+.inroom{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#1f2d3b;color:#fff;border-radius:14px;padding:10px 12px 10px 18px;display:flex;align-items:center;gap:14px;box-shadow:0 12px 30px rgba(0,0,0,.25);z-index:45;font-size:14px;max-width:calc(100vw - 32px)}
+.inroom .t{font-variant-numeric:tabular-nums;font-size:17px;font-weight:500;color:#ffd9d9}
+.rate{display:grid;grid-template-columns:1fr auto;gap:10px 16px;align-items:center}
+.rate .lbl{font-size:14px;color:var(--ink)}
+.rate .lbl small{display:block;color:var(--muted);font-size:12px}
+.stars{display:inline-flex;gap:4px}
+.stars button{width:34px;height:32px;border:1px solid var(--line2);background:#fff;border-radius:6px;font-size:13.5px;color:var(--ink2)}
+.stars button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.stars button.on.lo{background:#e04a4a;border-color:#e04a4a}
+.stars button.on.mid{background:#f0a020;border-color:#f0a020}
+.actlist{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
+.actlist li{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13.5px}
+.actlist li.done span{text-decoration:line-through;color:var(--muted)}
+.actlist li .x{margin-left:auto;background:none;border:0;color:var(--muted2);padding:2px}
+.actlist input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue)}
+.obsum{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;background:#f6f9fc;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:16px}
+.obsum .k{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.obsum .v{font-size:14px;color:var(--ink);margin-top:3px}
+.fb{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:#fff}
+.fb.new{border-color:#a9cdfa;box-shadow:0 0 0 3px rgba(5,111,236,.06)}
+.fb-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.fb-h .score{margin-left:auto;font-size:22px;font-weight:500;color:var(--ink)}
+.fb-h .score small{font-size:13px;color:var(--muted);font-weight:400}
+.meters{display:grid;gap:8px}
+.meter{display:grid;grid-template-columns:160px 1fr 40px;gap:10px;align-items:center;font-size:13.5px}
+.meter .bar{min-width:0}
+.meter b{font-weight:500;text-align:right;font-variant-numeric:tabular-nums}
+.fbcols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+.box{border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.5;white-space:pre-wrap}
+.box small{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;font-weight:500}
+.box.good{background:#f1faf4;border:1px solid #cdebd7}.box.good small{color:#0b7a2c}
+.box.imp{background:#fff8ec;border:1px solid #f5dcb0}.box.imp small{color:#a35d00}
+.fb-foot{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.fb-foot .sp{flex:1}
+.improve{display:grid;gap:10px}
+.imp-item{border:1px solid #f5dcb0;background:#fffaf1;border-radius:10px;padding:12px 14px}
+.imp-item b{font-weight:500;color:var(--ink)}
+.imp-item .tip2{font-size:13.5px;color:var(--ink2);margin-top:4px;line-height:1.45}
+.tinput{display:flex;gap:8px}
+.tinput .inp{flex:1}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.numinp{width:90px;height:36px;border:1px solid var(--line2);border-radius:6px;padding:0 10px;font-size:14px;text-align:right}
+.numinp.err{border-color:var(--bad);background:#fff6f6}
+.numinp:focus{outline:0;border-color:var(--blue);box-shadow:0 0 0 3px rgba(5,111,236,.1)}
+.muted{color:var(--muted)}
+.empty2{padding:40px;text-align:center;color:var(--muted)}
+.pager2{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:10px 14px;font-size:13.5px;color:var(--muted)}
+.modal.md{width:min(760px,100%)}
+.m-body.pad2{padding:20px 28px}
+.m-foot.right{justify-content:flex-end;padding:14px 26px 22px;border-top:1px solid var(--line)}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.two{grid-template-columns:1fr}}
+@media (max-width:820px){.kpis{grid-template-columns:1fr 1fr}.fbcols,.formgrid,.obsum{grid-template-columns:1fr 1fr}.meter{grid-template-columns:110px 1fr 36px}.role-sw span{display:none}.notif{width:300px}}
+
+.tb-seg{padding:0 20px}.tb-right{gap:14px;padding-right:24px}
+@media (max-width:1500px){.role-sw span{display:none}.avail{padding:4px 16px}}
+.btn{white-space:nowrap}
+
+.tag{white-space:nowrap}
+.pad{padding-bottom:96px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M7.4 8.6 12 13.2l4.6-4.6L18 10l-6 6-6-6z"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M8.6 16.6 13.2 12 8.6 7.4 10 6l6 6-6 6z"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></symbol>
+  <symbol id="i-bank" viewBox="0 0 24 24"><path d="M4 10h3v7H4zm6.5 0h3v7h-3zM2 19h20v3H2zm15-9h3v7h-3zM12 1 2 6v2h20V6z"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1z"/></symbol>
+  <symbol id="i-person" viewBox="0 0 24 24"><path d="M12 12c2.2 0 4-1.8 4-4s-1.8-4-4-4-4 1.8-4 4 1.8 4 4 4zm0 2c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4z"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12z"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14z"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11z"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6zm8 5H6v-2h8zm4-6H6V6h12z"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2zm2.07-7.75-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 21h16v2H4zM5 17.25V20h2.75l8.1-8.1-2.75-2.75zm13.71-7.54a1 1 0 0 0 0-1.41l-1.96-1.96a1 1 0 0 0-1.41 0l-1.34 1.34 3.37 3.37z"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8zm-1 7V3.5L18.5 9zM8 13h8v2H8zm0 4h5v2H8z"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z"/></symbol>
+  <symbol id="i-export" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h8v-2H6V4h7v5h5v3h2V8zm5 12-1.41 1.41L19.17 17H13v2h6.17l-1.58 1.59L19 22l4-4z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><path d="M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z"/></symbol>
+  <symbol id="i-tune" viewBox="0 0 24 24"><path d="M3 17v2h6v-2zM3 5v2h10V5zm10 16v-2h8v-2h-8v-2h-2v6zM7 9v2H3v2h4v2h2V9zm14 4v-2H11v2zm-6-4h2V7h4V5h-4V3h-2z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm.5 5v5.25l4.5 2.67-.75 1.23L11 13V7z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8z"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></symbol>
+  <symbol id="i-attach" viewBox="0 0 24 24"><path d="M16.5 6v11.5a4 4 0 0 1-8 0V5a2.5 2.5 0 0 1 5 0v10.5a1 1 0 0 1-2 0V6H10v9.5a2.5 2.5 0 0 0 5 0V5a4 4 0 0 0-8 0v12.5a5.5 5.5 0 0 0 11 0V6z"/></symbol>
+  <symbol id="i-contact" viewBox="0 0 24 24"><path d="M9 12c2.2 0 4-1.8 4-4S11.2 4 9 4 5 5.8 5 8s1.8 4 4 4zm0 2c-2.7 0-8 1.3-8 4v2h9.5l.4-2.9 1.7-1.7C11.3 14.2 10 14 9 14zm11.7-1.3-1.4-1.4a.9.9 0 0 0-1.3 0l-1.1 1.1 2.7 2.7 1.1-1.1a.9.9 0 0 0 0-1.3zM12 19.3V22h2.7l6-6-2.7-2.7z"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M5 20h14v-2H5zm0-10h4v6h6v-6h4l-7-7z" transform="translate(0 0)"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5a2 2 0 0 0-2-2zm0 12h-4a3 3 0 0 1-6 0H5V5h14z"/></symbol>
+</svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M1 21h22L12 2zm12-3h-2v-2h2zm0-4h-2v-4h2z"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm0-14a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm0 10a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm0-6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24"><path d="m16 6 2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></symbol>
+  <symbol id="i-dash" viewBox="0 0 24 24"><path d="M3 13h8V3H3zm0 8h8v-6H3zm10 0h8V11h-8zm0-18v6h8V3z"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M3 13h2v-2H3zm0 4h2v-2H3zm0-8h2V7H3zm4 4h14v-2H7zm0 4h14v-2H7zM7 7v2h14V7z"/></symbol>
+  <symbol id="i-feedback" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2zm0-4h-2V6h2z"/></symbol>
+  <symbol id="i-school" viewBox="0 0 24 24"><path d="M5 13.18v4L12 21l7-3.82v-4L12 17zM12 3 1 9l11 6 9-4.91V17h2V9z"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7zm-6 .67 2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/></symbol>
+</svg>
+
+<div class="app">
+  <header class="topbar">
+    <div class="tb-seg first">
+      <button class="tb-btn tb-back" id="btnBack" aria-label="Toggle sidebar"><svg class="i"><use href="#i-back"/></svg></button>
+      <a class="logo" href="#" id="logoLink" aria-label="iSchool home"><svg width="481" height="138" viewBox="0 0 481 138" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="iSchool">
+<path d="M473.385 51.418C473.385 51.7433 473.272 52.0361 473.028 52.2801C472.784 52.5241 472.491 52.6542 472.149 52.6542C471.905 52.6542 471.678 52.5891 471.466 52.459C471.255 52.3289 471.108 52.1337 471.011 51.906L469.726 48.848H467.888V51.418C467.888 51.7596 467.774 52.0524 467.53 52.2964C467.286 52.5403 466.993 52.6542 466.652 52.6542H466.619C466.277 52.6542 465.985 52.5403 465.741 52.2964C465.497 52.0524 465.383 51.7596 465.383 51.418V44.4563C465.383 44.0659 465.48 43.6918 465.676 43.3502C465.871 43.0086 466.147 42.7321 466.489 42.5369C466.83 42.3417 467.205 42.2441 467.595 42.2441H469.628C470.929 42.2441 471.905 42.5207 472.556 43.0574C473.207 43.5942 473.516 44.4075 473.516 45.481V45.5298C473.516 46.0991 473.402 46.5871 473.19 47.0263C472.963 47.4492 472.654 47.7908 472.231 48.0022L471.889 48.1811L473.239 50.8812C473.337 51.0602 473.385 51.2391 473.385 51.4343V51.418ZM470.62 46.4407C470.897 46.2618 471.027 45.9853 471.027 45.6437V45.5949C471.027 44.928 470.506 44.6027 469.465 44.6027H467.888V46.7335H469.465C469.97 46.7335 470.36 46.6359 470.637 46.457L470.62 46.4407Z" fill="#056FEC"/>
+<path d="M469.482 58.4129C463.333 58.4129 458.34 53.4194 458.34 47.2709C458.34 41.1225 463.333 36.1289 469.482 36.1289C475.63 36.1289 480.624 41.1225 480.624 47.2709C480.624 53.4194 475.63 58.4129 469.482 58.4129ZM469.482 38.4874C464.635 38.4874 460.682 42.44 460.682 47.2872C460.682 52.1344 464.635 56.0869 469.482 56.0869C474.329 56.0869 478.281 52.1344 478.281 47.2872C478.281 42.44 474.329 38.4874 469.482 38.4874Z" fill="#056FEC"/>
+<path d="M113.461 50.1813C110.533 28.6943 95.8288 8.80132 74.6348 2.50649C50.6431 -5.26852 24.667 6.13374 7.24657 21.7488C3.37536 25.2134 8.30383 31.1667 12.419 27.9786C33.8245 10.1188 66.9575 1.88839 87.4846 24.2049C94.5439 31.7034 98.2687 40.7634 99.2609 50.1813H113.461Z" fill="#FFD700"/>
+<path d="M97.8296 68.431C95.2271 78.8248 89.6968 88.6981 81.8406 96.3104C72.0975 106.314 60.3863 115.049 48.2847 118.139C30.8317 122.889 14.5662 112.706 22.3737 93.5615C30.0022 75.1162 45.6009 62.9982 65.9491 54.4913L64.9406 52.3767C78.7013 44.2927 66.128 23.2123 52.2047 30.9873C38.3464 39.3316 26.1798 50.3598 15.5096 63.6651C2.57846 79.2802 -6.90437 104.427 6.49846 123.035C23.4146 145.937 56.8729 139.463 76.0988 124.222C94.4789 110.624 109.638 91.4958 113.136 68.4473H97.8296V68.431Z" fill="#FFD700"/>
+<path d="M72.8942 73.3927L74.2117 108.608C74.472 115.277 70.7472 119.539 64.4524 119.783C58.1576 120.026 54.1075 116.058 53.8635 109.389L52.546 74.1735C52.2858 67.5045 56.0106 63.2429 62.3053 62.9989C68.6001 62.7549 72.6502 66.7238 72.8942 73.3927Z" fill="#056FEC"/>
+<path d="M215.982 101.953C211.363 108.183 203.962 112.314 194.967 113.567C176.62 116.104 162.452 105.808 160.013 88.2899C157.589 70.7718 168.406 56.9947 186.753 54.4573C194.821 53.3349 202.173 54.8151 208.582 59.0442C210.696 60.5406 212.062 62.7202 212.42 65.3065C213.185 70.8043 210.062 74.9195 204.564 75.684C202.108 76.0256 199.896 75.5051 198.074 74.4478C194.837 72.6261 192.153 72.0568 189.225 72.4634C182.801 73.358 179.125 78.6281 180.084 85.5248C181.044 92.4214 186.021 96.4879 192.446 95.5932C196.073 95.089 198.903 93.2672 201.034 90.5834C202.872 88.4201 204.873 87.314 207.199 86.9887C212.811 86.2079 216.926 89.3309 217.69 94.8288C218.064 97.5126 217.332 100.001 215.95 101.986L215.982 101.953Z" fill="#056FEC"/>
+<path d="M283.323 88.2749L280.769 110.429C280.021 116.87 275.808 120.432 269.725 119.716C263.625 119.017 260.339 114.593 261.088 108.152L263.381 88.3562C264.145 81.671 261.527 77.6859 255.785 77.0353C249.458 76.3033 245.586 80.0119 244.724 87.5104L242.594 106.021C241.845 112.462 237.633 116.024 231.549 115.308C225.45 114.609 222.164 110.185 222.912 103.744L230.134 41.1694C230.882 34.7282 235.095 31.166 241.178 31.8817C247.278 32.5811 250.564 37.0054 249.815 43.4466L247.457 63.8438L247.685 63.8763C251.653 60.2978 256.924 58.8827 263.137 59.5984C278.248 61.3389 285.291 71.4236 283.339 88.2911L283.323 88.2749Z" fill="#056FEC"/>
+<path d="M320.684 59.0293C339.211 59.0293 351.817 71.1798 351.817 88.8769C351.817 106.574 339.194 118.724 320.684 118.724C302.174 118.724 289.536 106.574 289.536 88.8769C289.536 71.1798 302.158 59.0293 320.684 59.0293ZM320.684 100.556C327.174 100.556 331.533 95.8386 331.533 88.8769C331.533 81.9151 327.174 77.1981 320.684 77.1981C314.194 77.1981 309.835 81.9151 309.835 88.8769C309.835 95.8386 314.194 100.556 320.684 100.556Z" fill="#056FEC"/>
+<path d="M389.194 56.1816C407.721 56.1816 420.327 68.3321 420.327 86.0292C420.327 103.726 407.705 115.877 389.194 115.877C370.684 115.877 358.046 103.726 358.046 86.0292C358.046 68.3321 370.668 56.1816 389.194 56.1816ZM389.194 97.6917C395.684 97.6917 400.044 92.9747 400.044 86.013C400.044 79.0512 395.684 74.3342 389.194 74.3342C382.704 74.3342 378.345 79.0512 378.345 86.013C378.345 92.9747 382.704 97.6917 389.194 97.6917Z" fill="#056FEC"/>
+<path d="M451.557 47.7262L444.677 110.333C443.961 116.79 439.781 120.353 433.681 119.686C427.581 119.019 424.263 114.611 424.979 108.17L431.859 45.5629C432.575 39.1217 436.755 35.5432 442.855 36.2101C448.954 36.877 452.273 41.285 451.557 47.7262Z" fill="#056FEC"/>
+<path d="M126.213 117.536C115.38 118.708 104.271 116.43 94.9182 111.144C92.1694 109.615 90.2175 106.622 89.8597 103.336C89.2416 97.6597 93.2592 92.7149 99.0009 92.0968C101.262 91.8528 103.36 92.2758 105.377 93.3818C111.818 97.1229 118.032 98.5869 124.408 97.9037C126.457 97.676 133.126 96.6024 132.638 92.0318V91.8041C132.345 89.3967 131.19 87.6726 118.064 85.7695C102.742 83.5736 89.9085 80.353 88.0379 62.9487V62.7372C86.3951 47.7077 97.2768 35.9151 114.502 34.0608C124.017 33.036 132.898 34.5162 140.917 38.4688C143.357 39.5749 146.204 42.3075 146.675 46.6179C147.293 52.2946 143.276 57.2394 137.534 57.8575C135.598 58.069 133.809 57.7762 131.906 56.9304C126.002 54.2628 120.943 53.2055 116.405 53.7098C111.818 54.214 109.037 56.2472 109.313 58.8985V59.1262C109.655 62.1191 111.021 63.3553 125.026 65.3723C138.998 67.438 152.157 71.5858 153.913 87.8677V88.0955C155.654 103.987 144.772 115.568 126.197 117.585L126.213 117.536Z" fill="#056FEC"/>
+<path d="M60.11 55.7925C67.6649 55.7925 73.7893 49.668 73.7893 42.1131C73.7893 34.5581 67.6649 28.4336 60.11 28.4336C52.5551 28.4336 46.4307 34.5581 46.4307 42.1131C46.4307 49.668 52.5551 55.7925 60.11 55.7925Z" fill="#FF7F1C"/>
+        </svg></a>
+    </div>
+    <div class="tb-seg"><button class="tb-btn tb-home" id="btnHome" aria-label="Home"><svg class="i"><use href="#i-home"/></svg></button></div>
+    <div class="tb-seg hide-sm"><button class="tb-btn" id="btnOrg"><svg class="i" style="color:#5b88c9;width:26px;height:26px"><use href="#i-bank"/></svg>&nbsp;B2G<svg class="i chev"><use href="#i-chev"/></svg></button></div>
+    <div class="tb-seg hide-sm"><button class="tb-btn" id="btnIntake">
+        <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="1" y="3" width="28" height="24" rx="3" fill="#f3f0e6" stroke="#d8cfae"/><circle cx="15" cy="13" r="6" fill="#d9b45a"/><path d="M9 21h12v2H9z" fill="#4a7c59"/><path d="M12 13l3-3 3 3-3 3z" fill="#fff"/></svg>
+        DEMI 3rd Intake<svg class="i chev"><use href="#i-chev"/></svg></button></div>
+    <div class="tb-seg" style="border-right:0"><span class="tb-btn tb-support" style="cursor:default">Live Monitoring</span></div>
+    <div class="tb-right">
+      <label class="role-sw"><span>View as</span>
+        <select id="roleSel" aria-label="Switch demo role">
+          <option value="supervisor">Educational Supervisor</option>
+          <option value="tl">Team Leader</option>
+          <option value="tutor">Tutor</option>
+        </select></label>
+      <span class="avail" id="availPill">Available</span>
+      <div class="bell-wrap">
+        <button class="bell" id="btnBell" aria-label="Notifications"><svg class="i"><use href="#i-bell"/></svg></button>
+        <span class="badge" id="bellBadge" hidden>0</span>
+        <div class="menu notif" id="notifMenu" hidden></div>
+      </div>
+      <div style="position:relative">
+        <button class="user" data-menu="userMenu"><span class="avatar"><svg class="i"><use href="#i-person"/></svg></span><span class="nm" id="userName">Heba.Mahmoud</span><svg class="i chev"><use href="#i-chev"/></svg></button>
+        <div class="menu" id="userMenu" hidden>
+          <button data-act="resetdemo">Reset demo data</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="body" id="body">
+    <nav class="side" id="side" aria-label="Main navigation"></nav>
+    <main class="main" id="main">
+      <div class="content" id="content"></div>
+    </main>
+  </div>
+</div>
+
+<div class="inroom" id="inroom" hidden></div>
+
+<div class="overlay center" id="modalOv" hidden>
+  <div class="modal md" role="dialog" aria-modal="true" id="modal"></div>
+</div>
+<div class="overlay center" id="modalOv2" hidden style="z-index:70">
+  <div class="modal sm" role="dialog" aria-modal="true" id="modal2"></div>
+</div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script>
+(function(){
+'use strict';
+/* =====================================================================
+   iSchool · Live Monitoring & Coaching — prototype
+   Roles: Educational Supervisor · Team Leader · Tutor (switch with "View as")
+   ===================================================================== */
+const LS = 'ischool_live_monitoring_demo_v1';
+const MIN = 60000, DAY = 86400000;
+const SLOTS = [[9,0,11,30],[12,0,14,30],[15,0,17,30],[18,0,20,30]];
+const CRIT = [
+  {k:'eng',  n:'Student engagement',   d:'Participation, questions, energy'},
+  {k:'del',  n:'Content delivery',     d:'Clarity, accuracy, examples'},
+  {k:'time', n:'Time management',      d:'Pacing, starting and ending on time'},
+  {k:'cls',  n:'Classroom management', d:'Rules, handling interruptions'},
+  {k:'tech', n:'Tech & setup',         d:'Audio/video, screen sharing, tools'}
+];
+const CRIT_N = Object.fromEntries(CRIT.map(c => [c.k, c.n]));
+const TIPS = {
+  eng:'Use a quick poll or “think-pair-share” every 10 minutes and call on quieter students by name.',
+  del:'Open with the lesson goal, model one worked example before practice, and recap the key idea at the end.',
+  time:'Plan the session in timed blocks (warm-up 5 · teach 20 · practice 25 · wrap-up 10) and keep a visible timer.',
+  cls:'Agree on 3 class rules at the start and use mute / raise-hand consistently to handle interruptions.',
+  tech:'Join 5 minutes early to test audio, share only the lesson window, and keep links and files ready in one tab.'
+};
+const STRENGTHS = {
+  eng:['Students were highly engaged and answered questions confidently.','Great energy — you kept students involved throughout the activity.'],
+  del:['Explanations were clear and the examples matched the students’ level.','The worked example on the board made the concept easy to follow.'],
+  time:['Session started on time and each activity had a clear time box.','Good pacing — the practice part had enough time.'],
+  cls:['Calm and consistent handling of interruptions.','Clear class rules; students used raise-hand properly.'],
+  tech:['Smooth screen sharing and good audio quality.','All tools and links were ready before the session started.']
+};
+const IMPROVE = {
+  eng:['A few students stayed silent for most of the session — involve them with direct questions.','Engagement dropped during the long explanation; break it with a short activity.'],
+  del:['Some steps were skipped in the explanation; slow down at the key concept.','Check understanding before moving to the practice task.'],
+  time:['The introduction took too long and the wrap-up was rushed.','Session ended 8 minutes late — keep an eye on the timer.'],
+  cls:['Side chat distracted the group; set expectations at the start.','Two students talked over each other — use mute and the raise-hand queue.'],
+  tech:['Screen share showed other tabs; share the lesson window only.','Audio echo for the first 5 minutes — test your headset before joining.']
+};
+const ACTIONS = {
+  eng:['Ask every student at least one direct question','Add one poll / quiz per 15 minutes'],
+  del:['Prepare one worked example per concept','Do a 2-question understanding check before practice'],
+  time:['Prepare a timed lesson plan before the session','Start the wrap-up 10 minutes before the end'],
+  cls:['Share 3 class rules in the first 2 minutes','Use mute for side conversations consistently'],
+  tech:['Join 5 minutes early to test audio','Close unrelated tabs before screen sharing']
+};
+const REASONS = ['Disruptive student behaviour','Technical issue in the room','Need live coaching support','Guardian present and escalating','Safeguarding concern','Other'];
+const SUBJ = ['Programming','AI Basics','Digital Skills'];
+const TLS = [
+  {id:'tl1', name:'Dina Farouk Hassan',   user:'Dina.Hassan',    code:118, f:0.95},
+  {id:'tl2', name:'Mona Ashraf Galal',    user:'Mona.Galal',     code:246, f:0.82},
+  {id:'tl3', name:'Tamer Nabil Fouad',    user:'Tamer.Fouad',    code:131, f:0.58},
+  {id:'tl4', name:'Rana Samir Abdelaziz', user:'Rana.Abdelaziz', code:152, f:1.02}
+];
+const SUPERVISOR = {name:'Heba Mahmoud', user:'Heba.Mahmoud'};
+const ME_TL = 'tl2';                 // demo team leader
+const ME_TUTOR = 't12';              // demo tutor (in ME_TL's team)
+const ALWAYS = new Set([12, 15, 26]); // tutors teaching every slot (keeps the demo flows available)
+const FIRST = ['Hany','Mostafa','Sherif','Aya','Khaled','Nada','Ahmed','Yasmin','Mahmoud','Rania','Omar','Salma','Eman','Karim','Hagar','Tarek','Noha','Islam','Reem','Waleed','Mai','Hossam','Dalia','Amr','Shimaa','Ali','Nourhan','Bassem','Heba','Fady','Asmaa','Ramy','Ghada','Sameh','Marwa','Adel','Lamiaa','Ehab','Doaa','Hesham','Sara','Moataz','Esraa','Wael','Rasha','Ayman','Nermeen','Emad'];
+const LAST = ['Adel Saber','Ibrahim Rashad','Kamal Elnaggar','Hassan Elsherbiny','Magdy Soliman','Samy Fawzy','Gamal Ezzat','Nabil Shawky','Lotfy Barakat','Sobhy Mansour','Zaki Hamdy','Anwar Galal','Fathy Abdelghany'];
+const TUTORS = FIRST.map((f, i) => ({
+  id:'t' + i, idx:i, name: i === 12 ? 'Eman Fathy Abdelghany' : `${f} ${LAST[(i * 5) % LAST.length]}`,
+  code: i === 12 ? 18816 : 14000 + (i * 397) % 8000, tlId: TLS[Math.floor(i / 12)].id, grade: 4 + (i % 3)
+}));
+TUTORS[12].user = 'Eman.Fathy';
+const tutorById = id => TUTORS.find(t => t.id === id);
+const SUP_ID = 'sup';   // observations made by the Educational Supervisor
+const observerName = id => id === SUP_ID ? `${SUPERVISOR.name} (Supervisor)` : (TLS.find(t => t.id === id) || {name:'—'}).name;
+const tlById = id => TLS.find(t => t.id === id);
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const icon = (n, st) => `<svg class="i"${st ? ` style="${st}"` : ''}><use href="#i-${n}"/></svg>`;
+const dayStart = ms => { const d = new Date(ms); d.setHours(0,0,0,0); return d.getTime(); };
+const dayKey = ms => { const d = new Date(ms); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const fmtDate = ms => { const d = new Date(ms); return `${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}`; };
+const fmtDay = ms => { const d = new Date(ms); return `${DOW[d.getDay()]} ${d.getDate()} ${MON[d.getMonth()]}`; };
+const fmtTime = ms => { const d = new Date(ms); let h = d.getHours(); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return `${pad(h)}:${pad(d.getMinutes())} ${ap}`; };
+const fmtClock = ms => { const d = new Date(ms); return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`; };
+const fmtDT = ms => ms ? `${fmtDate(ms)}, ${fmtTime(ms)}` : '—';
+const isoLocal = ms => ms ? `${dayKey(ms)} ${pad(new Date(ms).getHours())}:${pad(new Date(ms).getMinutes())}:${pad(new Date(ms).getSeconds())}` : '';
+function fmtDur(sec){ sec = Math.max(0, Math.round(sec)); const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60; return h ? `${h}h ${pad(m)}m` : m ? `${m}m ${pad(s)}s` : `${s}s`; }
+function fmtAgo(ms){ const m = Math.round((Date.now() - ms) / MIN); if (m < 1) return 'just now'; if (m < 60) return `${m} min ago`; const h = Math.round(m / 60); if (h < 24) return `${h} h ago`; return `${Math.round(h / 24)} d ago`; }
+function hashStr(s){ let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function rng(a){ return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0;
+const r1 = n => (Math.round(n * 10) / 10).toFixed(1);
+function toast(msg, kind){ const el = document.createElement('div'); el.className = 'toast' + (kind ? ' ' + kind : ''); el.textContent = msg; const b = $('#toasts'); b.appendChild(el); while (b.children.length > 3) b.firstElementChild.remove(); setTimeout(() => el.remove(), 4500); }
+const uid = p => p + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
+
+/* ---------- storage ---------- */
+const store = (function(){ let ok = false; try { localStorage.setItem('__t','1'); localStorage.removeItem('__t'); ok = true; } catch(e){}
+  return { ok, load(){ if (!ok) return null; try { return JSON.parse(localStorage.getItem(LS) || 'null'); } catch(e){ return null; } },
+    save(d){ if (!ok) return; try { localStorage.setItem(LS, JSON.stringify(d)); } catch(e){ toast('Could not save — storage is full or blocked.', 'err'); } },
+    clear(){ if (ok) try { localStorage.removeItem(LS); } catch(e){} } }; })();
+
+/* =====================================================================
+   Time slots (2.5h). If no real slot is live right now, a demo slot is
+   placed around the current time so the live flows can always be tried.
+   ===================================================================== */
+function liveInfo(){
+  const now = Date.now(), d0 = dayStart(now);
+  for (let i = 0; i < SLOTS.length; i++) { const [h1,m1,h2,m2] = SLOTS[i]; const s = d0 + (h1*60+m1)*MIN, e = d0 + (h2*60+m2)*MIN; if (now >= s && now < e) return {idx:i, demo:false}; }
+  return {idx:2, demo:true};
+}
+function slotRange(i){
+  const L = liveInfo();
+  if (!L.demo) { const [h1,m1,h2,m2] = SLOTS[i]; const d0 = dayStart(Date.now()); return [d0 + (h1*60+m1)*MIN, d0 + (h2*60+m2)*MIN]; }
+  const liveStart = Math.floor((Date.now() - 50*MIN) / (15*MIN)) * 15*MIN;
+  const s = liveStart + (i - L.idx) * 180 * MIN; return [s, s + 150*MIN];
+}
+function histSlotRange(dayMs, i){ const [h1,m1,h2,m2] = SLOTS[i]; const d0 = dayStart(dayMs); return [d0 + (h1*60+m1)*MIN, d0 + (h2*60+m2)*MIN]; }
+const slotState = i => { const L = liveInfo(); return i < L.idx ? 'past' : i === L.idx ? 'live' : 'future'; };
+const slotLabel = i => { const [s, e] = slotRange(i); const f = ms => { const d = new Date(ms); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; }; return `${f(s)}–${f(e)}`; };
+
+/* ---------- sessions (deterministic per day) ---------- */
+const sessCache = {};
+function sessionsFor(dk){
+  if (sessCache[dk]) return sessCache[dk];
+  const r = rng(hashStr(dk)); const out = [];
+  TUTORS.forEach((t, ti) => {
+    const skip = ALWAYS.has(ti) ? -1 : Math.floor(r() * 4);
+    for (let s = 0; s < 4; s++) { if (s === skip) continue;
+      out.push({id:`${dk}|${s}|${t.id}`, dk, slot:s, tutorId:t.id, tlId:t.tlId, group:`DEMI${t.grade}-G-${2000 + ti*13 + s*3}`, grade:t.grade, subject:SUBJ[(ti + s) % 3], students:8 + (ti*7 + s*5) % 7}); }
+  });
+  return (sessCache[dk] = out);
+}
+const sessionById = sid => sid ? sessionsFor(sid.split('|')[0]).find(s => s.id === sid) : null;
+
+/* =====================================================================
+   Seed data (fictional)
+   ===================================================================== */
+function genFeedback(r, tutor, ageDays){
+  const base = 2.7 + (tutor.idx % 5) * 0.32 + (30 - ageDays) / 30 * 0.6;
+  const bias = tutor.idx === 12 ? {time:-1.1, tech:-0.5, eng:0.3} : {[CRIT[tutor.idx % 5].k]: -0.8};
+  const scores = {}; CRIT.forEach(c => { scores[c.k] = Math.max(1, Math.min(5, Math.round(base + (bias[c.k] || 0) + (r() - 0.5) * 1.4))); });
+  const sorted = CRIT.map(c => c.k).sort((a, b) => scores[a] - scores[b]);
+  const lo = sorted[0], hi = sorted[sorted.length - 1];
+  return {scores, overall: +avg(Object.values(scores)).toFixed(1),
+    strengths: STRENGTHS[hi][Math.floor(r() * 2)], improve: IMPROVE[lo][Math.floor(r() * 2)],
+    actions: ACTIONS[lo].slice(0, 1 + Math.floor(r() * 2)).map(t => ({text:t, done: ageDays > 6 && r() < 0.7})), followUp: scores[lo] <= 2};
+}
+function buildSeed(){
+  const r = rng(777 + hashStr(dayKey(Date.now())));
+  const now = Date.now(), today = dayStart(now);
+  const db = {version:1, seedDay: dayKey(now), targets:{}, targetLog:[], obs:[], queues:{}, requests:[], notifs:[], prefs:{role:'tl', view:null}};
+  TLS.forEach(t => { db.targets[t.id] = {daily:12, weekly:55, monthly:220, pool:5, updatedAt: now - 20*DAY, by: SUPERVISOR.name}; });
+  db.targets.tl3 = {daily:10, weekly:45, monthly:180, pool:4, updatedAt: now - 9*DAY, by: SUPERVISOR.name};
+  db.targetLog.push({at: now - 9*DAY, by: SUPERVISOR.name, text: 'Tamer Nabil Fouad: daily 12 → 10, weekly 55 → 45, monthly 220 → 180, per slot 5 → 4'});
+  // history: last 30 days (no Fridays)
+  for (let d = 30; d >= 1; d--) {
+    const day = today - d * DAY; if (new Date(day).getDay() === 5) continue;
+    const sess = sessionsFor(dayKey(day));
+    TLS.forEach(tl => {
+      const seen = new Set(); const team = sess.filter(s => s.tlId === tl.id && s.tutorId !== ME_TUTOR).sort(() => r() - 0.5).filter(s => !seen.has(s.tutorId) && seen.add(s.tutorId));
+      const n = Math.min(team.length, Math.round(db.targets[tl.id].daily * tl.f * (0.75 + r() * 0.45)));
+      team.slice(0, n).forEach(s => {
+        const [ss] = histSlotRange(day, s.slot); const ci = ss + (5 + Math.floor(r() * 80)) * MIN; const dur = (15 + Math.floor(r() * 40)) * 60 + Math.floor(r() * 60);
+        const tutor = tutorById(s.tutorId); const fb = genFeedback(r, tutor, d);
+        const sentAt = ci + dur * 1000 + (2 + Math.floor(r() * 25)) * MIN;
+        const reviewed = d > 3 ? r() < 0.86 : r() < 0.35;
+        db.obs.push({id: uid('o'), sid: s.id, dk: s.dk, slot: s.slot, tlId: tl.id, tutorId: s.tutorId, group: s.group, checkIn: ci, checkOut: ci + dur * 1000, durS: dur, status: 'completed',
+          fb: Object.assign(fb, {sentAt, ackStatus: reviewed ? 'Reviewed' : 'Sent', ackAt: reviewed ? sentAt + (1 + Math.floor(r() * 20)) * 3600e3 : null})});
+      });
+    });
+  }
+  // make sure the demo tutor has a meaningful feedback history (a few recent, unreviewed)
+  const eman = TUTORS[12];
+  [21, 14, 9, 5, 2, 1].forEach((d, k) => {
+    const day = today - d * DAY; const s = sessionsFor(dayKey(day)).find(x => x.tutorId === eman.id && x.slot === 1 + (k % 3)) || sessionsFor(dayKey(day)).find(x => x.tutorId === eman.id);
+    const [ss] = histSlotRange(day, s.slot); const ci = ss + 20*MIN; const dur = 28*60 + k*95;
+    const fb = genFeedback(r, eman, d); const sentAt = ci + dur*1000 + 9*MIN;
+    const rev = d > 3;
+    db.obs.push({id: uid('o'), sid: s.id, dk: s.dk, slot: s.slot, tlId: ME_TL, tutorId: eman.id, group: s.group, checkIn: ci, checkOut: ci + dur*1000, durS: dur, status:'completed',
+      fb: Object.assign(fb, {sentAt, ackStatus: rev ? 'Reviewed' : 'Sent', ackAt: rev ? sentAt + 5*3600e3 : null})});
+    if (!rev) db.notifs.push({id: uid('n'), to:'tutor:' + eman.id, text:`New coaching feedback from Mona Ashraf Galal for ${s.group} (${fb.overall}/5)`, at: sentAt, read:false, view:'feedback'});
+  });
+  // today: earlier slots + live slot
+  const L = liveInfo(); const dk = dayKey(now);
+  for (let sl = 0; sl <= L.idx; sl++) {
+    TLS.forEach(tl => {
+      const q = buildQueue(db, dk, sl, tl.id);
+      if (sl < L.idx) {
+        const rate = tl.id === 'tl3' ? 0.4 : tl.id === ME_TL ? 0.6 : 0.85;
+        q.forEach((e, k) => { if (k / q.length >= rate) return; const s = sessionById(e.sid); if (s.tutorId === ME_TUTOR) return; const [ss] = slotRange(sl); const ci = ss + (10 + k * 22) * MIN; const dur = (18 + Math.floor(r() * 25)) * 60;
+          const fb = genFeedback(r, tutorById(s.tutorId), 0); const sentAt = ci + dur * 1000 + 6 * MIN;
+          db.obs.push({id: uid('o'), sid: s.id, dk, slot: sl, tlId: tl.id, tutorId: s.tutorId, group: s.group, checkIn: ci, checkOut: ci + dur * 1000, durS: dur, status:'completed', fb: Object.assign(fb, {sentAt, ackStatus: r() < 0.3 ? 'Reviewed' : 'Sent', ackAt: null})});
+          const o = db.obs[db.obs.length - 1]; if (o.fb.ackStatus === 'Reviewed') o.fb.ackAt = sentAt + 20 * MIN; });
+      } else {
+        if (tl.id === 'tl1') { const s = sessionById(q[0].sid); db.obs.push({id: uid('o'), sid: s.id, dk, slot: sl, tlId: tl.id, tutorId: s.tutorId, group: s.group, checkIn: now - 14*MIN - 20000, status:'in_room'}); }
+        if (tl.id === 'tl4') { [0,1].forEach(k => { const s = sessionById(q[k].sid); if (k === 0) { const ci = now - 48*MIN, dur = 31*60; const fb = genFeedback(r, tutorById(s.tutorId), 0); db.obs.push({id: uid('o'), sid: s.id, dk, slot: sl, tlId: tl.id, tutorId: s.tutorId, group: s.group, checkIn: ci, checkOut: ci + dur*1000, durS: dur, status:'completed', fb: Object.assign(fb, {sentAt: ci + dur*1000 + 4*MIN, ackStatus:'Sent', ackAt:null})}); }
+          else db.obs.push({id: uid('o'), sid: s.id, dk, slot: sl, tlId: tl.id, tutorId: s.tutorId, group: s.group, checkIn: now - 6*MIN - 40000, status:'in_room'}); }); }
+      }
+    });
+  }
+  // one supervisor shadow note from yesterday for the demo Team Leader
+  { const yd = today - DAY - (new Date(today - DAY).getDay() === 5 ? DAY : 0); const s = sessionsFor(dayKey(yd)).find(x => x.tutorId === 't17' && x.slot === 1) || sessionsFor(dayKey(yd)).find(x => x.tutorId === 't17');
+    if (s) { const [ss] = histSlotRange(yd, s.slot); const ci = ss + 35 * MIN; const dur = 22 * 60 + 14;
+      db.obs.push({id: uid('o'), sid: s.id, dk: s.dk, slot: s.slot, tlId: 'sup', shadow: true, tutorId: s.tutorId, group: s.group, checkIn: ci, checkOut: ci + dur * 1000, durS: dur, status:'completed',
+        note: {to: ME_TL, focus: ['eng','cls'], recommendation: 'Coach the tutor in the next observation', priority: 'High', text: 'Most students had cameras off and only two answered questions. Side chat went on for ~10 minutes without the tutor addressing it.', tlComment: '', sentAt: ci + dur * 1000 + 15 * MIN, ackStatus: 'Sent', ackAt: null}});
+      db.notifs.push({id: uid('n'), to:'tl:' + ME_TL, text:`${SUPERVISOR.name} (Supervisor) sent a note about ${tutorById('t17').name} — ${s.group} · HIGH priority`, at: ci + dur * 1000 + 15 * MIN, read:false, view:'supnotes'}); } }
+  // urgent requests
+  const live = L.idx;
+  const sesFor = (tIdx) => sessionsFor(dk).find(s => s.tutorId === 't' + tIdx && s.slot === live);
+  const pastObs = db.obs.find(o => o.tutorId === eman.id && o.dk === dayKey(today - 14 * DAY));
+  const past = pastObs ? sessionById(pastObs.sid) : sessionsFor(dayKey(today - 14 * DAY)).find(s => s.tutorId === eman.id);
+  db.requests.push({id: uid('r'), tutorId: eman.id, sid: past.id, group: past.group, reason: 'Disruptive student behaviour', note: 'Two students keep unmuting and talking over the lesson.', createdAt: (pastObs ? pastObs.checkIn : today - 12*DAY) - 4*MIN, tlId: ME_TL, status:'Completed', acceptedAt: pastObs ? pastObs.checkIn : null, acceptedBy: ME_TL, obsId: pastObs ? pastObs.id : null, completedAt: pastObs ? pastObs.fb.sentAt : null});
+  if (pastObs) pastObs.reqId = db.requests[0].id;
+  const s15 = sesFor(15), s26 = sesFor(26);
+  db.requests.push({id: uid('r'), tutorId:'t15', sid: s15.id, group: s15.group, reason:'Technical issue in the room', note:'Half of the students cannot hear me; I already rejoined once.', createdAt: now - 3*MIN - 15000, tlId: ME_TL, status:'Pending'});
+  db.requests.push({id: uid('r'), tutorId:'t26', sid: s26.id, group: s26.group, reason:'Need live coaching support', note:'First session with this group, would like feedback on pacing.', createdAt: now - 9*MIN, tlId:'tl3', status:'Pending'});
+  db.notifs.push({id: uid('n'), to:'tl:' + ME_TL, text:`Urgent observation requested by ${tutorById('t15').name} — ${s15.group}`, at: now - 3*MIN, read:false, view:'requests'});
+  db.notifs.push({id: uid('n'), to:'supervisor', text:`Urgent request for Tamer Nabil Fouad is waiting — ${s26.group}`, at: now - 9*MIN, read:false, view:'requests'});
+  db.notifs.push({id: uid('n'), to:'supervisor', text:`Urgent request for Mona Ashraf Galal is waiting — ${s15.group}`, at: now - 3*MIN, read:false, view:'requests'});
+  return db;
+}
+function lastObservedMap(db){ const m = {}; db.obs.forEach(o => { const t = o.checkIn || 0; if (!m[o.tutorId] || t > m[o.tutorId]) m[o.tutorId] = t; }); return m; }
+function buildQueue(db, dk, slot, tlId){
+  const key = `${dk}|${slot}|${tlId}`;
+  if (db.queues[key]) return db.queues[key];
+  const pool = (db.targets[tlId] || {pool:5}).pool;
+  const last = lastObservedMap(db);
+  const cands = sessionsFor(dk).filter(s => s.slot === slot && s.tlId === tlId)
+    .sort((a, b) => (last[a.tutorId] || 0) - (last[b.tutorId] || 0) || hashStr(a.id) - hashStr(b.id));
+  db.queues[key] = cands.slice(0, pool).map(s => ({sid: s.id, reason: last[s.tutorId] ? `Last observed ${Math.max(1, Math.round((Date.now() - last[s.tutorId]) / DAY))} d ago` : 'Not observed yet', lastAt: last[s.tutorId] || null}));
+  return db.queues[key];
+}
+
+/* ---------- state ---------- */
+let db = store.load();
+let reseeded = false;
+if (!db || db.version !== 1 || db.seedDay !== dayKey(Date.now())) { reseeded = !!db; db = buildSeed(); store.save(db); }
+const ui = {liveStatus:'', tq:'', slot: null, period:'daily', tlFilter:'', logPage:1, logStatus:'', fbFilter:'all', reqFilter:''};
+function persist(){ store.save(db); }
+const role = () => db.prefs.role;
+const meKey = () => role() === 'supervisor' ? 'supervisor' : role() === 'tl' ? 'tl:' + ME_TL : 'tutor:' + ME_TUTOR;
+function notify(to, text, view){ db.notifs.push({id: uid('n'), to, text, at: Date.now(), read:false, view}); }
+const queueFor = (dk, slot, tlId) => { const had = !!db.queues[`${dk}|${slot}|${tlId}`]; const q = buildQueue(db, dk, slot, tlId); if (!had) persist(); return q; };
+const obsFor = (sid, tlId) => db.obs.find(o => o.sid === sid && (!tlId || o.tlId === tlId));
+const activeObs = tlId => db.obs.find(o => o.tlId === tlId && o.status === 'in_room');
+const DONE = new Set(['await','completed']);
+
+function periodRange(p){
+  const now = Date.now(), t0 = dayStart(now);
+  if (p === 'daily') return [t0, t0 + DAY];
+  if (p === 'weekly') { const d = new Date(t0); const s = t0 - d.getDay() * DAY; return [s, s + 7*DAY]; }
+  const d = new Date(t0); const s = new Date(d.getFullYear(), d.getMonth(), 1).getTime(); const e = new Date(d.getFullYear(), d.getMonth() + 1, 1).getTime(); return [s, e];
+}
+const PLBL = {daily:'Today', weekly:'This week', monthly:'This month'};
+function statsFor(tlId, p){
+  const [s, e] = periodRange(p);
+  const obs = db.obs.filter(o => (tlId ? o.tlId === tlId : o.tlId !== SUP_ID) && DONE.has(o.status) && o.checkOut >= s && o.checkOut < e);
+  const target = tlId ? db.targets[tlId][p] : TLS.reduce((a, t) => a + db.targets[t.id][p], 0);
+  const fb = obs.filter(o => o.fb); const rev = fb.filter(o => o.fb.ackStatus === 'Reviewed');
+  const reqs = db.requests.filter(q => (!tlId || q.tlId === tlId) && q.createdAt >= s && q.createdAt < e);
+  const handled = reqs.filter(q => q.acceptedAt);
+  return {target, done: obs.length, pct: target ? obs.length / target : 0, remaining: Math.max(0, target - obs.length), avgDur: avg(obs.map(o => o.durS)), fbSent: fb.length, reviewed: rev.length,
+    ackPct: fb.length ? rev.length / fb.length : 0, reqs: reqs.length, avgResp: avg(handled.map(q => (q.acceptedAt - q.createdAt) / 1000)), obs};
+}
+const barCls = p => p >= 0.9 ? 'ok' : p >= 0.6 ? 'warn' : 'bad';
+
+/* =====================================================================
+   Shell: role, sidebar, notifications
+   ===================================================================== */
+const NAV = {
+  supervisor: {group:'Live Monitoring', items:[['dash','Monitoring Dashboard','dash'],['live','All Live Sessions','video'],['targets','Observation Targets','target'],['requests','Urgent Requests','alert'],['log','Observation Reports','list']]},
+  tl:         {group:'Live Monitoring', items:[['queue','My Observation Queue','eye'],['requests','Urgent Requests','alert'],['sent','Coaching Feedback Sent','feedback'],['supnotes','Supervisor Notes','eye'],['progress','My Progress','trend']]},
+  tutor:      {group:'Tutor Dashboard', items:[['sessions','My Live Sessions','video'],['feedback','Feedback & Improvement','feedback']]}
+};
+const USERNAME = {supervisor: SUPERVISOR.user, tl: tlById(ME_TL).user, tutor: TUTORS[12].user};
+function navBadge(v){
+  if (v === 'requests') { const n = db.requests.filter(q => q.status === 'Pending' && (role() === 'supervisor' || q.tlId === ME_TL)).length; return n ? `<span class="badge" style="margin-left:auto;font-size:11.5px;padding:1px 7px;background:#e02424">${n}</span>` : ''; }
+  if (v === 'feedback') { const n = db.obs.filter(o => o.tutorId === ME_TUTOR && o.fb && o.fb.ackStatus === 'Sent').length; return n ? `<span class="badge" style="margin-left:auto;font-size:11.5px;padding:1px 7px">${n}</span>` : ''; }
+  if (v === 'queue') { const a = activeObs(ME_TL); return a ? '<span class="tag live" style="margin-left:auto">In room</span>' : ''; }
+  if (v === 'supnotes') { const n = db.obs.filter(o => o.note && tutorById(o.tutorId).tlId === ME_TL && o.note.ackStatus === 'Sent').length; return n ? `<span class="badge" style="margin-left:auto;font-size:11.5px;padding:1px 7px">${n}</span>` : ''; }
+  if (v === 'live') { const a = activeObs(SUP_ID); return a ? '<span class="tag live" style="margin-left:auto">In room</span>' : ''; }
+  return '';
+}
+function renderSide(){
+  const nav = NAV[role()];
+  const g = (ic, n) => `<div class="nav-g"><button class="nav-h">${icon(ic)}${n}${icon('chev').replace('class="i"','class="i chev"')}</button><div class="nav-sub"><button data-oos>Overview</button></div></div>`;
+  $('#side').innerHTML = (role() === 'tutor' ? '' : g('book','Content') + g('users','Users')) + g('cal','Sessions') + g('video','Meetings') +
+    `<div class="nav-g open"><button class="nav-h">${icon(role() === 'tutor' ? 'school' : 'eye')}${nav.group}${icon('chev').replace('class="i"','class="i chev"')}</button><div class="nav-sub">
+      ${nav.items.map(([v, n]) => `<button data-view="${v}" class="${db.prefs.view === v ? 'active' : ''}" style="display:flex;align-items:center;gap:8px">${n}${navBadge(v)}</button>`).join('')}</div></div>` +
+    (role() === 'tutor' ? g('help','Tutor Support') : g('help','General Support') + g('help','Tutor Support'));
+}
+function renderBell(){
+  const mine = db.notifs.filter(n => n.to === meKey()).sort((a, b) => b.at - a.at);
+  const unread = mine.filter(n => !n.read).length;
+  $('#bellBadge').hidden = !unread; $('#bellBadge').textContent = unread;
+  $('#notifMenu').innerHTML = `<h4>Notifications ${unread ? `<button class="linkbtn" data-act="readall" style="font-size:12.5px">Mark all read</button>` : ''}</h4>` +
+    (mine.length ? mine.slice(0, 30).map(n => `<button class="n${n.read ? '' : ' unread'}" data-notif="${n.id}">${esc(n.text)}<small>${fmtAgo(n.at)}</small></button>`).join('') : '<div class="none">No notifications</div>');
+}
+function renderInRoom(){
+  const el = $('#inroom');
+  const a = role() === 'tl' ? activeObs(ME_TL) : role() === 'supervisor' ? activeObs(SUP_ID) : null;
+  if (!a) { el.hidden = true; return; }
+  const t = tutorById(a.tutorId);
+  el.hidden = false;
+  el.innerHTML = `<span class="live-dot"></span><div><div style="font-weight:500">${a.shadow ? 'Shadowing' : 'Observing'} ${esc(a.group)} · ${esc(t.name)}</div><div style="font-size:12px;color:#c5d0db">Entered ${fmtClock(a.checkIn)}${a.reqId ? ' · urgent request' : ''}${a.shadow ? ' · silent — not visible to the tutor' : ''}</div></div>
+    <span class="t" data-since="${a.checkIn}">${fmtDur((Date.now() - a.checkIn) / 1000)}</span>
+    <button class="btn amber sm" data-act="complete" data-obs="${a.id}">${icon('stop','width:14px;height:14px;margin-right:4px')}${a.shadow ? 'End shadowing' : 'Complete Observation'}</button>`;
+}
+function renderAll(){
+  $('#roleSel').value = role();
+  $('#userName').textContent = USERNAME[role()];
+  if (!db.prefs.view || !NAV[role()].items.some(i => i[0] === db.prefs.view)) db.prefs.view = NAV[role()].items[0][0];
+  renderSide(); renderBell(); renderInRoom();
+  const v = db.prefs.view;
+  const fn = {supnotes: vSupNotes, live: vLive, dash: vDash, targets: vTargets, requests: vRequests, log: vLog, queue: vQueue, sent: vSent, progress: vProgress, sessions: vSessions, feedback: vFeedback}[v];
+  $('#content').innerHTML = `<div class="pad">${fn()}</div>`;
+  afterRender();
+}
+const afterHooks = [];
+function afterRender(){ while (afterHooks.length) afterHooks.shift()(); }
+
+/* =====================================================================
+   Charts (SVG, single series + target reference, hover tooltips)
+   ===================================================================== */
+function barChart(id, rows, opts){
+  // rows: [{label, value, target, tip}]
+  afterHooks.push(() => {
+    const host = document.getElementById(id); if (!host) return;
+    const W = Math.max(320, host.clientWidth || 680), H = 220, L = 34, R = 8, T = 10, B = 28, iw = W - L - R, ih = H - T - B;
+    const max = Math.max(4, ...rows.map(r => Math.max(r.value, r.target || 0))) * 1.12;
+    const step = Math.ceil(max / 4 / 5) * 5 || 1; const ymax = step * 4;
+    const y = v => T + ih - v / ymax * ih; const bw = iw / rows.length; const w = Math.min(26, bw * 0.6);
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.aria)}">`;
+    for (let k = 0; k <= 4; k++) { const v = step * k; s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#e8edf2"/><text x="${L - 6}" y="${y(v) + 4}" font-size="11" fill="#8c9aa8" text-anchor="end">${v}</text>`; }
+    rows.forEach((r, i) => { const x = L + i * bw + (bw - w) / 2; const h = Math.max(0, ih - (y(r.value) - T)); const yy = y(r.value);
+      if (h > 0) s += `<path d="M${x},${T + ih} V${yy + 4} Q${x},${yy} ${x + 4},${yy} H${x + w - 4} Q${x + w},${yy} ${x + w},${yy + 4} V${T + ih} Z" fill="#056FEC"/>`;
+      if (i % Math.ceil(rows.length / 14) === 0) s += `<text x="${L + i * bw + bw / 2}" y="${H - 8}" font-size="11" fill="#6b7b8b" text-anchor="middle">${esc(r.label)}</text>`; });
+    if (rows.some(r => r.target != null)) { let d = ''; rows.forEach((r, i) => { const x1 = L + i * bw, x2 = x1 + bw; d += `${i ? 'L' : 'M'}${x1},${y(r.target)} L${x2},${y(r.target)} `; }); s += `<path d="${d}" fill="none" stroke="#7b8a99" stroke-width="2" stroke-dasharray="5 4"/>`; }
+    rows.forEach((r, i) => { s += `<rect x="${L + i * bw}" y="${T}" width="${bw}" height="${ih}" fill="transparent" data-i="${i}"/>`; });
+    s += `<line x1="${L}" x2="${W - R}" y1="${T + ih}" y2="${T + ih}" stroke="#c9d3dd"/></svg><div class="tip"></div>`;
+    host.innerHTML = s; hoverTips(host, rows, (i) => ({x: (L + i * bw + bw / 2) / W, y: y(rows[i].value) / H}));
+  });
+  return `<div class="legend"><span><i></i>${esc(opts.series)}</span>${rows.some(r => r.target != null) ? '<span><i class="dash"></i>Target</span>' : ''}</div><div class="chart" id="${id}"></div>`;
+}
+function lineChart(id, pts, opts){
+  afterHooks.push(() => {
+    const host = document.getElementById(id); if (!host) return;
+    if (!pts.length) { host.innerHTML = '<div class="empty2">No observations yet</div>'; return; }
+    const W = Math.max(320, host.clientWidth || 680), H = 200, L = 30, R = 14, T = 12, B = 28, iw = W - L - R, ih = H - T - B;
+    const x = i => L + (pts.length === 1 ? iw / 2 : i * iw / (pts.length - 1)); const y = v => T + ih - (v - 1) / 4 * ih;
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.aria)}">`;
+    [1,2,3,4,5].forEach(v => { s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#e8edf2"/><text x="${L - 8}" y="${y(v) + 4}" font-size="11" fill="#8c9aa8" text-anchor="end">${v}</text>`; });
+    s += `<path d="${pts.map((p, i) => `${i ? 'L' : 'M'}${x(i)},${y(p.value)}`).join(' ')}" fill="none" stroke="#056FEC" stroke-width="2"/>`;
+    pts.forEach((p, i) => { s += `<circle cx="${x(i)}" cy="${y(p.value)}" r="4.5" fill="#056FEC" stroke="#fff" stroke-width="2"/>`; s += `<text x="${x(i)}" y="${H - 8}" font-size="11" fill="#6b7b8b" text-anchor="middle">${esc(p.label)}</text>`; });
+    const bw = iw / Math.max(1, pts.length - 1);
+    pts.forEach((p, i) => { s += `<rect x="${x(i) - bw / 2}" y="${T}" width="${bw}" height="${ih}" fill="transparent" data-i="${i}"/>`; });
+    s += `</svg><div class="tip"></div>`;
+    host.innerHTML = s; hoverTips(host, pts, i => ({x: x(i) / W, y: y(pts[i].value) / H}));
+  });
+  return `<div class="chart" id="${id}"></div>`;
+}
+function hoverTips(host, rows, pos){
+  const tip = host.querySelector('.tip'); const svg = host.querySelector('svg');
+  svg.addEventListener('mousemove', e => { const r = e.target.closest('rect[data-i]'); if (!r) { tip.style.opacity = 0; return; } const i = +r.dataset.i; const p = pos(i); const b = svg.getBoundingClientRect();
+    tip.innerHTML = rows[i].tip; tip.style.left = (p.x * b.width) + 'px'; tip.style.top = (p.y * b.height) + 'px'; tip.style.opacity = 1; });
+  svg.addEventListener('mouseleave', () => tip.style.opacity = 0);
+}
+function last14(tlId){
+  const out = []; const t0 = dayStart(Date.now());
+  for (let d = 13; d >= 0; d--) { const s = t0 - d * DAY, e = s + DAY; if (new Date(s).getDay() === 5) continue;
+    const n = db.obs.filter(o => (tlId ? o.tlId === tlId : o.tlId !== SUP_ID) && DONE.has(o.status) && o.checkOut >= s && o.checkOut < e).length;
+    const tg = tlId ? db.targets[tlId].daily : TLS.reduce((a, t) => a + db.targets[t.id].daily, 0);
+    const dd = new Date(s); out.push({label: `${dd.getDate()} ${MON[dd.getMonth()]}`, value: n, target: tg, tip: `<b>${fmtDay(s)}</b><br>${n} observations · target ${tg}`}); }
+  return out;
+}
+
+/* =====================================================================
+   SUPERVISOR · Monitoring dashboard
+   ===================================================================== */
+function periodSeg(){ return `<div class="segc" role="group" aria-label="Report period">${['daily','weekly','monthly'].map(p => `<button data-period="${p}" class="${ui.period === p ? 'on' : ''}">${p[0].toUpperCase() + p.slice(1)}</button>`).join('')}</div>`; }
+function tlSelect(withSup){ return `<select class="sel" id="tlFilter" aria-label="Team leader"><option value="">All team leaders</option>${TLS.map(t => `<option value="${t.id}"${ui.tlFilter === t.id ? ' selected' : ''}>${esc(t.name)}</option>`).join('')}${withSup ? `<option value="${SUP_ID}"${ui.tlFilter === SUP_ID ? ' selected' : ''}>My observations (Supervisor)</option>` : ''}</select>`; }
+function liveStatusHTML(tlId){
+  const a = activeObs(tlId);
+  if (a) return `<span class="live-dot"></span><b style="font-weight:500;color:#c21818">Observing</b> ${esc(a.group)}<div class="s2">${esc(tutorById(a.tutorId).name)} · <span class="mono" data-since="${a.checkIn}">${fmtDur((Date.now() - a.checkIn) / 1000)}</span> in room</div>`;
+  const last = db.obs.filter(o => o.tlId === tlId && o.checkOut).sort((x, y) => y.checkOut - x.checkOut)[0];
+  return `<span class="idle-dot"></span>Not in a room<div class="s2">${last ? 'Last exit ' + fmtAgo(last.checkOut) : 'No observations yet'}</div>`;
+}
+function vDash(){
+  if (ui.tlFilter === SUP_ID) ui.tlFilter = '';
+  const p = ui.period; const all = statsFor(ui.tlFilter, p); const L = liveInfo();
+  const observingNow = TLS.filter(t => activeObs(t.id)).length;
+  const pend = db.requests.filter(q => q.status === 'Pending' && (!ui.tlFilter || q.tlId === ui.tlFilter));
+  return `
+  <div class="headrow"><div class="grow"><h1 class="h1">Monitoring Dashboard</h1><div class="subt">Team Leader observation targets vs. actual · ${PLBL[p]} · live slot ${slotLabel(L.idx)} ${L.demo ? '<span class="tag demo">demo slot</span>' : '<span class="tag live">Live</span>'}</div></div>
+    ${periodSeg()} ${tlSelect()} <button class="btn sm" data-act="exportSummary">${icon('download','width:16px;height:16px;margin-right:4px')}Export ${p} report</button></div>
+  <div class="kpis">
+    <div class="kpi"><div class="k">Observations completed</div><div class="v">${all.done} <small>/ ${all.target}</small></div><div class="bar ${barCls(all.pct)}" style="margin-top:8px"><i style="width:${Math.min(100, all.pct * 100)}%"></i></div></div>
+    <div class="kpi"><div class="k">Remaining to target</div><div class="v">${all.remaining}</div><div class="s">${Math.round(all.pct * 100)}% of ${PLBL[p].toLowerCase()}’s target</div></div>
+    <div class="kpi"><div class="k">Avg. time in room</div><div class="v">${all.done ? fmtDur(all.avgDur) : '—'}</div><div class="s">per completed observation</div></div>
+    <div class="kpi"><div class="k">Feedback reviewed by tutors</div><div class="v">${all.fbSent ? Math.round(all.ackPct * 100) + '%' : '—'}</div><div class="s">${all.reviewed} of ${all.fbSent} acknowledged</div></div>
+    <div class="kpi"><div class="k">Live now</div><div class="v">${observingNow} <small>TLs in rooms</small></div><div class="s">${pend.length} urgent request${pend.length === 1 ? '' : 's'} waiting</div></div>
+  </div>
+  ${pend.length ? `<div class="card" style="margin-bottom:14px;border-color:#f4b4b4"><h3>${icon('alert','width:16px;height:16px;color:#e02424')} Urgent observation requests waiting<span class="r"><button class="linkbtn" data-view="requests">View all</button></span></h3>${pend.map(reqCard).join('')}</div>` : ''}
+  <div class="card" style="margin-bottom:14px;padding:0"><div style="padding:16px 18px 6px"><h3>Team Leaders — ${PLBL[p]}</h3></div>
+    <div class="tbl" style="border:0;border-radius:0 0 12px 12px"><table class="grid2"><thead><tr><th>Team Leader</th><th style="min-width:220px">Live status</th><th>Target</th><th>Completed</th><th style="min-width:180px">Progress</th><th>Remaining</th><th>Avg. time in room</th><th>Feedback reviewed</th><th>Urgent requests</th></tr></thead><tbody>
+    ${TLS.filter(t => !ui.tlFilter || t.id === ui.tlFilter).map(t => { const s = statsFor(t.id, p); return `<tr>
+      <td><div class="nm2">${esc(t.name)}</div><div class="s2">${t.code} · ${TUTORS.filter(x => x.tlId === t.id).length} tutors</div></td>
+      <td data-live="${t.id}">${liveStatusHTML(t.id)}</td>
+      <td class="mono">${s.target}</td><td class="mono"><b style="font-weight:500">${s.done}</b></td>
+      <td><div class="mini-prog"><div class="bar ${barCls(s.pct)}"><i style="width:${Math.min(100, s.pct * 100)}%"></i></div><span class="mono">${Math.round(s.pct * 100)}%</span></div></td>
+      <td class="mono">${s.remaining}</td><td class="mono">${s.done ? fmtDur(s.avgDur) : '—'}</td>
+      <td class="mono">${s.fbSent ? `${Math.round(s.ackPct * 100)}% <span class="muted">(${s.reviewed}/${s.fbSent})</span>` : '—'}</td>
+      <td class="mono">${s.reqs ? `${s.reqs}${s.avgResp ? ` <span class="muted">· avg response ${fmtDur(s.avgResp)}</span>` : ''}` : '—'}</td></tr>`; }).join('')}
+    </tbody></table></div></div>
+  <div class="two">
+    <div class="card"><h3>Completed observations — last 14 days ${ui.tlFilter ? '· ' + esc(tlById(ui.tlFilter).name) : '· all team leaders'}</h3>${barChart('chDash', last14(ui.tlFilter), {series:'Completed observations', aria:'Daily completed observations versus target'})}</div>
+    <div class="card"><h3>Weakest coaching areas (${PLBL[p].toLowerCase()})</h3>${critMeters(all.obs.filter(o => o.fb))}</div>
+  </div>`;
+}
+function critMeters(obs){
+  if (!obs.length) return '<div class="empty2">No feedback in this period</div>';
+  return `<div class="meters">${CRIT.map(c => ({c, v: avg(obs.map(o => o.fb.scores[c.k]))})).sort((a, b) => a.v - b.v).map(({c, v}) => `<div class="meter"><span>${c.n}</span><div class="bar ${barCls(v / 5)}"><i style="width:${v / 5 * 100}%"></i></div><b>${r1(v)}</b></div>`).join('')}</div><div class="s2" style="margin-top:10px">Average score (1–5) from ${obs.length} feedback forms.</div>`;
+}
+function reqCard(q){
+  const t = tutorById(q.tutorId); const tl = tlById(q.tlId);
+  const canAct = role() === 'tl' && q.tlId === ME_TL;
+  return `<div class="urgent-card">${icon('alert','width:22px;height:22px;color:#e02424')}
+    <div><div class="uwho">${esc(t.name)} · ${esc(q.group)} <span class="tag urgent">URGENT</span></div>
+      <div class="meta">${esc(q.reason)}${q.note ? ' — “' + esc(q.note) + '”' : ''}</div>
+      <div class="s2">Waiting <span class="mono" data-wait="${q.createdAt}">${fmtDur((Date.now() - q.createdAt) / 1000)}</span> · routed to ${esc(tl.name)}</div></div>
+    <div class="acts">${canAct ? `<button class="btn red sm" data-act="acceptReq" data-req="${q.id}">${icon('play','width:14px;height:14px;margin-right:4px')}Accept &amp; Join</button><button class="btn ghost sm" data-act="declineReq" data-req="${q.id}">Decline</button>`
+      : role() === 'supervisor' ? `<select class="sel" data-reassign="${q.id}" aria-label="Reassign request"><option value="">Reassign to…</option>${TLS.filter(x => x.id !== q.tlId).map(x => `<option value="${x.id}">${esc(x.name)}${activeObs(x.id) ? ' (in a room)' : ''}</option>`).join('')}</select>` : ''}</div></div>`;
+}
+
+
+/* =====================================================================
+   SUPERVISOR · all live sessions (join any session, filter by Team Leader)
+   ===================================================================== */
+function vLive(){
+  if (ui.tlFilter === SUP_ID) ui.tlFilter = '';
+  const L = liveInfo(); if (ui.slot == null) ui.slot = L.idx;
+  const dk = dayKey(Date.now()); const sl = ui.slot; const st = slotState(sl);
+  const q = ui.tq.trim().toLowerCase();
+  const inQueue = {}; TLS.forEach(tl => { const k = `${dk}|${sl}|${tl.id}`; (db.queues[k] || []).forEach((e, i) => { inQueue[e.sid] = i + 1; }); });
+  const all = sessionsFor(dk).filter(s => s.slot === sl);
+  const rows = all.filter(s => !ui.tlFilter || s.tlId === ui.tlFilter).filter(s => { const t = tutorById(s.tutorId); return !q || t.name.toLowerCase().includes(q) || String(t.code).includes(q) || s.group.toLowerCase().includes(q); })
+    .map(s => ({s, t: tutorById(s.tutorId), inRoom: db.obs.filter(o => o.sid === s.id && o.status === 'in_room'), mine: db.obs.find(o => o.sid === s.id && o.tlId === SUP_ID), done: db.obs.filter(o => o.sid === s.id && DONE.has(o.status)), req: db.requests.find(r => r.sid === s.id && (r.status === 'Pending' || r.status === 'Accepted'))}))
+    .filter(x => !ui.liveStatus || (ui.liveStatus === 'inroom' ? x.inRoom.length : ui.liveStatus === 'none' ? !x.inRoom.length && !x.done.length : ui.liveStatus === 'urgent' ? !!x.req : ui.liveStatus === 'queued' ? !!inQueue[x.s.id] : true))
+    .sort((a, b) => TLS.findIndex(t => t.id === a.s.tlId) - TLS.findIndex(t => t.id === b.s.tlId) || a.t.name.localeCompare(b.t.name));
+  const mineActive = activeObs(SUP_ID);
+  const teamCounts = TLS.map(t => ({t, n: all.filter(s => s.tlId === t.id).length}));
+  return `<div class="headrow"><div class="grow"><h1 class="h1">All Live Sessions</h1><div class="subt">Every session in the selected slot across all teams. Join any live session as a <b style="font-weight:500">silent shadow</b>: the tutor is not notified and you don’t give the tutor feedback. Afterwards, write a note to the tutor’s Team Leader with what to coach. Entry and time in room are logged (not counted toward TL targets).</div></div></div>
+  <div class="tabbar" style="margin:0 0 14px" role="tablist">${SLOTS.map((_, i) => { const s2 = slotState(i); return `<button class="slot${i === sl ? ' on' : ''}" data-slot="${i}" role="tab" aria-selected="${i === sl}"><b>Slot ${i + 1} · ${slotLabel(i)}</b><small>${s2 === 'live' ? `<span class="tag live">Live${L.demo ? ' (demo)' : ''}</span>` : s2 === 'past' ? '<span class="tag done">Ended</span>' : '<span class="tag up">Upcoming</span>'} &nbsp;${sessionsFor(dk).filter(x => x.slot === i).length} sessions</small></button>`; }).join('')}</div>
+  <div class="headrow" style="margin-bottom:12px">
+    ${tlSelect()}
+    <label class="search" style="height:38px;width:260px;border-radius:8px"><svg class="i" style="color:#2f3d4a;width:18px;height:18px"><use href="#i-search"/></svg><input id="tutorQ" placeholder="Search tutor, code or group" value="${esc(ui.tq)}" aria-label="Search tutors" autocomplete="off"></label>
+    <select class="sel" id="liveStatus" aria-label="Session filter"><option value="">All sessions</option>${[['inroom','Observer in room'],['none','Not observed yet'],['urgent','Urgent request open'],['queued',"In a TL's queue"]].map(([k, l]) => `<option value="${k}"${ui.liveStatus === k ? ' selected' : ''}>${l}</option>`).join('')}</select>
+    <div class="grow"></div>
+    <div class="s2" style="font-size:13.5px">${rows.length} of ${all.length} sessions${ui.tlFilter ? ' · team of ' + esc(tlById(ui.tlFilter).name) : ''} · ${rows.filter(x => x.inRoom.length).length} with an observer in room</div>
+  </div>
+  <div class="tabbar" style="margin-bottom:12px">${teamCounts.map(({t, n}) => `<button class="slot${ui.tlFilter === t.id ? ' on' : ''}" data-tlchip="${t.id}" style="min-width:0;padding:6px 12px"><b style="font-size:13.5px">${esc(t.name)}</b><small>${TUTORS.filter(x => x.tlId === t.id).length} tutors · ${n} sessions${activeObs(t.id) ? ' · <span class="live-dot" style="margin:0 2px 0 4px"></span>in room' : ''}</small></button>`).join('')}${ui.tlFilter ? '<button class="linkbtn" data-tlchip="">Show all teams</button>' : ''}</div>
+  <div class="tbl"><table class="grid2"><thead><tr><th>Group</th><th>Tutor</th><th>Team Leader</th><th>Grade · Subject</th><th>Students</th><th style="min-width:200px">Observer in room</th><th>TL queue</th><th>Urgent</th><th style="min-width:200px">Action</th></tr></thead><tbody>
+  ${rows.map(({s, t, inRoom, mine, done, req}) => {
+    let act;
+    if (mine && mine.status === 'in_room') act = `<button class="btn amber sm" data-act="complete" data-obs="${mine.id}">${icon('stop','width:14px;height:14px;margin-right:4px')}End shadowing</button>`;
+    else if (mine && mine.status === 'await') act = `<button class="btn line sm" data-act="writeFb" data-obs="${mine.id}">Write note to Team Leader</button>`;
+    else if (mine && mine.note) act = `<button class="linkbtn" data-act="viewFb" data-obs="${mine.id}">View my note</button> <span class="st ${mine.note.ackStatus === 'Reviewed' ? 'reviewed' : 'sent'}">${mine.note.ackStatus === 'Reviewed' ? 'Reviewed by TL' : 'Sent to TL'}</span>`;
+    else if (st === 'live') act = `<button class="btn sm" data-act="join" data-sid="${s.id}"${mineActive ? ' title="End your current shadowing first"' : ''}>${icon('eye','width:15px;height:15px;margin-right:4px')}Join as shadow</button>`;
+    else act = `<span class="muted">${st === 'past' ? 'Session ended' : 'Starts ' + slotLabel(sl).split('–')[0]}</span>`;
+    return `<tr class="${req ? 'urg' : ''}"><td class="nm2">${esc(s.group)}</td><td><div class="nm2">${esc(t.name)}</div><div class="s2">${t.code}</div></td><td>${esc(tlById(s.tlId).name)}</td>
+      <td>Grade ${s.grade} · ${esc(s.subject)}</td><td class="mono">${s.students}</td>
+      <td>${inRoom.length ? inRoom.map(o => `<div><span class="live-dot"></span>${esc(observerName(o.tlId))}${o.shadow ? ' · shadow' : ''} <span class="s2 mono" data-since="${o.checkIn}">${fmtDur((Date.now() - o.checkIn) / 1000)}</span></div>`).join('') : done.length ? `<span class="s2">Observed by ${done.map(o => esc(observerName(o.tlId))).join(', ')}</span>` : '—'}</td>
+      <td>${inQueue[s.id] ? `#${inQueue[s.id]}` : '—'}</td>
+      <td>${req ? `<span class="tag urgent">URGENT</span><div class="s2">${esc(req.reason)} · ${req.status}</div>` : '—'}</td><td>${act}</td></tr>`; }).join('') || '<tr><td colspan="9" class="empty2">No sessions match the selected team leader and filters.</td></tr>'}
+  </tbody></table></div>`;
+}
+
+
+/* =====================================================================
+   Supervisor shadowing → note to the tutor's Team Leader (tutor never sees it)
+   ===================================================================== */
+const RECS = ['Coach the tutor in the next observation','Schedule a follow-up observation this week','Share a best-practice example with the tutor','Escalate to the academic team','No action needed — good session'];
+function tlObsFor(o){ return db.obs.find(x => x.sid === o.sid && x.tlId !== SUP_ID); }
+function openShadowNote(obsId){
+  const o = db.obs.find(x => x.id === obsId); const t = tutorById(o.tutorId); const tl = tlById(t.tlId); const tlo = tlObsFor(o);
+  openModal(`${mHead('Shadow note to Team Leader', 'eye')}
+  <div class="m-body pad2">
+    <div class="note-box blue" style="margin-bottom:14px;font-size:13.5px">This note goes to <b>${esc(tl.name)}</b> only. The tutor is <b>not</b> notified and does not see it — the Team Leader decides how to coach.</div>
+    <div class="obsum"><div><div class="k">Tutor</div><div class="v">${esc(t.name)}</div></div><div><div class="k">Group</div><div class="v">${esc(o.group)}</div></div>
+      <div><div class="k">Shadowed</div><div class="v mono">${fmtClock(o.checkIn)} → ${fmtClock(o.checkOut)}</div></div><div><div class="k">Time in room</div><div class="v mono">${fmtDur(o.durS)}</div></div></div>
+    <div style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:6px">Areas the Team Leader should coach</div>
+    <div class="labels" id="snFocus">${CRIT.map(c => `<button type="button" class="lab" data-focus="${c.k}" aria-pressed="false">${c.n}</button>`).join('')}</div>
+    <div class="formgrid" style="margin-top:14px">
+      <div><label class="l" for="snRec">Recommendation for the Team Leader</label><select class="inp" id="snRec">${RECS.map(r => `<option>${esc(r)}</option>`).join('')}</select></div>
+      <div><label class="l" for="snPrio">Priority</label><select class="inp" id="snPrio"><option>Normal</option><option>High</option><option>Low</option></select></div>
+    </div>
+    <div style="margin-top:14px"><label class="l" for="snText">What you observed about the tutor <span style="color:var(--bad)">*</span></label><textarea class="inp" id="snText" rows="4" placeholder="e.g. Students were not involved during the first 20 minutes; the tutor talked over questions…" dir="auto"></textarea></div>
+    ${tlo ? `<div style="margin-top:14px"><label class="l" for="snTl">Feedback on ${esc(tl.name)}’s observation of this session <span class="muted">(optional)</span></label><textarea class="inp" id="snTl" rows="2" placeholder="e.g. Good catch on pacing; the feedback could be more specific about engagement." dir="auto"></textarea>
+      <div class="hint">${esc(tl.name)} was also in this room (${tlo.status === 'in_room' ? 'still observing' : fmtDur(tlo.durS || 0)}).</div></div>` : ''}
+    <div class="msg-err" id="snErr" role="alert"></div>
+  </div>
+  <div class="m-foot right"><button class="btn ghost" data-act="noteLater">Save for later</button><button class="btn" data-act="sendNote" data-obs="${o.id}">Send to Team Leader</button></div>`, 'md');
+  fbDraft = {obsId, shadow: true};
+}
+function sendShadowNote(){
+  const o = db.obs.find(x => x.id === fbDraft.obsId); const text = $('#snText').value.trim();
+  const focus = $$('#snFocus [data-focus].on').map(b => b.dataset.focus);
+  if (text.length < 10) { $('#snErr').textContent = 'Describe what you observed (10+ characters).'; $('#snText').focus(); return; }
+  const tutor = tutorById(o.tutorId); const tlId = tutor.tlId;
+  o.note = {to: tlId, focus, recommendation: $('#snRec').value, priority: $('#snPrio').value, text, tlComment: $('#snTl') ? $('#snTl').value.trim() : '', sentAt: Date.now(), ackStatus: 'Sent', ackAt: null};
+  o.status = 'completed';
+  notify('tl:' + tlId, `${SUPERVISOR.name} (Supervisor) sent a note about ${tutor.name} — ${o.group}${o.note.priority === 'High' ? ' · HIGH priority' : ''}`, 'supnotes');
+  persist(); closeModal(); renderAll(); toast(`Note sent to ${tlById(tlId).name}. The tutor was not notified.`, 'ok');
+}
+function noteBody(o, tlView){
+  const n = o.note; const t = tutorById(o.tutorId);
+  return `<div class="fb-h"><span class="st ${n.ackStatus === 'Reviewed' ? 'reviewed' : 'sent'}">${n.ackStatus === 'Reviewed' ? icon('check') + 'Reviewed ' + fmtDT(n.ackAt) : tlView ? 'New — please review' : 'Sent · waiting for Team Leader'}</span>
+      ${n.priority === 'High' ? '<span class="tag urgent">HIGH PRIORITY</span>' : n.priority === 'Low' ? '<span class="tag done">Low priority</span>' : ''}<span class="tag up">Not visible to the tutor</span></div>
+    <div class="info" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 16px;margin-bottom:10px">
+      <div><div class="k" style="font-size:12px;color:var(--muted)">Tutor</div><div>${esc(t.name)} <span class="s2">${t.code}</span></div></div>
+      <div><div class="k" style="font-size:12px;color:var(--muted)">Session</div><div>${esc(o.group)} · ${fmtDay(o.checkIn)}</div></div>
+      <div><div class="k" style="font-size:12px;color:var(--muted)">Shadowed</div><div class="mono">${fmtClock(o.checkIn)} · ${fmtDur(o.durS)}</div></div></div>
+    ${n.focus.length ? `<div class="labels" style="margin-bottom:10px">${n.focus.map(k => `<span class="lab on">${esc(CRIT_N[k])}</span>`).join('')}</div>` : ''}
+    <div class="box imp"><small>What the supervisor observed</small>${esc(n.text)}</div>
+    <div class="fbcols"><div class="box good" style="background:#f2f8ff;border-color:#cfe2fb"><small style="color:#0b5fc8">Recommendation</small>${esc(n.recommendation)}</div>
+      ${n.tlComment ? `<div class="box" style="background:#f6f7f9;border:1px solid var(--line)"><small style="color:var(--muted)">On your observation of this session</small>${esc(n.tlComment)}</div>` : '<div></div>'}</div>
+    ${n.tlReply ? `<div class="box" style="margin-top:10px;background:#f1faf4;border:1px solid #cdebd7"><small style="color:#0b7a2c">Team Leader reply</small>${esc(n.tlReply)}</div>` : ''}`;
+}
+function viewShadowNote(obsId){
+  const o = db.obs.find(x => x.id === obsId);
+  openModal(`${mHead('Shadow note — ' + esc(o.group), 'eye')}<div class="m-body pad2">${noteBody(o, role() === 'tl')}</div><div class="m-foot right"><button class="btn ghost" data-closem>Close</button></div>`, 'md');
+}
+function vSupNotes(){
+  const list = db.obs.filter(o => o.note && tutorById(o.tutorId).tlId === ME_TL).sort((a, b) => (a.note.ackStatus === 'Sent' ? 0 : 1) - (b.note.ackStatus === 'Sent' ? 0 : 1) || b.note.sentAt - a.note.sentAt);
+  return `<div class="headrow"><div class="grow"><h1 class="h1">Supervisor Notes</h1><div class="subt">Notes from ${esc(SUPERVISOR.name)} after silently shadowing your tutors’ live sessions. Tutors don’t see these — use them to plan your coaching.</div></div></div>
+  <div class="cards">${list.map(o => `<div class="fb${o.note.ackStatus === 'Sent' ? ' new' : ''}">
+    <div class="fb-h" style="margin-bottom:6px"><div><div class="nm2">${esc(tutorById(o.tutorId).name)} · ${esc(o.group)}</div><div class="s2">From ${esc(SUPERVISOR.name)} · ${fmtDT(o.note.sentAt)}</div></div></div>
+    ${noteBody(o, true)}
+    <div class="fb-foot">${o.note.ackStatus === 'Sent' ? `<input class="inp" id="tlReply-${o.id}" placeholder="Optional reply to the supervisor (e.g. Will coach on engagement in Thursday’s observation)" style="flex:1;min-width:240px" dir="auto"><button class="btn sm" data-act="ackNote" data-obs="${o.id}">${icon('check','width:15px;height:15px;margin-right:4px')}Mark as Reviewed</button>` : `<span class="sp"></span><span class="s2">Reviewed ${fmtDT(o.note.ackAt)}</span>`}</div></div>`).join('') || '<div class="empty2">No supervisor notes yet.</div>'}</div>`;
+}
+
+/* ---------- SUPERVISOR · targets ---------- */
+function vTargets(){
+  return `<div class="headrow"><div class="grow"><h1 class="h1">Observation Targets</h1><div class="subt">Set how many live sessions each Team Leader must observe. “Sessions per slot” controls the size of each TL’s rotated queue for every 2.5-hour slot (applies to queues generated after saving).</div></div>
+    <button class="btn ghost sm" data-act="resetTargets">Discard changes</button><button class="btn sm" data-act="saveTargets">Save targets</button></div>
+  <div class="tbl"><table class="grid2" style="min-width:900px"><thead><tr><th>Team Leader</th><th>Team size</th><th>Daily target</th><th>Weekly target</th><th>Monthly target</th><th>Sessions per slot</th><th>Today</th><th>Last updated</th></tr></thead><tbody>
+  ${TLS.map(t => { const g = db.targets[t.id]; const s = statsFor(t.id, 'daily'); return `<tr>
+    <td><div class="nm2">${esc(t.name)}</div><div class="s2">${t.code}</div></td><td>${TUTORS.filter(x => x.tlId === t.id).length} tutors</td>
+    ${['daily','weekly','monthly','pool'].map(k => `<td><input class="numinp" type="number" min="${k === 'pool' ? 1 : 0}" max="${k === 'pool' ? 20 : 999}" step="1" data-tgt="${t.id}" data-k="${k}" value="${g[k]}" aria-label="${k} target for ${esc(t.name)}"></td>`).join('')}
+    <td class="mono">${s.done} / ${s.target}</td><td><div>${fmtDate(g.updatedAt)}</div><div class="s2">by ${esc(g.by)}</div></td></tr>`; }).join('')}
+  </tbody></table></div>
+  <div class="msg-err" id="tgtErr" role="alert" style="margin-top:10px"></div>
+  <div class="card" style="margin-top:16px"><h3>Change log</h3>${db.targetLog.length ? `<ul class="hist">${db.targetLog.slice().reverse().map(h => `<li><time>${fmtDT(h.at)}</time><div><b style="font-weight:500">${esc(h.by)}</b> — ${esc(h.text)}</div></li>`).join('')}</ul>` : '<div class="muted">No changes yet.</div>'}</div>`;
+}
+function saveTargets(){
+  const inputs = $$('[data-tgt]'); const next = {}; let err = '';
+  inputs.forEach(i => i.classList.remove('err'));
+  inputs.forEach(i => { const v = i.value.trim(); const n = Number(v); const k = i.dataset.k; const bad = !/^\d+$/.test(v) || n > (k === 'pool' ? 20 : 999) || (k === 'pool' && n < 1);
+    if (bad) { i.classList.add('err'); err = err || `Enter a whole number${k === 'pool' ? ' between 1 and 20 for sessions per slot' : ' between 0 and 999'}.`; }
+    (next[i.dataset.tgt] = next[i.dataset.tgt] || {})[k] = n; });
+  TLS.forEach(t => { const g = next[t.id]; if (!g) return; if (g.weekly < g.daily) { err = err || `${t.name}: weekly target cannot be lower than the daily target.`; $(`[data-tgt="${t.id}"][data-k="weekly"]`).classList.add('err'); }
+    if (g.monthly < g.weekly) { err = err || `${t.name}: monthly target cannot be lower than the weekly target.`; $(`[data-tgt="${t.id}"][data-k="monthly"]`).classList.add('err'); } });
+  $('#tgtErr').textContent = err; if (err) return;
+  let changed = 0;
+  TLS.forEach(t => { const o = db.targets[t.id], g = next[t.id]; const diff = ['daily','weekly','monthly','pool'].filter(k => o[k] !== g[k]);
+    if (diff.length) { changed++; db.targetLog.push({at: Date.now(), by: SUPERVISOR.name, text: `${t.name}: ` + diff.map(k => `${k === 'pool' ? 'per slot' : k} ${o[k]} → ${g[k]}`).join(', ')});
+      Object.assign(o, g, {updatedAt: Date.now(), by: SUPERVISOR.name}); notify('tl:' + t.id, `Your observation targets were updated: daily ${g.daily}, weekly ${g.weekly}, monthly ${g.monthly}, ${g.pool} per slot`, 'progress'); } });
+  persist(); renderAll(); toast(changed ? `Targets saved for ${changed} team leader${changed > 1 ? 's' : ''}.` : 'No changes to save.', changed ? 'ok' : '');
+}
+
+/* ---------- requests list (supervisor + TL) ---------- */
+function vRequests(){
+  const list = db.requests.filter(q => (role() === 'supervisor' || q.tlId === ME_TL) && (!ui.reqFilter || q.status === ui.reqFilter)).sort((a, b) => b.createdAt - a.createdAt);
+  const pend = list.filter(q => q.status === 'Pending');
+  return `<div class="headrow"><div class="grow"><h1 class="h1">Urgent Requests</h1><div class="subt">Tutors can ask for someone to join their live session urgently. Requests go to the tutor’s Team Leader${role() === 'supervisor' ? '; supervisors can reassign them' : ''}.</div></div>
+    <select class="sel" id="reqFilter" aria-label="Status filter"><option value="">All statuses</option>${['Pending','Accepted','Completed','Declined'].map(s => `<option${ui.reqFilter === s ? ' selected' : ''}>${s}</option>`).join('')}</select></div>
+  ${pend.map(reqCard).join('')}
+  <div class="tbl" style="margin-top:6px"><table class="grid2"><thead><tr><th>Requested</th><th>Tutor</th><th>Group</th><th>Reason</th><th>Team Leader</th><th>Status</th><th>Response time</th><th>Outcome</th></tr></thead><tbody>
+  ${list.map(q => { const t = tutorById(q.tutorId); const o = q.obsId ? db.obs.find(x => x.id === q.obsId) : null; return `<tr>
+    <td><div>${fmtDT(q.createdAt)}</div><div class="s2">${fmtAgo(q.createdAt)}</div></td><td><div class="nm2">${esc(t.name)}</div><div class="s2">${t.code}</div></td><td>${esc(q.group)}</td>
+    <td style="max-width:280px"><div>${esc(q.reason)}</div>${q.note ? `<div class="s2">${esc(q.note)}</div>` : ''}</td><td>${esc(tlById(q.tlId).name)}</td>
+    <td><span class="st ${q.status}">${q.status}</span></td>
+    <td class="mono">${q.acceptedAt ? fmtDur((q.acceptedAt - q.createdAt) / 1000) : q.status === 'Pending' ? `<span data-wait="${q.createdAt}">${fmtDur((Date.now() - q.createdAt) / 1000)}</span> waiting` : '—'}</td>
+    <td>${q.status === 'Declined' ? `<span class="s2">${esc(q.declineReason || '')}</span>` : o ? (o.status === 'in_room' ? '<span class="st inroom">In room now</span>' : o.fb ? `<button class="linkbtn" data-act="viewFb" data-obs="${o.id}">View feedback</button>` : '<span class="st await">Awaiting feedback</span>') : '—'}</td></tr>`; }).join('') || '<tr><td colspan="8" class="empty2">No requests.</td></tr>'}
+  </tbody></table></div>`;
+}
+
+/* ---------- SUPERVISOR · reports / log ---------- */
+function logRows(){
+  const [s, e] = periodRange(ui.period);
+  return db.obs.filter(o => (!ui.tlFilter || o.tlId === ui.tlFilter) && (o.checkIn >= s && o.checkIn < e) && (!ui.logStatus || o.status === ui.logStatus)).sort((a, b) => b.checkIn - a.checkIn);
+}
+const OBS_LBL = {in_room:'In room', await:'Awaiting feedback', completed:'Completed', missed:'Missed'};
+const OBS_CLS = {in_room:'inroom', await:'await', completed:'completed', missed:'missed'};
+function vLog(){
+  const rows = logRows(); const per = 15; const pages = Math.max(1, Math.ceil(rows.length / per)); ui.logPage = Math.min(Math.max(1, ui.logPage), pages);
+  const pr = rows.slice((ui.logPage - 1) * per, ui.logPage * per);
+  return `<div class="headrow"><div class="grow"><h1 class="h1">Observation Reports</h1><div class="subt">Every observation with check-in time, time spent in the room and feedback status.</div></div>
+    ${periodSeg()} ${tlSelect(true)}
+    <select class="sel" id="logStatus" aria-label="Status"><option value="">All statuses</option>${Object.entries(OBS_LBL).filter(([k]) => k !== 'missed').map(([k, v]) => `<option value="${k}"${ui.logStatus === k ? ' selected' : ''}>${v}</option>`).join('')}</select>
+    <button class="btn line sm" data-act="exportSummary">${icon('download','width:16px;height:16px;margin-right:4px')}Summary CSV</button>
+    <button class="btn sm" data-act="exportLog">${icon('download','width:16px;height:16px;margin-right:4px')}Observations CSV (${rows.length})</button></div>
+  <div class="tbl"><table class="grid2"><thead><tr><th>Date</th><th>Observer</th><th>Tutor</th><th>Group</th><th>Check-in</th><th>Check-out</th><th>Time in room</th><th>Status</th><th>Score</th><th>Tutor review</th><th></th></tr></thead><tbody>
+  ${pr.map(o => { const t = tutorById(o.tutorId); return `<tr><td>${fmtDay(o.checkIn)}</td><td>${esc(observerName(o.tlId))}</td><td><div class="nm2">${esc(t.name)}</div><div class="s2">${t.code}</div></td>
+    <td>${esc(o.group)}${o.reqId ? ' <span class="tag urgent">URGENT</span>' : ''}</td><td class="mono">${fmtClock(o.checkIn)}</td><td class="mono">${o.checkOut ? fmtClock(o.checkOut) : '—'}</td>
+    <td class="mono">${o.status === 'in_room' ? `<span data-since="${o.checkIn}">${fmtDur((Date.now() - o.checkIn) / 1000)}</span>` : fmtDur(o.durS)}</td>
+    <td><span class="st ${OBS_CLS[o.status]}">${OBS_LBL[o.status]}</span></td><td class="mono">${o.fb ? o.fb.overall + ' / 5' : o.shadow ? '<span class="s2">Shadow</span>' : '—'}</td>
+    <td>${o.fb ? `<span class="st ${o.fb.ackStatus === 'Reviewed' ? 'reviewed' : 'sent'}">${o.fb.ackStatus}</span>` : o.note ? `<span class="st ${o.note.ackStatus === 'Reviewed' ? 'reviewed' : 'sent'}">TL: ${o.note.ackStatus}</span>` : '—'}</td>
+    <td>${o.fb || o.note ? `<button class="linkbtn" data-act="viewFb" data-obs="${o.id}">View</button>` : ''}</td></tr>`; }).join('') || '<tr><td colspan="11" class="empty2">No observations match the selected period and filters.</td></tr>'}
+  </tbody></table>
+  <div class="pager2">${rows.length ? `${(ui.logPage - 1) * per + 1}–${Math.min(rows.length, ui.logPage * per)} of ${rows.length}` : ''}
+    <button class="tool" data-act="logPrev" ${ui.logPage <= 1 ? 'disabled' : ''} aria-label="Previous page">${icon('back')}</button><span>${ui.logPage} / ${pages}</span><button class="tool" data-act="logNext" ${ui.logPage >= pages ? 'disabled' : ''} aria-label="Next page">${icon('next')}</button></div></div>`;
+}
+
+/* =====================================================================
+   TEAM LEADER · queue
+   ===================================================================== */
+function vQueue(){
+  const L = liveInfo(); if (ui.slot == null) ui.slot = L.idx;
+  const dk = dayKey(Date.now()); const sl = ui.slot; const st = slotState(sl);
+  const q = queueFor(dk, sl, ME_TL);
+  const urgentHere = db.requests.filter(r => r.tlId === ME_TL && r.obsId && sessionById(r.sid) && sessionById(r.sid).dk === dk && sessionById(r.sid).slot === sl && !q.some(e => e.sid === r.sid));
+  const entries = [...urgentHere.map(r => ({sid: r.sid, reason:'Urgent request', urgent: r})), ...q.map(e => Object.assign({}, e, {urgent: db.requests.find(r => r.sid === e.sid && r.tlId === ME_TL && r.status !== 'Declined')}))];
+  const day = statsFor(ME_TL, 'daily');
+  const pend = db.requests.filter(r => r.tlId === ME_TL && r.status === 'Pending');
+  return `
+  <div class="headrow"><div class="grow"><h1 class="h1">My Observation Queue</h1><div class="subt">Sessions are rotated across slots so every tutor in your team gets observed. Join a live session, then complete it to send coaching feedback.</div></div>
+    <div class="mini-prog" style="min-width:280px">Today <b class="mono" style="font-weight:500">${day.done} / ${day.target}</b><div class="bar ${barCls(day.pct)}"><i style="width:${Math.min(100, day.pct * 100)}%"></i></div></div></div>
+  ${pend.map(reqCard).join('')}
+  <div class="tabbar" style="margin:6px 0 14px" role="tablist">${SLOTS.map((_, i) => { const qq = queueFor(dk, i, ME_TL); const dn = qq.filter(e => { const o = obsFor(e.sid, ME_TL); return o && DONE.has(o.status); }).length; const s2 = slotState(i);
+    return `<button class="slot${i === sl ? ' on' : ''}" data-slot="${i}" role="tab" aria-selected="${i === sl}"><b>Slot ${i + 1} · ${slotLabel(i)}</b><small>${s2 === 'live' ? `<span class="tag live">Live${L.demo ? ' (demo)' : ''}</span>` : s2 === 'past' ? '<span class="tag done">Ended</span>' : '<span class="tag up">Upcoming</span>'} &nbsp;${dn}/${qq.length} observed</small></button>`; }).join('')}</div>
+  <div class="tbl"><table class="grid2"><thead><tr><th>#</th><th>Group</th><th>Tutor</th><th>Grade · Subject</th><th>Students</th><th>Why in queue</th><th>Status</th><th>Check-in</th><th>Time in room</th><th style="min-width:220px">Action</th></tr></thead><tbody>
+  ${entries.map((e, k) => { const s = sessionById(e.sid); const t = tutorById(s.tutorId); const o = obsFor(e.sid, ME_TL);
+    const status = o ? o.status : st === 'past' ? 'missed' : 'pending';
+    let act = '';
+    if (status === 'pending') act = st === 'live' ? `<button class="btn sm" data-act="join" data-sid="${s.id}"${e.urgent && e.urgent.status === 'Pending' ? ` data-req="${e.urgent.id}"` : ''}>${icon('play','width:14px;height:14px;margin-right:4px')}Join &amp; Start Observation</button>` : `<span class="muted">Starts ${slotLabel(sl).split('–')[0]}</span>`;
+    if (status === 'in_room') act = `<button class="btn amber sm" data-act="complete" data-obs="${o.id}">${icon('stop','width:14px;height:14px;margin-right:4px')}Complete Observation</button>`;
+    if (status === 'await') act = `<button class="btn line sm" data-act="writeFb" data-obs="${o.id}">Write feedback</button>`;
+    if (status === 'completed') act = `<button class="linkbtn" data-act="viewFb" data-obs="${o.id}">View feedback</button> <span class="st ${o.fb.ackStatus === 'Reviewed' ? 'reviewed' : 'sent'}">${o.fb.ackStatus === 'Reviewed' ? 'Reviewed by tutor' : 'Sent to tutor'}</span>`;
+    if (status === 'missed') act = '<span class="muted">Slot ended — not observed</span>';
+    return `<tr class="${e.urgent && e.urgent.status !== 'Completed' ? 'urg' : ''}"><td class="mono">${k + 1}</td><td><div class="nm2">${esc(s.group)}</div>${e.urgent ? '<span class="tag urgent">URGENT</span>' : ''}</td>
+      <td><div class="nm2">${esc(t.name)}</div><div class="s2">${t.code}</div></td><td>Grade ${s.grade} · ${esc(s.subject)}</td><td class="mono">${s.students}</td>
+      <td>${e.urgent ? `<span style="color:#c21818">${esc(e.urgent.reason)}</span>` : esc(e.reason)}</td>
+      <td><span class="st ${OBS_CLS[status] || 'pending'}">${status === 'pending' ? (st === 'live' ? 'Not started' : 'Scheduled') : OBS_LBL[status]}</span></td>
+      <td class="mono">${o ? fmtClock(o.checkIn) : '—'}</td>
+      <td class="mono">${o ? (o.status === 'in_room' ? `<b style="font-weight:500;color:#c21818" data-since="${o.checkIn}">${fmtDur((Date.now() - o.checkIn) / 1000)}</b>` : fmtDur(o.durS)) : '—'}</td><td>${act}</td></tr>`; }).join('') || '<tr><td colspan="10" class="empty2">No sessions assigned in this slot.</td></tr>'}
+  </tbody></table></div>`;
+}
+function vSent(){
+  const list = db.obs.filter(o => o.tlId === ME_TL && o.fb).sort((a, b) => b.fb.sentAt - a.fb.sentAt).slice(0, 60);
+  return `<div class="headrow"><div class="grow"><h1 class="h1">Coaching Feedback Sent</h1><div class="subt">Feedback is delivered instantly to the tutor’s dashboard. You’ll see when the tutor marks it as reviewed.</div></div></div>
+  <div class="tbl"><table class="grid2"><thead><tr><th>Sent</th><th>Tutor</th><th>Group</th><th>Time in room</th><th>Score</th><th style="min-width:280px">What to improve</th><th>Tutor review</th><th></th></tr></thead><tbody>
+  ${list.map(o => { const t = tutorById(o.tutorId); return `<tr><td><div>${fmtDT(o.fb.sentAt)}</div></td><td><div class="nm2">${esc(t.name)}</div><div class="s2">${t.code}</div></td><td>${esc(o.group)}${o.reqId ? ' <span class="tag urgent">URGENT</span>' : ''}</td>
+    <td class="mono">${fmtDur(o.durS)}</td><td class="mono">${o.fb.overall} / 5</td><td><div class="clip" style="max-width:340px">${esc(o.fb.improve)}</div></td>
+    <td><span class="st ${o.fb.ackStatus === 'Reviewed' ? 'reviewed' : 'sent'}">${o.fb.ackStatus}</span>${o.fb.ackAt ? `<div class="s2">${fmtDT(o.fb.ackAt)}</div>` : ''}</td>
+    <td><button class="linkbtn" data-act="viewFb" data-obs="${o.id}">View</button></td></tr>`; }).join('') || '<tr><td colspan="8" class="empty2">No feedback sent yet.</td></tr>'}</tbody></table></div>`;
+}
+function vProgress(){
+  const tg = db.targets[ME_TL];
+  return `<div class="headrow"><div class="grow"><h1 class="h1">My Progress</h1><div class="subt">Targets set by your Educational Supervisor · ${tg.pool} sessions per slot</div></div></div>
+  <div class="kpis" style="grid-template-columns:repeat(3,minmax(0,1fr))">${['daily','weekly','monthly'].map(p => { const s = statsFor(ME_TL, p); return `<div class="kpi"><div class="k">${PLBL[p]}</div><div class="v">${s.done} <small>/ ${s.target}</small></div>
+    <div class="bar ${barCls(s.pct)}" style="margin-top:8px"><i style="width:${Math.min(100, s.pct * 100)}%"></i></div><div class="s">${s.remaining} remaining · avg ${s.done ? fmtDur(s.avgDur) : '—'} in room · ${s.fbSent ? Math.round(s.ackPct * 100) : 0}% reviewed</div></div>`; }).join('')}</div>
+  <div class="two"><div class="card"><h3>Completed observations — last 14 days</h3>${barChart('chTl', last14(ME_TL), {series:'Completed observations', aria:'My daily completed observations versus target'})}</div>
+  <div class="card"><h3>Team coaching focus (this month)</h3>${critMeters(statsFor(ME_TL, 'monthly').obs.filter(o => o.fb))}</div></div>`;
+}
+
+/* ---------- TL actions ---------- */
+function joinSession(sid, reqId){
+  const me = role() === 'supervisor' ? SUP_ID : ME_TL;
+  const a = activeObs(me);
+  if (a) { toast(`You are still observing ${a.group}. Complete that observation first.`, 'err'); return; }
+  const s = sessionById(sid); if (!s) return;
+  if (slotState(s.slot) !== 'live' || s.dk !== dayKey(Date.now())) { toast('This session is not live right now.', 'err'); return; }
+  const now = Date.now();
+  if (db.obs.some(x => x.sid === sid && x.tlId === me)) { toast('You have already observed this session.', 'err'); return; }
+  const o = {id: uid('o'), sid, dk: s.dk, slot: s.slot, tlId: me, tutorId: s.tutorId, group: s.group, checkIn: now, status:'in_room'};
+  const req = me === SUP_ID ? null : reqId ? db.requests.find(r => r.id === reqId) : db.requests.find(r => r.sid === sid && r.tlId === me && r.status === 'Pending');
+  if (me === SUP_ID) o.shadow = true;
+  if (req) { req.status = 'Accepted'; req.acceptedAt = now; req.acceptedBy = me; req.obsId = o.id; o.reqId = req.id;
+    notify('tutor:' + s.tutorId, `${observerName(me)} accepted your urgent request and joined ${s.group}`, 'sessions');
+    if (me === SUP_ID) notify('tl:' + req.tlId, `${SUPERVISOR.name} (Supervisor) took the urgent request for ${s.group}`, 'requests');
+    else notify('supervisor', `${observerName(me)} accepted an urgent request (${s.group}) after ${fmtDur((now - req.createdAt) / 1000)}`, 'requests'); }
+  if (me === SUP_ID) { const tl = tutorById(s.tutorId).tlId; notify('tl:' + tl, `${SUPERVISOR.name} (Supervisor) is shadowing ${tutorById(s.tutorId).name}'s session ${s.group}`, 'supnotes'); }
+  db.obs.push(o); persist(); ui.slot = s.slot; if (req && me !== SUP_ID) db.prefs.view = 'queue'; renderAll();
+  toast(me === SUP_ID ? `Shadow entry logged at ${fmtClock(now)} — ${s.group}. You are a silent observer; the tutor is not notified (demo: no real room opened).` : `Entrance logged at ${fmtClock(now)} — observing ${s.group} (demo: no real room opened).`, 'ok');
+}
+function completeObs(id){
+  const o = db.obs.find(x => x.id === id); if (!o || o.status !== 'in_room') return;
+  o.checkOut = Date.now(); o.durS = Math.max(1, Math.round((o.checkOut - o.checkIn) / 1000)); o.status = 'await';
+  persist(); renderAll(); toast(`Exit logged at ${fmtClock(o.checkOut)} · ${fmtDur(o.durS)} in room.`); if (o.tlId === SUP_ID) openShadowNote(o.id); else openFeedbackForm(o.id);
+}
+
+/* ---------- modals ---------- */
+function openModal(html, size, which){ const m = which === 2 ? $('#modal2') : $('#modal'); m.className = 'modal ' + (size || 'md'); m.innerHTML = html; $(which === 2 ? '#modalOv2' : '#modalOv').hidden = false; }
+function closeModal(which){ $(which === 2 ? '#modalOv2' : '#modalOv').hidden = true; if (which !== 2) fbDraft = null; }
+const mHead = (title, ic) => `<div class="m-head">${ic ? icon(ic).replace('class="i"','class="i ic"') : ''}<h2>${title}</h2><button class="m-close" data-closem aria-label="Close">${icon('close')}</button></div>`;
+let fbDraft = null;
+function openFeedbackForm(obsId){
+  const o = db.obs.find(x => x.id === obsId); const t = tutorById(o.tutorId); const s = sessionById(o.sid);
+  fbDraft = {obsId, scores:{}, actions:[]};
+  openModal(`${mHead('Coaching Feedback — ' + esc(o.group), 'feedback')}
+  <div class="m-body pad2">
+    <div class="obsum"><div><div class="k">Tutor</div><div class="v">${esc(t.name)}</div></div><div><div class="k">Group</div><div class="v">${esc(o.group)} · G${s ? s.grade : ''}</div></div>
+      <div><div class="k">Check-in → out</div><div class="v mono">${fmtClock(o.checkIn)} → ${fmtClock(o.checkOut)}</div></div><div><div class="k">Time in room</div><div class="v mono">${fmtDur(o.durS)}</div></div></div>
+    ${o.reqId ? `<div class="note-box" style="margin-bottom:14px">Urgent request: ${esc((db.requests.find(r => r.id === o.reqId) || {}).reason || '')}</div>` : ''}
+    <div class="rate">${CRIT.map(c => `<div class="lbl">${c.n}<small>${c.d}</small></div><div class="stars" data-crit="${c.k}" role="radiogroup" aria-label="${c.n}">${[1,2,3,4,5].map(n => `<button type="button" data-score="${n}" role="radio" aria-checked="false">${n}</button>`).join('')}</div>`).join('')}</div>
+    <div class="formgrid" style="margin-top:16px">
+      <div><label class="l" for="fbGood" style="font-size:13px;color:var(--muted);font-weight:500;display:block;margin-bottom:6px">Strengths</label><textarea class="inp" id="fbGood" rows="3" placeholder="What went well…" dir="auto"></textarea></div>
+      <div><label class="l" for="fbImp" style="font-size:13px;color:var(--muted);font-weight:500;display:block;margin-bottom:6px">What to improve <span style="color:var(--bad)">*</span></label><textarea class="inp" id="fbImp" rows="3" placeholder="Specific, actionable points…" dir="auto"></textarea></div>
+    </div>
+    <div style="margin-top:14px"><div style="font-size:13px;color:var(--muted);font-weight:500;margin-bottom:6px">Action items for the tutor</div>
+      <div class="tinput"><input class="inp" id="fbAct" placeholder="e.g. Start the wrap-up 10 minutes before the end" dir="auto"><button class="btn line sm" data-act="addAction" type="button">Add</button></div>
+      <div class="hint">Suggested: <span id="fbSugg" class="muted">rate the criteria to get suggestions</span></div>
+      <ul class="actlist" id="fbActs"></ul></div>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:14px"><input type="checkbox" id="fbFollow" style="width:16px;height:16px;accent-color:var(--blue)"> Schedule a follow-up observation for this tutor</label>
+    <div class="msg-err" id="fbErr" role="alert"></div>
+  </div>
+  <div class="m-foot right"><span class="hint" style="margin-right:auto">Sent instantly to the tutor’s dashboard as an internal notification (demo).</span><button class="btn ghost" data-act="fbLater">Save for later</button><button class="btn" data-act="sendFb">Send to tutor</button></div>`, 'md');
+}
+function renderFbActs(){ $('#fbActs').innerHTML = fbDraft.actions.map((a, i) => `<li><span>${esc(a)}</span><button class="x" data-rmact="${i}" aria-label="Remove">${icon('close','width:15px;height:15px')}</button></li>`).join('');
+  const lows = Object.entries(fbDraft.scores).filter(([, v]) => v <= 3).sort((a, b) => a[1] - b[1]).map(([k]) => k);
+  $('#fbSugg').innerHTML = lows.length ? ACTIONS[lows[0]].filter(a => !fbDraft.actions.includes(a)).map(a => `<button class="linkbtn" data-sugg="${esc(a)}" style="font-size:12.5px">+ ${esc(a)}</button>`).join(' ') || '—' : 'rate the criteria to get suggestions'; }
+function sendFeedback(){
+  const o = db.obs.find(x => x.id === fbDraft.obsId);
+  const missing = CRIT.filter(c => !fbDraft.scores[c.k]);
+  const imp = $('#fbImp').value.trim();
+  if (missing.length) return ($('#fbErr').textContent = `Rate all criteria (missing: ${missing.map(c => c.n).join(', ')}).`);
+  if (imp.length < 10) { $('#fbErr').textContent = 'Write at least one specific point in “What to improve” (10+ characters).'; $('#fbImp').focus(); return; }
+  const pend = $('#fbAct').value.trim(); if (pend) fbDraft.actions.push(pend);
+  const now = Date.now();
+  o.fb = {scores: Object.assign({}, fbDraft.scores), overall: +avg(Object.values(fbDraft.scores)).toFixed(1), strengths: $('#fbGood').value.trim(), improve: imp,
+    actions: fbDraft.actions.map(t => ({text: t, done: false})), followUp: $('#fbFollow').checked, sentAt: now, ackStatus: 'Sent', ackAt: null};
+  o.status = 'completed';
+  notify('tutor:' + o.tutorId, `New coaching feedback from ${observerName(o.tlId)} for ${o.group} (${o.fb.overall}/5)`, 'feedback');
+  if (o.tlId === SUP_ID) notify('tl:' + tutorById(o.tutorId).tlId, `${SUPERVISOR.name} (Supervisor) sent feedback to ${tutorById(o.tutorId).name} for ${o.group} (${o.fb.overall}/5)`, 'queue');
+  if (o.reqId) { const r = db.requests.find(x => x.id === o.reqId); if (r) { r.status = 'Completed'; r.completedAt = now; } }
+  persist(); closeModal(); renderAll(); toast(`Feedback sent to ${tutorById(o.tutorId).name}.`, 'ok');
+}
+function viewFeedback(obsId){
+  const o = db.obs.find(x => x.id === obsId); const t = tutorById(o.tutorId);
+  openModal(`${mHead('Coaching Feedback — ' + esc(o.group), 'feedback')}<div class="m-body pad2">
+    <div class="obsum"><div><div class="k">Tutor</div><div class="v">${esc(t.name)}</div></div><div><div class="k">Observed by</div><div class="v">${esc(observerName(o.tlId))}</div></div>
+      <div><div class="k">Check-in → out</div><div class="v mono">${fmtClock(o.checkIn)} → ${fmtClock(o.checkOut)}</div></div><div><div class="k">Time in room</div><div class="v mono">${fmtDur(o.durS)}</div></div></div>
+    ${fbBody(o, false)}</div><div class="m-foot right"><button class="btn ghost" data-closem>Close</button></div>`, 'md');
+}
+function fbBody(o, tutorView){
+  const f = o.fb;
+  return `<div class="fb-h"><span class="st ${f.ackStatus === 'Reviewed' ? 'reviewed' : 'sent'}">${f.ackStatus === 'Reviewed' ? icon('check') + 'Reviewed ' + fmtDT(f.ackAt) : (tutorView ? 'New — please review' : 'Sent · waiting for tutor review')}</span>${f.followUp ? '<span class="tag up">Follow-up observation planned</span>' : ''}
+    <span class="score">${f.overall}<small> / 5</small></span></div>
+  <div class="meters">${CRIT.map(c => `<div class="meter"><span>${c.n}</span><div class="bar ${barCls(f.scores[c.k] / 5)}"><i style="width:${f.scores[c.k] * 20}%"></i></div><b>${f.scores[c.k]}</b></div>`).join('')}</div>
+  <div class="fbcols"><div class="box good"><small>Strengths</small>${esc(f.strengths || '—')}</div><div class="box imp"><small>What to improve</small>${esc(f.improve)}</div></div>
+  ${f.actions.length ? `<div style="margin-top:12px;font-size:13px;color:var(--muted);font-weight:500">Action items</div><ul class="actlist">${f.actions.map((a, i) => `<li class="${a.done ? 'done' : ''}">${tutorView ? `<input type="checkbox" data-toggle="${o.id}" data-i="${i}" ${a.done ? 'checked' : ''} aria-label="Mark action done">` : (a.done ? icon('check','width:16px;height:16px;color:#0eaa3a') : icon('target','width:16px;height:16px;color:#8c9aa8'))}<span>${esc(a.text)}</span></li>`).join('')}</ul>` : ''}`;
+}
+
+/* =====================================================================
+   TUTOR · sessions & urgent requests
+   ===================================================================== */
+function vSessions(){
+  const dk = dayKey(Date.now()); const me = tutorById(ME_TUTOR); const tl = tlById(me.tlId); const L = liveInfo();
+  const mine = sessionsFor(dk).filter(s => s.tutorId === ME_TUTOR).sort((a, b) => a.slot - b.slot);
+  const reqs = db.requests.filter(r => r.tutorId === ME_TUTOR).sort((a, b) => b.createdAt - a.createdAt);
+  return `<div class="headrow"><div class="grow"><h1 class="h1">My Live Sessions</h1><div class="subt">Today · Team Leader: ${esc(tl.name)} (${tl.code}). Need help in a live session? Request an urgent observation and your Team Leader is notified immediately.</div></div></div>
+  <div class="tbl"><table class="grid2"><thead><tr><th>Slot</th><th>Time</th><th>Group</th><th>Grade · Subject</th><th>Students</th><th>Status</th><th>Observer in room</th><th style="min-width:260px">Urgent support</th></tr></thead><tbody>
+  ${mine.map(s => { const st = slotState(s.slot); const o = db.obs.find(x => x.sid === s.id && !x.shadow); const r = reqs.find(x => x.sid === s.id && x.status !== 'Declined') || reqs.find(x => x.sid === s.id);
+    let act = '';
+    if (r) act = `<span class="st ${r.status}">${r.status === 'Pending' ? 'Requested · waiting' : r.status === 'Accepted' ? 'Accepted — TL in room' : r.status}</span>${r.status === 'Pending' ? ` <span class="s2 mono" data-wait="${r.createdAt}">${fmtDur((Date.now() - r.createdAt) / 1000)}</span> <button class="linkbtn" data-act="cancelReq" data-req="${r.id}">Cancel</button>` : ''}${r.status === 'Declined' && st === 'live' ? ` <button class="btn redo sm" data-act="requestObs" data-sid="${s.id}">Request again</button>` : ''}`;
+    else act = st === 'live' ? `<button class="btn redo sm" data-act="requestObs" data-sid="${s.id}">${icon('alert','width:15px;height:15px;margin-right:4px')}Request urgent observation</button>` : `<span class="muted">${st === 'past' ? 'Session ended' : 'Available when live'}</span>`;
+    return `<tr class="${st === 'live' ? 'urg' : ''}"><td>Slot ${s.slot + 1}</td><td class="mono">${slotLabel(s.slot)}</td><td class="nm2">${esc(s.group)}</td><td>Grade ${s.grade} · ${esc(s.subject)}</td><td class="mono">${s.students}</td>
+      <td>${st === 'live' ? `<span class="tag live">Live${L.demo ? ' (demo)' : ''}</span>` : st === 'past' ? '<span class="tag done">Ended</span>' : '<span class="tag up">Upcoming</span>'}</td>
+      <td>${o ? (o.status === 'in_room' ? `<span class="live-dot"></span>${esc(observerName(o.tlId))} <span class="s2 mono" data-since="${o.checkIn}">${fmtDur((Date.now() - o.checkIn) / 1000)}</span>` : `${esc(observerName(o.tlId))} <span class="s2">· observed</span>`) : '—'}</td><td>${act}</td></tr>`; }).join('')}
+  </tbody></table></div>
+  <div class="card" style="margin-top:16px"><h3>My urgent requests</h3>${reqs.length ? `<div class="tbl" style="border:0"><table class="grid2" style="min-width:760px"><thead><tr><th>Requested</th><th>Group</th><th>Reason</th><th>Status</th><th>Response</th></tr></thead><tbody>${reqs.map(r => `<tr><td>${fmtDT(r.createdAt)}</td><td>${esc(r.group)}</td><td>${esc(r.reason)}${r.note ? `<div class="s2">${esc(r.note)}</div>` : ''}</td><td><span class="st ${r.status}">${r.status}</span></td>
+    <td>${r.acceptedAt ? `${esc(observerName(r.acceptedBy))} joined after ${fmtDur((r.acceptedAt - r.createdAt) / 1000)}` : r.status === 'Declined' ? esc(r.declineReason || 'Declined') : r.status === 'Pending' ? 'Waiting for your Team Leader' : '—'}</td></tr>`).join('')}</tbody></table></div>` : '<div class="muted">No requests yet.</div>'}</div>`;
+}
+function openRequestForm(sid){
+  const s = sessionById(sid); const tl = tlById(tutorById(ME_TUTOR).tlId);
+  openModal(`${mHead('Request urgent observation', 'alert')}<div class="m-body pad2"><div class="frm">
+    <div class="note-box blue" style="font-size:13.5px">${esc(s.group)} · Grade ${s.grade} · ${esc(s.subject)} · live now (${slotLabel(s.slot)}). Your Team Leader <b>${esc(tl.name)}</b> will be notified immediately${activeObs(tl.id) ? ' — note: they are currently observing another room' : ''}.</div>
+    <div><label class="l" for="rqReason">Reason <span style="color:var(--bad)">*</span></label><select class="inp" id="rqReason"><option value="">Select a reason</option>${REASONS.map(r => `<option>${esc(r)}</option>`).join('')}</select></div>
+    <div><label class="l" for="rqNote">What is happening? <span id="rqNoteReq" class="muted">(optional)</span></label><textarea class="inp" id="rqNote" rows="3" maxlength="300" placeholder="Short description for your Team Leader…" dir="auto"></textarea></div>
+    <div class="msg-err" id="rqErr" role="alert"></div></div></div>
+    <div class="m-foot right"><button class="btn ghost" data-closem>Cancel</button><button class="btn red" data-act="sendReq" data-sid="${sid}">${icon('alert','width:15px;height:15px;margin-right:4px')}Send urgent request</button></div>`, 'sm');
+}
+function sendRequest(sid){
+  const reason = $('#rqReason').value, note = $('#rqNote').value.trim();
+  if (!reason) return ($('#rqErr').textContent = 'Select a reason.');
+  if (reason === 'Other' && note.length < 5) return ($('#rqErr').textContent = 'Please describe the situation when choosing “Other”.');
+  if (db.requests.some(r => r.sid === sid && (r.status === 'Pending' || r.status === 'Accepted'))) return ($('#rqErr').textContent = 'There is already an open request for this session.');
+  const s = sessionById(sid); if (slotState(s.slot) !== 'live') return ($('#rqErr').textContent = 'This session is no longer live.');
+  const me = tutorById(ME_TUTOR);
+  const r = {id: uid('r'), tutorId: ME_TUTOR, sid, group: s.group, reason, note, createdAt: Date.now(), tlId: me.tlId, status:'Pending'};
+  db.requests.push(r);
+  notify('tl:' + me.tlId, `URGENT: ${me.name} requested an observation — ${s.group} (${reason})`, 'requests');
+  notify('supervisor', `Urgent request from ${me.name} routed to ${tlById(me.tlId).name} — ${s.group}`, 'requests');
+  persist(); closeModal(); renderAll(); toast('Urgent request sent to your Team Leader.', 'ok');
+}
+
+/* ---------- TUTOR · feedback & improvement ---------- */
+function vFeedback(){
+  const all = db.obs.filter(o => o.tutorId === ME_TUTOR && o.fb).sort((a, b) => b.fb.sentAt - a.fb.sentAt);
+  const d30 = all.filter(o => o.fb.sentAt >= Date.now() - 30 * DAY);
+  const pending = all.filter(o => o.fb.ackStatus === 'Sent');
+  const openActs = all.flatMap(o => o.fb.actions.map((a, i) => ({a, o, i}))).filter(x => !x.a.done);
+  const critAvg = CRIT.map(c => ({c, v: avg(d30.map(o => o.fb.scores[c.k]))})).sort((a, b) => a.v - b.v);
+  const prev = all.slice(1, 4), cur = all.slice(0, 3);
+  const delta = prev.length && cur.length ? avg(cur.map(o => o.fb.overall)) - avg(prev.map(o => o.fb.overall)) : 0;
+  const list = all.filter(o => ui.fbFilter === 'all' || (ui.fbFilter === 'pending' ? o.fb.ackStatus === 'Sent' : o.fb.ackStatus === 'Reviewed'));
+  const trend = all.slice(0, 10).reverse().map(o => { const d = new Date(o.fb.sentAt); return {label: `${d.getDate()} ${MON[d.getMonth()]}`, value: o.fb.overall, tip: `<b>${fmtDay(o.fb.sentAt)}</b> · ${esc(o.group)}<br>Overall ${o.fb.overall} / 5`}; });
+  return `<div class="headrow"><div class="grow"><h1 class="h1">Feedback &amp; Improvement</h1><div class="subt">Coaching feedback from live-session observations by your Team Leader. Mark each one as reviewed once you have read it.</div></div></div>
+  <div class="kpis" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+    <div class="kpi"><div class="k">Average score · 30 days</div><div class="v">${d30.length ? r1(avg(d30.map(o => o.fb.overall))) : '—'} <small>/ 5</small></div><div class="s">${delta ? (delta > 0 ? '▲ ' : '▼ ') + r1(Math.abs(delta)) + ' vs. previous observations' : 'Based on ' + d30.length + ' observations'}</div></div>
+    <div class="kpi"><div class="k">Observations · 30 days</div><div class="v">${d30.length}</div><div class="s">Last: ${all[0] ? fmtDate(all[0].fb.sentAt) : '—'}</div></div>
+    <div class="kpi"><div class="k">Waiting for your review</div><div class="v" style="color:${pending.length ? 'var(--blue)' : 'inherit'}">${pending.length}</div><div class="s">${pending.length ? 'Open and mark as reviewed below' : 'All caught up'}</div></div>
+    <div class="kpi"><div class="k">Open action items</div><div class="v">${openActs.length}</div><div class="s">Tick them off as you apply them</div></div>
+  </div>
+  <div class="two">
+    <div class="card"><h3>${icon('target','width:16px;height:16px;color:#f08a25')} What to improve</h3>
+      ${critAvg.length && d30.length ? `<div class="improve">${critAvg.slice(0, 2).map(({c, v}) => { const lastNote = all.find(o => o.fb.scores[c.k] <= 3); return `<div class="imp-item"><div style="display:flex;justify-content:space-between;gap:10px"><b>${c.n}</b><span class="mono">${r1(v)} / 5</span></div>
+        <div class="tip2"><b style="font-weight:500">Tip:</b> ${esc(TIPS[c.k])}</div>${lastNote ? `<div class="tip2 muted">Latest note: “${esc(lastNote.fb.improve)}”</div>` : ''}</div>`; }).join('')}</div>` : '<div class="empty2">No feedback yet.</div>'}
+      ${openActs.length ? `<div style="margin-top:14px;font-size:13px;color:var(--muted);font-weight:500">Open action items</div><ul class="actlist">${openActs.slice(0, 6).map(x => `<li><input type="checkbox" data-toggle="${x.o.id}" data-i="${x.i}" aria-label="Mark action done"><span>${esc(x.a.text)}</span><span class="s2" style="margin-left:auto">${fmtDate(x.o.fb.sentAt)}</span></li>`).join('')}</ul>` : ''}</div>
+    <div class="card"><h3>Score by area · 30 days</h3>${d30.length ? `<div class="meters">${CRIT.map(c => { const v = avg(d30.map(o => o.fb.scores[c.k])); return `<div class="meter"><span>${c.n}</span><div class="bar ${barCls(v / 5)}"><i style="width:${v / 5 * 100}%"></i></div><b>${r1(v)}</b></div>`; }).join('')}</div>` : '<div class="empty2">No feedback yet.</div>'}
+      <h3 style="margin-top:18px">Overall score trend</h3>${lineChart('chTrend', trend, {aria:'Overall feedback score over the last observations'})}</div>
+  </div>
+  <div class="headrow" style="margin-top:6px"><h2 class="h1 grow" style="font-size:16px">All feedback</h2>
+    <div class="segc">${[['all','All'],['pending','Waiting for review'],['reviewed','Reviewed']].map(([k, l]) => `<button data-fbf="${k}" class="${ui.fbFilter === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>
+  <div class="cards">${list.map(o => `<div class="fb${o.fb.ackStatus === 'Sent' ? ' new' : ''}">
+    <div class="fb-h" style="margin-bottom:6px"><div><div class="nm2">${esc(o.group)} · ${fmtDay(o.checkIn)}</div><div class="s2">Observed by ${esc(observerName(o.tlId))} · ${fmtDur(o.durS)} in room${o.reqId ? ' · after your urgent request' : ''}</div></div></div>
+    ${fbBody(o, true)}
+    <div class="fb-foot"><span class="sp"></span>${o.fb.ackStatus === 'Sent' ? `<button class="btn sm" data-act="ack" data-obs="${o.id}">${icon('check','width:15px;height:15px;margin-right:4px')}Mark as Reviewed</button>` : `<span class="s2">Reviewed ${fmtDT(o.fb.ackAt)}</span>`}</div></div>`).join('') || '<div class="empty2">No feedback in this view.</div>'}</div>`;
+}
+
+/* =====================================================================
+   CSV export
+   ===================================================================== */
+function csvCell(v){ const s = v == null ? '' : String(v); return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+function download(name, rows){
+  const csv = '﻿' + rows.map(r => r.map(csvCell).join(',')).join('\r\n') + '\r\n';
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'})); a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); window.__lastExport = {name, csv, count: rows.length - 1};
+}
+const stamp = () => { const d = new Date(); return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}`; };
+function exportSummary(){
+  const [s, e] = periodRange(ui.period);
+  const rows = [['Period','From','To','Team Leader','TL Code','Target','Completed','Completion %','Remaining','Avg time in room (min)','Feedback sent','Reviewed by tutor','Reviewed %','Urgent requests','Avg urgent response (min)','Currently observing']];
+  TLS.filter(t => !ui.tlFilter || ui.tlFilter === SUP_ID || t.id === ui.tlFilter).forEach(t => { const x = statsFor(t.id, ui.period); const a = activeObs(t.id);
+    rows.push([PLBL[ui.period], dayKey(s), dayKey(e - 1), t.name, t.code, x.target, x.done, Math.round(x.pct * 100) + '%', x.remaining, x.done ? (x.avgDur / 60).toFixed(1) : '', x.fbSent, x.reviewed, x.fbSent ? Math.round(x.ackPct * 100) + '%' : '', x.reqs, x.avgResp ? (x.avgResp / 60).toFixed(1) : '', a ? a.group : '']); });
+  download(`live_monitoring_${ui.period}_summary_${stamp()}.csv`, rows); toast(`Exported ${PLBL[ui.period].toLowerCase()} summary for ${rows.length - 1} team leader(s).`, 'ok');
+}
+function exportLog(){
+  const list = logRows(); if (!list.length) return toast('Nothing to export for the selected filters.', 'err');
+  const rows = [['Date','Slot','Observer','Tutor','Tutor Code','Group','Urgent request','Check-in','Check-out','Time in room (min)','Status','Overall score',...CRIT.map(c => c.n),'Strengths','What to improve','Action items','Feedback sent','Tutor review','Reviewed at','Supervisor note to TL','Coaching focus','Recommendation','Priority','Comment on TL coaching','TL review','TL reviewed at']];
+  list.forEach(o => { const t = tutorById(o.tutorId); const f = o.fb;
+    rows.push([dayKey(o.checkIn), 'Slot ' + (o.slot + 1), observerName(o.tlId), t.name, t.code, o.group, o.reqId ? 'Yes' : 'No', isoLocal(o.checkIn), isoLocal(o.checkOut), o.durS ? (o.durS / 60).toFixed(1) : '', OBS_LBL[o.status],
+      f ? f.overall : '', ...CRIT.map(c => f ? f.scores[c.k] : ''), f ? f.strengths : '', f ? f.improve : '', f ? f.actions.map(a => a.text + (a.done ? ' (done)' : '')).join('; ') : '', f ? isoLocal(f.sentAt) : '', f ? f.ackStatus : '', f && f.ackAt ? isoLocal(f.ackAt) : '', ...(o.note ? [o.note.text, o.note.focus.map(k => CRIT_N[k]).join('; '), o.note.recommendation, o.note.priority, o.note.tlComment || '', o.note.ackStatus, o.note.ackAt ? isoLocal(o.note.ackAt) : ''] : ['','','','','','',''])]); });
+  download(`live_monitoring_${ui.period}_observations_${stamp()}.csv`, rows); toast(`Exported ${list.length} observations.`, 'ok');
+}
+
+/* =====================================================================
+   Events
+   ===================================================================== */
+function go(view){ db.prefs.view = view; persist(); renderAll(); $('#content').scrollTop = 0; }
+document.addEventListener('click', e => {
+  const t = e.target;
+  // menus
+  const mb = t.closest('[data-menu]'); $$('.menu').forEach(m => { if (m.id === 'notifMenu') return; if (!mb || m.id !== mb.dataset.menu) m.hidden = true; });
+  if (mb) { const m = document.getElementById(mb.dataset.menu); m.hidden = !m.hidden; return; }
+  if (t.closest('#btnBell')) { $('#notifMenu').hidden = !$('#notifMenu').hidden; return; }
+  if (!t.closest('#notifMenu')) $('#notifMenu').hidden = true;
+  const fc = t.closest('[data-focus]'); if (fc) { fc.classList.toggle('on'); fc.setAttribute('aria-pressed', fc.classList.contains('on')); return; }
+  const nf = t.closest('[data-notif]'); if (nf) { const n = db.notifs.find(x => x.id === nf.dataset.notif); n.read = true; $('#notifMenu').hidden = true; if (n.view) db.prefs.view = n.view; persist(); renderAll(); return; }
+  const a = t.closest('[data-act]'); const act = a && a.dataset.act;
+  if (act === 'readall') { db.notifs.forEach(n => { if (n.to === meKey()) n.read = true; }); persist(); renderBell(); return; }
+  if (act === 'resetdemo') { $('#userMenu').hidden = true; openModal(`${mHead('Reset demo data?')}<div class="m-body pad2">This restores the original fictional sample data and removes your changes in this browser.</div><div class="m-foot right"><button class="btn ghost" data-closem>Cancel</button><button class="btn" data-act="confirmReset">Reset</button></div>`, 'sm', 2); return; }
+  if (act === 'confirmReset') { store.clear(); db = buildSeed(); store.save(db); ui.slot = null; closeModal(2); closeModal(1); renderAll(); toast('Demo data reset.', 'ok'); return; }
+  if (t.closest('[data-closem]')) { closeModal(t.closest('#modal2') ? 2 : 1); return; }
+  const nv = t.closest('[data-view]'); if (nv) { go(nv.dataset.view); return; }
+  const nh = t.closest('.nav-h'); if (nh) { nh.parentElement.classList.toggle('open'); return; }
+  if (t.closest('[data-oos]') || t.closest('#btnHome') || t.closest('#btnOrg') || t.closest('#btnIntake')) { toast('Outside the scope of this prototype.'); return; }
+  if (t.closest('#btnBack')) { $('#body').classList.toggle('collapsed'); return; }
+  if (t.closest('#logoLink')) { e.preventDefault(); return; }
+  const tc = t.closest('[data-tlchip]'); if (tc) { ui.tlFilter = tc.dataset.tlchip; renderAll(); return; }
+  const sb = t.closest('[data-slot]'); if (sb) { ui.slot = +sb.dataset.slot; renderAll(); return; }
+  const pb = t.closest('[data-period]'); if (pb) { ui.period = pb.dataset.period; ui.logPage = 1; renderAll(); return; }
+  const ff = t.closest('[data-fbf]'); if (ff) { ui.fbFilter = ff.dataset.fbf; renderAll(); return; }
+  // feedback form interactions
+  const sc = t.closest('[data-score]'); if (sc && fbDraft) { const g = sc.parentElement; const v = +sc.dataset.score; fbDraft.scores[g.dataset.crit] = v;
+    g.querySelectorAll('button').forEach(b => { const on = +b.dataset.score <= v; b.classList.toggle('on', on); b.classList.toggle('lo', on && v <= 2); b.classList.toggle('mid', on && v === 3); b.setAttribute('aria-checked', +b.dataset.score === v); }); renderFbActs(); return; }
+  const sg = t.closest('[data-sugg]'); if (sg && fbDraft) { fbDraft.actions.push(sg.dataset.sugg); renderFbActs(); return; }
+  const rm = t.closest('[data-rmact]'); if (rm && fbDraft) { fbDraft.actions.splice(+rm.dataset.rmact, 1); renderFbActs(); return; }
+  if (!act) return;
+  if (act === 'addAction') { const v = $('#fbAct').value.trim(); if (!v) return; fbDraft.actions.push(v); $('#fbAct').value = ''; renderFbActs(); return; }
+  if (act === 'join') return joinSession(a.dataset.sid, a.dataset.req);
+  if (act === 'complete') return completeObs(a.dataset.obs);
+  if (act === 'writeFb') { const o = db.obs.find(x => x.id === a.dataset.obs); return o && o.tlId === SUP_ID ? openShadowNote(o.id) : openFeedbackForm(a.dataset.obs); }
+  if (act === 'sendNote') return sendShadowNote();
+  if (act === 'noteLater') { closeModal(); toast('Shadow session saved — write the note to the Team Leader later from All Live Sessions.'); return; }
+  if (act === 'ackNote') { const o = db.obs.find(x => x.id === a.dataset.obs); o.note.ackStatus = 'Reviewed'; o.note.ackAt = Date.now(); o.note.tlReply = ($('#tlReply-' + o.id) || {}).value || '';
+    notify('supervisor', `${tlById(tutorById(o.tutorId).tlId).name} reviewed your shadow note on ${tutorById(o.tutorId).name} (${o.group})${o.note.tlReply ? ': “' + o.note.tlReply + '”' : ''}`, 'live'); persist(); renderAll(); toast('Marked as reviewed — the supervisor has been notified.', 'ok'); return; }
+  if (act === 'fbLater') { closeModal(); toast('Observation saved — feedback is still pending. Use “Write feedback” in your queue.'); return; }
+  if (act === 'sendFb') return sendFeedback();
+  if (act === 'viewFb') { const o = db.obs.find(x => x.id === a.dataset.obs); return o && o.note ? viewShadowNote(o.id) : viewFeedback(a.dataset.obs); }
+  if (act === 'acceptReq') { const r = db.requests.find(x => x.id === a.dataset.req); return joinSession(r.sid, r.id); }
+  if (act === 'declineReq') { const r = db.requests.find(x => x.id === a.dataset.req);
+    openModal(`${mHead('Decline urgent request')}<div class="m-body pad2"><p style="margin:0 0 10px">${esc(tutorById(r.tutorId).name)} · ${esc(r.group)} — ${esc(r.reason)}</p><label class="l" for="decReason">Reason (shared with the tutor and supervisor) <span style="color:var(--bad)">*</span></label><textarea class="inp" id="decReason" rows="3" placeholder="e.g. Already observing another urgent case — escalated to supervisor" dir="auto"></textarea><div class="msg-err" id="decErr"></div></div>
+      <div class="m-foot right"><button class="btn ghost" data-closem>Cancel</button><button class="btn red" data-act="confirmDecline" data-req="${r.id}">Decline request</button></div>`, 'sm', 2); return; }
+  if (act === 'confirmDecline') { const r = db.requests.find(x => x.id === a.dataset.req); const why = $('#decReason').value.trim(); if (why.length < 5) { $('#decErr').textContent = 'Please give a short reason.'; return; }
+    r.status = 'Declined'; r.declineReason = why; r.decidedAt = Date.now(); notify('tutor:' + r.tutorId, `Your urgent request for ${r.group} was declined: ${why}`, 'sessions'); notify('supervisor', `${tlById(r.tlId).name} declined an urgent request (${r.group}): ${why}`, 'requests');
+    persist(); closeModal(2); renderAll(); toast('Request declined. The tutor and supervisor were notified.'); return; }
+  if (act === 'requestObs') return openRequestForm(a.dataset.sid);
+  if (act === 'sendReq') return sendRequest(a.dataset.sid);
+  if (act === 'cancelReq') { const r = db.requests.find(x => x.id === a.dataset.req); if (r.status !== 'Pending') return; r.status = 'Declined'; r.declineReason = 'Cancelled by tutor'; r.decidedAt = Date.now(); notify('tl:' + r.tlId, `${tutorById(r.tutorId).name} cancelled the urgent request for ${r.group}`, 'requests'); persist(); renderAll(); toast('Request cancelled.'); return; }
+  if (act === 'ack') { const o = db.obs.find(x => x.id === a.dataset.obs); o.fb.ackStatus = 'Reviewed'; o.fb.ackAt = Date.now(); notify('tl:' + o.tlId, `${tutorById(o.tutorId).name} reviewed your feedback for ${o.group}`, 'sent'); persist(); renderAll(); toast('Marked as reviewed — your Team Leader has been notified.', 'ok'); return; }
+  if (act === 'saveTargets') return saveTargets();
+  if (act === 'resetTargets') { renderAll(); return; }
+  if (act === 'exportSummary') return exportSummary();
+  if (act === 'exportLog') return exportLog();
+  if (act === 'logPrev') { ui.logPage--; renderAll(); return; }
+  if (act === 'logNext') { ui.logPage++; renderAll(); return; }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'roleSel') { db.prefs.role = t.value; db.prefs.view = null; ui.slot = null; persist(); renderAll(); toast(`Now viewing as ${t.options[t.selectedIndex].text} (${USERNAME[t.value]}).`); return; }
+  if (t.id === 'tlFilter') { ui.tlFilter = t.value; ui.logPage = 1; renderAll(); return; }
+  if (t.id === 'logStatus') { ui.logStatus = t.value; ui.logPage = 1; renderAll(); return; }
+  if (t.id === 'liveStatus') { ui.liveStatus = t.value; renderAll(); return; }
+  if (t.id === 'reqFilter') { ui.reqFilter = t.value; renderAll(); return; }
+  if (t.dataset.reassign && t.value) { const r = db.requests.find(x => x.id === t.dataset.reassign); const old = r.tlId; r.tlId = t.value; r.reassignedBy = SUPERVISOR.name;
+    notify('tl:' + t.value, `URGENT (reassigned by supervisor): ${tutorById(r.tutorId).name} — ${r.group} (${r.reason})`, 'requests'); notify('tutor:' + r.tutorId, `Your urgent request was reassigned to ${tlById(t.value).name}`, 'sessions');
+    persist(); renderAll(); toast(`Request reassigned from ${tlById(old).name} to ${tlById(t.value).name}.`, 'ok'); return; }
+  if (t.dataset.toggle) { const o = db.obs.find(x => x.id === t.dataset.toggle); o.fb.actions[+t.dataset.i].done = t.checked; persist(); renderAll(); return; }
+  if (t.id === 'rqReason') { $('#rqNoteReq').textContent = t.value === 'Other' ? '(required)' : '(optional)'; $('#rqErr').textContent = ''; }
+});
+document.addEventListener('input', e => {
+  if (e.target.id !== 'tutorQ') return;
+  ui.tq = e.target.value; const pos = e.target.selectionStart; renderAll();
+  const i = $('#tutorQ'); if (i) { i.focus(); i.setSelectionRange(pos, pos); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if (!$('#modalOv2').hidden) closeModal(2); else if (!$('#modalOv').hidden) closeModal(1); }
+  if (e.key === 'Enter' && e.target.id === 'fbAct') { e.preventDefault(); $('[data-act="addAction"]').click(); }
+});
+$$('.overlay').forEach(o => o.addEventListener('mousedown', e => { if (e.target === o) closeModal(o.id === 'modalOv2' ? 2 : 1); }));
+// live timers
+setInterval(() => {
+  const now = Date.now();
+  $$('[data-since]').forEach(el => el.textContent = fmtDur((now - +el.dataset.since) / 1000));
+  $$('[data-wait]').forEach(el => el.textContent = fmtDur((now - +el.dataset.wait) / 1000));
+}, 1000);
+// keep several tabs (e.g. Tutor in one, Team Leader in another) in sync
+window.addEventListener('storage', e => { if (e.key !== LS) return; const d = store.load(); if (!d) return; const keepRole = db.prefs.role, keepView = db.prefs.view; db = d; db.prefs.role = keepRole; db.prefs.view = keepView; if ($('#modalOv').hidden) renderAll(); else { renderSide(); renderBell(); renderInRoom(); } });
+
+renderAll();
+if (reseeded) toast('New day — demo data was regenerated for today.');
+if (!store.ok) toast('Browser storage is unavailable — changes last until the page is closed.');
+window.__lm = {get db(){ return db; }, liveInfo, statsFor, ui, ME_TL, ME_TUTOR};
+})();
+
+</script>
+</body>
+</html>
