@@ -14,7 +14,7 @@ Built with a **100% client-side architecture**, all demos run directly in the br
 
 ---
 
-## 📂 Included Systems & Demos (6 Projects)
+## 📂 Included Systems & Demos (9 Projects)
 
 | # | Project | Directory | Description | Live Demo |
 |---|---------|-----------|-------------|-----------|
@@ -24,6 +24,9 @@ Built with a **100% client-side architecture**, all demos run directly in the br
 | 4 | **iSchool-Pedia Prototype V2** | `demos/ischool-pedia/` | Interactive multi-screen prototype (V2) showcasing the centralized knowledge repository, curriculum guidelines, operational workflows, and bilingual docs. | [Launch Demo](https://iabdelrhmaneyad.github.io/b2g-demo-hub/demos/ischool-pedia/index.html) |
 | 5 | **Session Cover Bot** | `demos/session-cover-bot/` | Automated session cover simulator handling tutor issue triage, timed recovery attempts, eligible tutor replacement, and case escalation workflows. | [Launch Demo](https://iabdelrhmaneyad.github.io/b2g-demo-hub/demos/session-cover-bot/index.html) |
 | 6 | **B2G HR Policy Engine** | `demos/hr-policy-engine/` | Interactive HR policy management prototype featuring configurable leave rules, automated cover routing, dynamic deductions, tutor salary tracking, and HR investigation workflows. | [Launch Demo](https://iabdelrhmaneyad.github.io/b2g-demo-hub/demos/hr-policy-engine/index.html) |
+| 7 | **iSchool CS Ticketing Dashboard** | `demos/cs-ticketing-dashboard/` | Interactive customer support ticketing prototype featuring advanced search and filtering, SLA monitoring, ticket assignment, appeal reviews, contact updates, and CSV exports. | [Launch Demo](https://iabdelrhmaneyad.github.io/b2g-demo-hub/demos/cs-ticketing-dashboard/index.html) |
+| 8 | **iSchool Live Monitoring** | `demos/live-monitoring/` | Interactive live-session monitoring prototype featuring role-based dashboards, observation queues, urgent support requests, coaching feedback, performance targets, and operational reports. | [Launch Demo](https://iabdelrhmaneyad.github.io/b2g-demo-hub/demos/live-monitoring/index.html) |
+| 9 | **Student Profile – Contact Change Request** | `demos/student-profile-contact/` | Self-service student portal enabling students and guardians to submit email and mobile number change requests with bilingual Egyptian number validation and security notices. | [Launch Demo](https://iabdelrhmaneyad.github.io/b2g-demo-hub/demos/student-profile-contact/index.html) |
 
 ---
 
