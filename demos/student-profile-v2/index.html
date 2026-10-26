@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Profile · iSchool B2G Systems (V2)</title>
-  <meta name="description" content="Redesigned student profile and contact management interface for iSchool B2G initiatives.">
+  <title>الملف الشخصي للتلميذ · مبادرات مصر الرقمية (iSchool B2G)</title>
+  <meta name="description" content="البوابة المطورة لبيانات التلميذ وإدارة طلبات تغيير وسائل التواصل - مبادرات مصر الرقمية.">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="../../assets/img/iSchool Logo-colors.png">
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts: Cairo (Arabic primary) & Plus Jakarta Sans (English) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -46,8 +46,8 @@
       --input-focus-border: #2C6FE0;
       --chip-bg: #F0F4FA;
 
-      --font-en: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
       --font-ar: 'Cairo', system-ui, -apple-system, sans-serif;
+      --font-en: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
       
       --radius-sm: 8px;
       --radius-md: 14px;
@@ -66,18 +66,18 @@
     }
 
     body {
-      font-family: var(--font-en);
+      font-family: var(--font-ar);
       background-color: var(--page-bg);
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
       font-size: 14px;
-      line-height: 1.5;
+      line-height: 1.6;
       -webkit-font-smoothing: antialiased;
     }
 
-    html[dir="rtl"] body {
-      font-family: var(--font-ar);
+    html[dir="ltr"] body {
+      font-family: var(--font-en);
     }
 
     /* Layout Wrapper */
@@ -182,19 +182,14 @@
       border: 1px dashed #CBD5E1;
       padding: 8px 16px;
       border-radius: var(--radius-md);
-      font-size: 12px;
+      font-size: 12.5px;
       color: var(--text-sub);
-      font-weight: 600;
-    }
-
-    .gov-badge img {
-      height: 24px;
-      width: auto;
+      font-weight: 700;
     }
 
     .brand-title {
       font-size: 26px;
-      font-weight: 800;
+      font-weight: 900;
       color: var(--primary);
       letter-spacing: -0.5px;
       display: flex;
@@ -254,24 +249,23 @@
     }
 
     .lang-toggle {
-      background: var(--chip-bg);
-      border: 1px solid var(--card-border);
-      color: var(--text-main);
-      padding: 8px 16px;
+      background: var(--primary-light);
+      border: 1.5px solid var(--primary);
+      color: var(--primary);
+      padding: 8px 18px;
       border-radius: var(--radius-md);
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 8px;
       transition: var(--transition);
-      font-size: 13px;
+      font-size: 13.5px;
     }
 
     .lang-toggle:hover {
-      background: var(--primary-light);
-      color: var(--primary);
-      border-color: var(--primary);
+      background: var(--primary);
+      color: #FFFFFF;
     }
 
     .user-pill {
@@ -293,8 +287,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 700;
-      font-size: 15px;
+      font-weight: 800;
+      font-size: 16px;
       box-shadow: 0 2px 8px rgba(31, 95, 204, 0.3);
     }
 
@@ -305,14 +299,15 @@
 
     .user-name {
       font-weight: 700;
-      font-size: 13px;
+      font-size: 13.5px;
       color: var(--text-main);
     }
 
     .user-code {
       font-size: 11px;
       color: var(--text-muted);
-      font-weight: 500;
+      font-weight: 600;
+      letter-spacing: 0.5px;
     }
 
     /* Hero / Student Banner */
@@ -334,12 +329,17 @@
       content: "";
       position: absolute;
       top: -60px;
-      right: -60px;
+      left: -60px;
       width: 240px;
       height: 240px;
       border-radius: 50%;
       background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 70%);
       pointer-events: none;
+    }
+
+    html[dir="rtl"] .profile-hero::before {
+      left: auto;
+      right: -60px;
     }
 
     .hero-info {
@@ -378,7 +378,7 @@
     .avatar-badge-btn {
       position: absolute;
       bottom: 2px;
-      right: 2px;
+      left: 2px;
       width: 32px;
       height: 32px;
       border-radius: 50%;
@@ -391,6 +391,11 @@
       cursor: pointer;
       transition: var(--transition);
       font-size: 13px;
+    }
+
+    html[dir="rtl"] .avatar-badge-btn {
+      left: auto;
+      right: 2px;
     }
 
     .avatar-badge-btn:hover {
@@ -414,10 +419,10 @@
     .hero-pill {
       background: rgba(255, 255, 255, 0.2);
       backdrop-filter: blur(8px);
-      padding: 4px 12px;
+      padding: 4px 14px;
       border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 12.5px;
+      font-weight: 700;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -428,25 +433,24 @@
       color: #A3FFD2;
     }
 
-    .hero-name-en {
+    .hero-name-primary {
       font-size: 26px;
       font-weight: 800;
       letter-spacing: -0.3px;
     }
 
-    .hero-name-ar {
-      font-family: var(--font-ar);
-      font-size: 20px;
+    .hero-name-secondary {
+      font-size: 18px;
       font-weight: 600;
-      opacity: 0.95;
+      opacity: 0.92;
     }
 
     .hero-meta {
       display: flex;
       align-items: center;
       gap: 18px;
-      font-size: 13px;
-      opacity: 0.85;
+      font-size: 13.5px;
+      opacity: 0.9;
       margin-top: 4px;
     }
 
@@ -464,18 +468,22 @@
       align-items: flex-end;
     }
 
+    html[dir="rtl"] .hero-actions {
+      align-items: flex-start;
+    }
+
     .btn-hero {
       background: #FFFFFF;
       color: var(--primary);
-      font-weight: 700;
+      font-weight: 800;
       border: 0;
-      padding: 10px 20px;
+      padding: 11px 22px;
       border-radius: var(--radius-md);
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 13px;
+      font-size: 13.5px;
       transition: var(--transition);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
@@ -532,15 +540,15 @@
     }
 
     .card-icon {
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       border-radius: var(--radius-md);
       background: var(--primary-light);
       color: var(--primary);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
+      font-size: 19px;
     }
 
     .card-icon.emerald {
@@ -559,13 +567,13 @@
     }
 
     .card-title {
-      font-size: 17px;
-      font-weight: 700;
+      font-size: 18px;
+      font-weight: 800;
       color: var(--text-main);
     }
 
     .card-subtitle {
-      font-size: 12px;
+      font-size: 12.5px;
       color: var(--text-muted);
       margin-top: 1px;
     }
@@ -591,7 +599,7 @@
       background: #F8FAFC;
       border: 1px solid var(--card-border);
       border-radius: var(--radius-md);
-      padding: 12px 16px;
+      padding: 14px 18px;
       position: relative;
       transition: var(--transition);
     }
@@ -609,22 +617,15 @@
     }
 
     .field-label {
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 12.5px;
+      font-weight: 700;
       color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-
-    .field-label-ar {
-      font-family: var(--font-ar);
-      font-size: 12px;
-      color: var(--text-muted);
+      letter-spacing: 0.2px;
     }
 
     .field-value {
-      font-size: 15px;
-      font-weight: 600;
+      font-size: 15.5px;
+      font-weight: 700;
       color: var(--text-main);
       display: flex;
       align-items: center;
@@ -643,10 +644,10 @@
       background: transparent;
       border: 1px solid transparent;
       color: var(--primary);
-      padding: 3px 8px;
+      padding: 4px 10px;
       border-radius: 6px;
-      font-size: 11px;
-      font-weight: 700;
+      font-size: 12px;
+      font-weight: 800;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -661,9 +662,9 @@
     }
 
     .verified-badge {
-      font-size: 11px;
+      font-size: 11.5px;
       color: var(--success);
-      font-weight: 700;
+      font-weight: 800;
       display: inline-flex;
       align-items: center;
       gap: 4px;
@@ -672,10 +673,10 @@
     .badge-primary-login {
       background: #DBEAFE;
       color: #1E40AF;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
       text-transform: uppercase;
     }
 
@@ -711,7 +712,7 @@
       border: 0;
       background: transparent;
       color: var(--text-sub);
-      font-weight: 700;
+      font-weight: 800;
       font-size: 14px;
       cursor: pointer;
       display: flex;
@@ -790,13 +791,13 @@
     }
 
     .radio-card-title {
-      font-weight: 700;
+      font-weight: 800;
       font-size: 15px;
       color: var(--text-main);
     }
 
     .radio-card-desc {
-      font-size: 12px;
+      font-size: 12.5px;
       color: var(--text-muted);
     }
 
@@ -811,20 +812,14 @@
       align-items: flex-start;
       gap: 14px;
       font-size: 14px;
-      line-height: 1.6;
+      line-height: 1.7;
     }
 
     .notice-box i {
       font-size: 18px;
       color: var(--warning);
-      margin-top: 2px;
+      margin-top: 3px;
       flex-shrink: 0;
-    }
-
-    .notice-box.arabic {
-      font-family: var(--font-ar);
-      direction: rtl;
-      text-align: right;
     }
 
     /* Input Groups */
@@ -835,8 +830,8 @@
     }
 
     .input-label {
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 13.5px;
+      font-weight: 700;
       color: var(--text-sub);
       display: flex;
       align-items: center;
@@ -882,9 +877,14 @@
 
     .input-lock-icon {
       position: absolute;
-      right: 18px;
+      left: 18px;
       color: var(--text-muted);
       pointer-events: none;
+    }
+
+    html[dir="ltr"] .input-lock-icon {
+      left: auto;
+      right: 18px;
     }
 
     /* Phone Input Wrap with Egypt Flag */
@@ -913,16 +913,16 @@
       gap: 8px;
       padding: 0 16px;
       background: #F8FAFC;
-      border-right: 1.5px solid var(--input-border);
-      font-weight: 600;
+      border-left: 1.5px solid var(--input-border);
+      font-weight: 700;
       color: var(--text-main);
-      font-size: 14px;
+      font-size: 14.5px;
       user-select: none;
     }
 
-    html[dir="rtl"] .country-code-pill {
-      border-right: 0;
-      border-left: 1.5px solid var(--input-border);
+    html[dir="ltr"] .country-code-pill {
+      border-left: 0;
+      border-right: 1.5px solid var(--input-border);
     }
 
     .country-code-pill svg {
@@ -936,7 +936,7 @@
       border: 0;
       height: 100%;
       padding: 0 18px;
-      font-size: 15px;
+      font-size: 15.5px;
       font-family: inherit;
       color: var(--text-main);
       outline: none;
@@ -950,11 +950,10 @@
     .input-error-msg {
       font-size: 12px;
       color: var(--danger);
-      font-weight: 600;
+      font-weight: 700;
       display: flex;
       align-items: center;
       gap: 6px;
-      font-family: var(--font-ar);
     }
 
     /* Buttons */
@@ -966,14 +965,15 @@
       color: #FFFFFF;
       border: 0;
       border-radius: 25px;
-      font-size: 15px;
-      font-weight: 700;
+      font-size: 15.5px;
+      font-weight: 800;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 10px;
       box-shadow: 0 4px 14px rgba(31, 95, 204, 0.3);
       transition: var(--transition);
+      font-family: inherit;
     }
 
     .btn-submit:hover:not(:disabled) {
@@ -1012,20 +1012,20 @@
     }
 
     .success-icon {
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background: var(--success);
       color: #FFFFFF;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
+      font-size: 20px;
     }
 
     .success-title {
       font-size: 20px;
-      font-weight: 800;
+      font-weight: 900;
       color: #0E6236;
     }
 
@@ -1047,14 +1047,13 @@
 
     .summary-label {
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
       color: #4A6E59;
-      text-transform: uppercase;
     }
 
     .summary-val {
       font-size: 15px;
-      font-weight: 700;
+      font-weight: 800;
       color: var(--text-main);
       overflow-wrap: anywhere;
     }
@@ -1067,12 +1066,13 @@
       background: #FFFFFF;
       color: var(--success);
       border-radius: 21px;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 8px;
       transition: var(--transition);
+      font-family: inherit;
     }
 
     .btn-reset:hover {
@@ -1084,11 +1084,16 @@
     .toast-container {
       position: fixed;
       bottom: 24px;
-      right: 24px;
+      left: 24px;
       display: flex;
       flex-direction: column;
       gap: 10px;
       z-index: 9999;
+    }
+
+    html[dir="ltr"] .toast-container {
+      left: auto;
+      right: 24px;
     }
 
     .toast {
@@ -1096,7 +1101,7 @@
       color: #FFFFFF;
       padding: 14px 22px;
       border-radius: var(--radius-md);
-      font-weight: 600;
+      font-weight: 700;
       font-size: 14px;
       display: flex;
       align-items: center;
@@ -1106,12 +1111,17 @@
     }
 
     .toast.success {
+      border-right: 4px solid #10B981;
+    }
+
+    html[dir="ltr"] .toast.success {
+      border-right: 0;
       border-left: 4px solid #10B981;
     }
 
     @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
 
     /* Responsive adjustments */
@@ -1157,30 +1167,30 @@
 
   <div class="app-shell">
 
-    <!-- Left Navigation Sidebar -->
+    <!-- Left / Right Navigation Sidebar -->
     <aside class="sidebar">
-      <button class="nav-btn" title="Menu" aria-label="Menu">
+      <button class="nav-btn" data-i18n-title="navMenu" aria-label="Menu">
         <i class="fa-solid fa-bars"></i>
       </button>
-      <a href="#" class="nav-btn" title="Courses" aria-label="Courses">
+      <a href="#" class="nav-btn" data-i18n-title="navCourses" aria-label="Courses">
         <i class="fa-solid fa-graduation-cap"></i>
       </a>
-      <a href="#" class="nav-btn" title="Sessions" aria-label="Sessions">
+      <a href="#" class="nav-btn" data-i18n-title="navSessions" aria-label="Sessions">
         <i class="fa-solid fa-video"></i>
       </a>
-      <a href="#" class="nav-btn" title="Schedule" aria-label="Schedule">
+      <a href="#" class="nav-btn" data-i18n-title="navSchedule" aria-label="Schedule">
         <i class="fa-solid fa-calendar-days"></i>
       </a>
-      <a href="#" class="nav-btn" title="Messages" aria-label="Messages">
+      <a href="#" class="nav-btn" data-i18n-title="navMessages" aria-label="Messages">
         <i class="fa-solid fa-comment-dots"></i>
       </a>
-      <a href="#" class="nav-btn" title="Support Helpdesk" aria-label="Support">
+      <a href="#" class="nav-btn" data-i18n-title="navSupport" aria-label="Support">
         <i class="fa-solid fa-headset"></i>
       </a>
-      <a href="#" class="nav-btn active" title="Student Profile" aria-label="Profile">
+      <a href="#" class="nav-btn active" data-i18n-title="navProfile" aria-label="Profile">
         <i class="fa-solid fa-user-shield"></i>
       </a>
-      <button class="nav-btn logout" title="Sign Out" aria-label="Sign Out" onclick="showToast('Signed out of student session demo.')">
+      <button class="nav-btn logout" data-i18n-title="navLogout" aria-label="Sign Out" onclick="showToast(currentLang==='ar'?'تم تسجيل الخروج بنجاح':'Signed out of student session demo.')">
         <i class="fa-solid fa-arrow-right-from-bracket"></i>
       </button>
     </aside>
@@ -1193,23 +1203,23 @@
         <div class="topbar-left">
           <div class="gov-badge">
             <i class="fa-solid fa-landmark" style="color:#1F5FCC"></i>
-            <span>MCIT &amp; Digital Egypt Initiatives (DECI / DEBI)</span>
+            <span data-i18n="govBadge">وزارة الاتصالات وتكنولوجيا المعلومات · مبادرات مصر الرقمية</span>
           </div>
           <div class="brand-title">
             <span>iSchool</span>
-            <span class="brand-tag">Student Portal</span>
+            <span class="brand-tag" data-i18n="brandTag">بوابة التلميذ</span>
           </div>
         </div>
 
         <div class="topbar-right">
-          <button class="btn-icon" aria-label="Notifications" onclick="showToast('You have 4 operational updates.')">
+          <button class="btn-icon" aria-label="Notifications" onclick="showToast(currentLang==='ar'?'لديك 4 إشعارات ومتابعات تشغيلية':'You have 4 operational updates.')">
             <i class="fa-regular fa-bell"></i>
             <span class="badge-count">4</span>
           </button>
 
           <button class="lang-toggle" id="langBtn" onclick="toggleLanguage()">
             <i class="fa-solid fa-globe"></i>
-            <span id="langLabel">عربي</span>
+            <span id="langLabel">English</span>
           </button>
 
           <div class="user-pill">
@@ -1229,7 +1239,7 @@
             <div class="student-avatar" id="avatarDisplay">
               <i class="fa-regular fa-user"></i>
             </div>
-            <label class="avatar-badge-btn" for="avatarUploadInput" title="Upload custom photo">
+            <label class="avatar-badge-btn" for="avatarUploadInput" data-i18n-title="tipUploadPhoto">
               <i class="fa-solid fa-camera"></i>
               <input type="file" id="avatarUploadInput" accept="image/*" style="display:none" onchange="previewAvatar(this)">
             </label>
@@ -1239,25 +1249,25 @@
             <div class="hero-tags">
               <span class="hero-pill green">
                 <i class="fa-solid fa-circle-check"></i>
-                <span id="txtActiveStatus">Active Student · DECI Cohort</span>
+                <span data-i18n="activeStatus">تلميذ نشط · دفعة براعم مصر الرقمية</span>
               </span>
               <span class="hero-pill">
                 <i class="fa-solid fa-award"></i>
-                <span>Grade 4 Engagement</span>
+                <span data-i18n="gradeBadge">المستوى الرابع (تفاعلي)</span>
               </span>
               <span class="hero-pill">
                 <i class="fa-solid fa-location-dot"></i>
-                <span>الإسكندرية (Alexandria)</span>
+                <span data-i18n="govPill">محافظة الإسكندرية</span>
               </span>
             </div>
 
-            <h1 class="hero-name-en" id="displayEnName">Omar Mohamed Hesham Moustafa</h1>
-            <div class="hero-name-ar" id="displayArName">عمر محمد هشام مصطفى</div>
+            <h1 class="hero-name-primary" id="displayPrimaryName">عمر محمد هشام مصطفى</h1>
+            <div class="hero-name-secondary" id="displaySecondaryName">Omar Mohamed Hesham Moustafa</div>
 
             <div class="hero-meta">
-              <span><i class="fa-solid fa-fingerprint"></i> ID: <b>DEMI4-S-210045</b></span>
-              <span><i class="fa-regular fa-envelope"></i> <span id="heroEmailDisplay">omar2202.moh@gmail.com</span></span>
-              <span><i class="fa-solid fa-mobile-screen"></i> <span id="heroPhoneDisplay">+20 10 03579851</span></span>
+              <span><i class="fa-solid fa-fingerprint"></i> <span data-i18n="lblStudentCode">كود التلميذ:</span> <b>DEMI4-S-210045</b></span>
+              <span><i class="fa-regular fa-envelope"></i> <span id="heroEmailDisplay" dir="ltr">omar2202.moh@gmail.com</span></span>
+              <span><i class="fa-solid fa-mobile-screen"></i> <span id="heroPhoneDisplay" dir="ltr">+20 10 03579851</span></span>
             </div>
           </div>
         </div>
@@ -1265,11 +1275,11 @@
         <div class="hero-actions">
           <button class="btn-hero" onclick="scrollToChangeRequest('email', 'student')">
             <i class="fa-solid fa-pen-to-square"></i>
-            <span id="btnReqChangeHero">Request Contact Change</span>
+            <span data-i18n="btnReqChangeHero">طلب تغيير بيانات الاتصال</span>
           </button>
-          <button class="btn-hero" style="background:rgba(255,255,255,0.15); color:#FFFFFF; border:1px solid rgba(255,255,255,0.3)" onclick="showToast('Profile data is verified by Ministry databases.')">
+          <button class="btn-hero" style="background:rgba(255,255,255,0.15); color:#FFFFFF; border:1px solid rgba(255,255,255,0.3)" onclick="showToast(currentLang==='ar'?'البيانات معتمدة ومطابقة لسجلات الوزارة':'Profile data is verified by Ministry databases.')">
             <i class="fa-solid fa-shield-halved"></i>
-            <span>Verified Identity</span>
+            <span data-i18n="verifiedId">هوية معتمدة</span>
           </button>
         </div>
       </section>
@@ -1285,11 +1295,11 @@
                 <i class="fa-solid fa-id-card"></i>
               </div>
               <div>
-                <h2 class="card-title" id="tStudentInfo">Student Information</h2>
-                <div class="card-subtitle" id="sStudentInfo">Official student profile and enrollment details</div>
+                <h2 class="card-title" data-i18n="tStudentInfo">بيانات التلميذ</h2>
+                <div class="card-subtitle" data-i18n="sStudentInfo">بيانات القيد والتسجيل المعتمدة بالمبادرة</div>
               </div>
             </div>
-            <span class="badge-primary-login">Profile Data</span>
+            <span class="badge-primary-login" data-i18n="badgeProfileData">الملف الشخصي</span>
           </div>
 
           <div class="card-body">
@@ -1297,31 +1307,28 @@
 
               <div class="field-item">
                 <div class="field-label-group">
-                  <span class="field-label">Student Name (Arabic)</span>
-                  <span class="field-label-ar">الاسم باللغة العربية</span>
+                  <span class="field-label" data-i18n="lblArName">الاسم باللغة العربية</span>
                 </div>
                 <div class="field-value">
-                  <span class="field-value-text" lang="ar" dir="rtl" style="font-family:var(--font-ar); font-size:16px;">عمر محمد هشام مصطفى</span>
+                  <span class="field-value-text" style="font-size:16px;">عمر محمد هشام مصطفى</span>
                 </div>
               </div>
 
               <div class="field-item">
                 <div class="field-label-group">
-                  <span class="field-label">Student Name (English)</span>
-                  <span class="field-label-ar">الاسم باللغة الإنجليزية</span>
+                  <span class="field-label" data-i18n="lblEnName">الاسم باللغة الإنجليزية</span>
                 </div>
                 <div class="field-value">
-                  <span class="field-value-text">Omar Mohamed Hesham Moustafa</span>
+                  <span class="field-value-text" dir="ltr">Omar Mohamed Hesham Moustafa</span>
                 </div>
               </div>
 
               <div class="field-item" style="grid-column: span 2;">
                 <div class="field-label-group">
-                  <span class="field-label">Date of Birth</span>
-                  <span class="field-label-ar">تاريخ الميلاد</span>
+                  <span class="field-label" data-i18n="lblDob">تاريخ الميلاد</span>
                 </div>
                 <div class="field-value">
-                  <span class="field-value-text">2015-02-22 (Age 11)</span>
+                  <span class="field-value-text" data-i18n="valDob">2015-02-22 (11 سنة)</span>
                 </div>
               </div>
 
@@ -1337,11 +1344,11 @@
                 <i class="fa-solid fa-phone-volume"></i>
               </div>
               <div>
-                <h2 class="card-title" id="tContactNums">Contact Numbers</h2>
-                <div class="card-subtitle" id="sContactNums">Registered lines for emergency alerts, SMS &amp; WhatsApp</div>
+                <h2 class="card-title" data-i18n="tContactNums">أرقام التواصل</h2>
+                <div class="card-subtitle" data-i18n="sContactNums">الخطوط المسجلة للتنبيهات وإشعارات الواتساب</div>
               </div>
             </div>
-            <span class="verified-badge"><i class="fa-solid fa-shield-check"></i> OTP Protected</span>
+            <span class="verified-badge"><i class="fa-solid fa-shield-check"></i> <span data-i18n="badgeOtpProtected">محمي برمز التحقق</span></span>
           </div>
 
           <div class="card-body">
@@ -1349,8 +1356,7 @@
 
               <div class="field-item">
                 <div class="field-label-group">
-                  <span class="field-label">Student Phone</span>
-                  <span class="field-label-ar">رقم التلميذ</span>
+                  <span class="field-label" data-i18n="lblStudentPhone">رقم هاتف التلميذ</span>
                 </div>
                 <div class="field-value">
                   <span class="field-value-text" dir="ltr">
@@ -1358,34 +1364,32 @@
                     <b id="valStudentPhone">+20 10 03579851</b>
                   </span>
                   <button class="field-action-btn" onclick="scrollToChangeRequest('mobile', 'student')">
-                    <i class="fa-solid fa-pen"></i> Request Change
+                    <i class="fa-solid fa-pen"></i> <span data-i18n="btnRequestChange">طلب تغيير</span>
                   </button>
                 </div>
               </div>
 
               <div class="field-item">
                 <div class="field-label-group">
-                  <span class="field-label">Parent / Guardian Phone</span>
-                  <span class="field-label-ar">رقم هاتف ولي الأمر (الأب)</span>
+                  <span class="field-label" data-i18n="lblGuardianPhone">رقم هاتف ولي الأمر (الأب)</span>
                 </div>
                 <div class="field-value">
                   <span class="field-value-text" dir="ltr">
                     <b id="valGuardianPhone">+20 12 23459812</b>
                   </span>
                   <button class="field-action-btn" onclick="scrollToChangeRequest('mobile', 'guardian')">
-                    <i class="fa-solid fa-pen"></i> Request Change
+                    <i class="fa-solid fa-pen"></i> <span data-i18n="btnRequestChange">طلب تغيير</span>
                   </button>
                 </div>
               </div>
 
               <div class="field-item" style="grid-column: span 2;">
                 <div class="field-label-group">
-                  <span class="field-label">Registered Guardian Full Name</span>
-                  <span class="field-label-ar">اسم ولي الأمر المسجل</span>
+                  <span class="field-label" data-i18n="lblGuardianName">اسم ولي الأمر المسجل</span>
                 </div>
                 <div class="field-value">
-                  <span class="field-value-text">Hesham Moustafa Mohamed (Father / الأب)</span>
-                  <span class="badge-primary-login">Legal Guardian</span>
+                  <span class="field-value-text" data-i18n="valGuardianName">هشام مصطفى محمد (الأب / ولي الأمر)</span>
+                  <span class="badge-primary-login" data-i18n="badgeLegalGuardian">ولي الأمر المعتمد</span>
                 </div>
               </div>
 
@@ -1401,11 +1405,11 @@
                 <i class="fa-solid fa-envelope-open-text"></i>
               </div>
               <div>
-                <h2 class="card-title" id="tEmailAccounts">Registered Email Accounts</h2>
-                <div class="card-subtitle" id="sEmailAccounts">Primary platform credentials and parent notifications</div>
+                <h2 class="card-title" data-i18n="tEmailAccounts">حسابات البريد الإلكتروني</h2>
+                <div class="card-subtitle" data-i18n="sEmailAccounts">بيانات تسجيل الدخول الأساسية وإشعارات ولي الأمر</div>
               </div>
             </div>
-            <span class="badge-primary-login">Login Credentials</span>
+            <span class="badge-primary-login" data-i18n="badgeLoginCreds">بيانات الدخول</span>
           </div>
 
           <div class="card-body">
@@ -1413,8 +1417,7 @@
 
               <div class="field-item" style="grid-column: span 2; background:#F0F6FF; border-color:#BFDBFE;">
                 <div class="field-label-group">
-                  <span class="field-label" style="color:#1D4ED8">Student Login Email (Primary)</span>
-                  <span class="field-label-ar">البريد الإلكتروني الأساسي للتلميذ</span>
+                  <span class="field-label" style="color:#1D4ED8" data-i18n="lblStudentEmail">البريد الإلكتروني الأساسي للتلميذ (تسجيل الدخول)</span>
                 </div>
                 <div class="field-value">
                   <span class="field-value-text" dir="ltr">
@@ -1422,18 +1425,17 @@
                     <b id="valStudentEmail" style="color:#1E3A8A">omar2202.moh@gmail.com</b>
                   </span>
                   <button class="field-action-btn" style="background:#FFFFFF; border-color:#93C5FD;" onclick="scrollToChangeRequest('email', 'student')">
-                    <i class="fa-solid fa-pen"></i> Request Change
+                    <i class="fa-solid fa-pen"></i> <span data-i18n="btnRequestChange">طلب تغيير</span>
                   </button>
                 </div>
-                <div style="font-size:11.5px; color:#3B82F6; margin-top:2px;">
-                  <i class="fa-solid fa-circle-info"></i> Used for Microsoft Teams &amp; Student Portal Authentication.
+                <div style="font-size:12px; color:#3B82F6; margin-top:2px;" data-i18n="hintStudentEmail">
+                  <i class="fa-solid fa-circle-info"></i> يُستخدم لتسجيل الدخول إلى المنصة وحساب مايكروسوفت تيمز التعليمي.
                 </div>
               </div>
 
               <div class="field-item" style="grid-column: span 2;">
                 <div class="field-label-group">
-                  <span class="field-label">Parent / 2nd Email (Reports &amp; Follow-up)</span>
-                  <span class="field-label-ar">البريد الإلكتروني الإضافي لولي الأمر</span>
+                  <span class="field-label" data-i18n="lblGuardianEmail">البريد الإلكتروني لولي الأمر (التقارير والمتابعة)</span>
                 </div>
                 <div class="field-value">
                   <span class="field-value-text" dir="ltr">
@@ -1441,11 +1443,11 @@
                     <b id="valGuardianEmail">rimo.magdy236@gmail.com</b>
                   </span>
                   <button class="field-action-btn" onclick="scrollToChangeRequest('email', 'guardian')">
-                    <i class="fa-solid fa-pen"></i> Request Change
+                    <i class="fa-solid fa-pen"></i> <span data-i18n="btnRequestChange">طلب تغيير</span>
                   </button>
                 </div>
-                <div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;">
-                  Receives monthly attendance summaries, exam scorecards, and session notices.
+                <div style="font-size:12px; color:var(--text-muted); margin-top:2px;" data-i18n="hintGuardianEmail">
+                  يستقبل تقارير الحضور الشهرية ونتائج التقييمات الدورية وإشعارات الحصص.
                 </div>
               </div>
 
@@ -1461,8 +1463,8 @@
                 <i class="fa-solid fa-compass"></i>
               </div>
               <div>
-                <h2 class="card-title" id="tEduLocation">Location &amp; Educational Enrollment</h2>
-                <div class="card-subtitle" id="sEduLocation">Geographic zone and learning curriculum track</div>
+                <h2 class="card-title" data-i18n="tEduLocation">الموقع والمسار التعليمي</h2>
+                <div class="card-subtitle" data-i18n="sEduLocation">المحافظة الجغرافية والمستوى التدريبي الحالي</div>
               </div>
             </div>
             <span class="badge-primary-login">DECI 2026</span>
@@ -1473,21 +1475,19 @@
 
               <div class="field-item">
                 <div class="field-label-group">
-                  <span class="field-label">Governorate</span>
-                  <span class="field-label-ar">المحافظة</span>
+                  <span class="field-label" data-i18n="lblGov">المحافظة</span>
                 </div>
                 <div class="field-value">
-                  <span class="field-value-text" style="font-size:16px;">الإسكندرية (Alexandria)</span>
+                  <span class="field-value-text" style="font-size:16px;" data-i18n="valGov">الإسكندرية (Alexandria)</span>
                 </div>
               </div>
 
               <div class="field-item">
                 <div class="field-label-group">
-                  <span class="field-label">Current Grade / Level</span>
-                  <span class="field-label-ar">المستوى الدراسي الحالي</span>
+                  <span class="field-label" data-i18n="lblGrade">المستوى الدراسي الحالي</span>
                 </div>
                 <div class="field-value">
-                  <span class="field-value-text" style="color:var(--primary); font-weight:800;">Grade 4 Engagement</span>
+                  <span class="field-value-text" style="color:var(--primary); font-weight:800;" data-i18n="valGrade">الصف الرابع (Grade 4 Engagement)</span>
                 </div>
               </div>
 
@@ -1503,13 +1503,13 @@
                 <i class="fa-solid fa-envelope-circle-check"></i>
               </div>
               <div>
-                <h2 class="card-title" id="tChangeReq">Change Email or Mobile Number</h2>
-                <div class="card-subtitle" id="sChangeReq">Submitting creates an official change request. Your current details stay active until verified.</div>
+                <h2 class="card-title" data-i18n="tChangeReq">تغيير البريد الإلكتروني أو رقم الهاتف المحمول</h2>
+                <div class="card-subtitle" data-i18n="sChangeReq">إرسال الطلب ينشئ طلباً رسمياً للمراجعة. تظل بياناتك الحالية سارية حتى اكتمال التحديث.</div>
               </div>
             </div>
             <span class="hero-pill" style="background:#EBF3FF; color:var(--primary)">
               <i class="fa-solid fa-shield-halved"></i>
-              <span>Official Request Flow</span>
+              <span data-i18n="badgeOfficialFlow">مسار طلب معتمد</span>
             </span>
           </div>
 
@@ -1519,11 +1519,11 @@
             <div class="tabs-wrapper" role="tablist">
               <button type="button" class="tab-btn active" id="tabEmailBtn" onclick="switchChangeType('email')">
                 <i class="fa-regular fa-envelope"></i>
-                <span>Email Address Change</span>
+                <span data-i18n="tabEmail">تغيير البريد الإلكتروني</span>
               </button>
               <button type="button" class="tab-btn" id="tabMobileBtn" onclick="switchChangeType('mobile')">
                 <i class="fa-solid fa-mobile-screen"></i>
-                <span>Registered Mobile Number (الرقم المسجل)</span>
+                <span data-i18n="tabMobile">رقم الهاتف المحمول المسجل</span>
               </button>
             </div>
 
@@ -1534,38 +1534,38 @@
                   <i class="fa-solid fa-check"></i>
                 </div>
                 <div>
-                  <h3 class="success-title" id="tReqSubmitted">Request Submitted Successfully</h3>
-                  <div style="font-size:13px; color:#166534">Your change request has been registered and routed to B2G Operations team for identity verification.</div>
+                  <h3 class="success-title" data-i18n="tReqSubmitted">تم إرسال الطلب بنجاح</h3>
+                  <div style="font-size:13.5px; color:#166534" data-i18n="sReqSubmitted">تم تسجيل طلب التغيير وإحالته لفريق العمليات للتحقق من الهوية والاعتماد.</div>
                 </div>
               </div>
 
               <div class="summary-grid">
                 <div class="summary-col">
-                  <span class="summary-label">Target Profile</span>
-                  <span class="summary-val" id="sumTargetWho">Student's email</span>
+                  <span class="summary-label" data-i18n="lblSumTarget">الحساب المستهدف</span>
+                  <span class="summary-val" id="sumTargetWho">بريد التلميذ</span>
                 </div>
                 <div class="summary-col">
-                  <span class="summary-label">Profile Field</span>
-                  <span class="summary-val" id="sumField">Email</span>
+                  <span class="summary-label" data-i18n="lblSumField">الحقل المطلوب</span>
+                  <span class="summary-val" id="sumField">البريد الإلكتروني</span>
                 </div>
                 <div class="summary-col">
-                  <span class="summary-label">Current Stored</span>
+                  <span class="summary-label" data-i18n="lblSumCurrent">القيمة الحالية المسجلة</span>
                   <span class="summary-val" id="sumOld" dir="ltr">omar2202.moh@gmail.com</span>
                 </div>
                 <div class="summary-col">
-                  <span class="summary-label">Requested Update</span>
+                  <span class="summary-label" data-i18n="lblSumNew">القيمة الجديدة المطلوبة</span>
                   <span class="summary-val" id="sumNew" dir="ltr" style="color:var(--primary)">new.email@example.com</span>
                 </div>
               </div>
 
-              <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; font-size:12px; color:#276749;">
-                <span><i class="fa-solid fa-ticket"></i> Reference Ticket: <b id="sumTicketId">REQ-2026-90412</b></span>
-                <span><i class="fa-regular fa-clock"></i> SLA: Processed within 24 operational hours.</span>
+              <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; font-size:12.5px; color:#276749;">
+                <span><i class="fa-solid fa-ticket"></i> <span data-i18n="lblTicketRef">رقم التذكرة المرجعية:</span> <b id="sumTicketId">REQ-2026-90412</b></span>
+                <span><i class="fa-regular fa-clock"></i> <span data-i18n="lblSlaNotice">زمن الاستجابة: خلال 24 ساعة عمل رسمية.</span></span>
               </div>
 
               <button type="button" class="btn-reset" onclick="resetChangeForm()">
                 <i class="fa-solid fa-rotate-left"></i>
-                <span>Submit Another Request</span>
+                <span data-i18n="btnSubmitAnother">تقديم طلب آخر</span>
               </button>
             </div>
 
@@ -1574,7 +1574,7 @@
 
               <!-- Target Selector (Student vs Guardian) -->
               <div class="input-group">
-                <label class="input-label" id="lblSelectTarget">Select which contact needs to be updated:</label>
+                <label class="input-label" id="lblSelectTarget" data-i18n="lblSelectTarget">حدد جهة الاتصال المطلوب تحديثها:</label>
                 <div class="radio-card-grid">
 
                   <div class="radio-card active" id="radioTargetStudent" onclick="selectTarget('student')">
@@ -1582,8 +1582,8 @@
                       <div class="radio-dot"></div>
                     </div>
                     <div class="radio-card-content">
-                      <div class="radio-card-title" id="radioTitleStudent">Student's Contact</div>
-                      <div class="radio-card-desc" id="radioDescStudent">Updates Omar's direct login and platform access</div>
+                      <div class="radio-card-title" data-i18n="radioTitleStudent">بيانات التلميذ</div>
+                      <div class="radio-card-desc" data-i18n="radioDescStudent">تحديث بيانات تسجيل الدخول والوصول للمنصة الخاصة بعمر</div>
                     </div>
                   </div>
 
@@ -1592,8 +1592,8 @@
                       <div class="radio-dot"></div>
                     </div>
                     <div class="radio-card-content">
-                      <div class="radio-card-title" id="radioTitleGuardian">Parent / Guardian's Contact</div>
-                      <div class="radio-card-desc" id="radioDescGuardian">Updates legal guardian emergency &amp; progress reports</div>
+                      <div class="radio-card-title" data-i18n="radioTitleGuardian">بيانات ولي الأمر</div>
+                      <div class="radio-card-desc" data-i18n="radioDescGuardian">تحديث بيانات التواصل للطوارئ والتقارير الدورية</div>
                     </div>
                   </div>
 
@@ -1601,19 +1601,19 @@
               </div>
 
               <!-- Warning Notice for Student Email change -->
-              <div class="notice-box arabic" id="studentEmailNotice">
+              <div class="notice-box" id="studentEmailNotice">
                 <i class="fa-solid fa-triangle-exclamation"></i>
                 <div>
-                  <b>تنبيه أمني هام:</b>
-                  رجاء العلم أنه في حالة تغيير البريد الإلكتروني للتلميذ، سيتم استخدام البريد الإلكتروني الجديد لتسجيل الدخول إلى المنصة وحساب مايكروسوفت التعليمي فور اكتمال مراجعة الطلب.
+                  <b data-i18n="noticeSecurityTitle">تنبيه أمني هام:</b>
+                  <span data-i18n="noticeSecurityBody">رجاء العلم أنه في حالة تغيير البريد الإلكتروني للتلميذ، سيتم استخدام البريد الإلكتروني الجديد لتسجيل الدخول إلى المنصة وحساب مايكروسوفت التعليمي فور اكتمال مراجعة الطلب.</span>
                 </div>
               </div>
 
               <!-- Current Value (Locked) -->
               <div class="input-group">
-                <label class="input-label" for="txtCurrentVal" id="lblCurrentVal">
-                  Current contact as registered in system
-                  <span style="font-size:11px; color:var(--text-muted); font-weight:normal;">(Read-only from verified record)</span>
+                <label class="input-label" for="txtCurrentVal">
+                  <span data-i18n="lblCurrentVal">جهة الاتصال الحالية المسجلة بالنظام:</span>
+                  <span style="font-size:11.5px; color:var(--text-muted); font-weight:normal;" data-i18n="hintCurrentVal">(بيانات معتمدة للقراءة فقط)</span>
                 </label>
                 <div class="input-control-wrap">
                   <input type="text" id="txtCurrentVal" class="input-control locked" value="omar2202.moh@gmail.com" readonly tabindex="-1" dir="ltr">
@@ -1624,24 +1624,24 @@
               <!-- New Email Field (Shown when Email tab active) -->
               <div class="input-group" id="groupNewEmail">
                 <label class="input-label" for="txtNewEmail">
-                  <span id="lblNewEmail">New Email Address</span>
-                  <span lang="ar" dir="rtl" style="font-family:var(--font-ar); color:var(--text-muted); font-size:12px;">برجاء كتابة البريد الإلكتروني الجديد الذي تود تغييره</span>
+                  <span data-i18n="lblNewEmail">البريد الإلكتروني الجديد:</span>
+                  <span style="color:var(--text-muted); font-size:12px;" data-i18n="sublblNewEmail">برجاء كتابة البريد الإلكتروني الجديد الذي تود تغييره</span>
                 </label>
                 <div class="input-control-wrap">
                   <input type="email" id="txtNewEmail" class="input-control" placeholder="name@example.com" autocomplete="email" dir="ltr" oninput="validateEmailInput()">
                 </div>
                 <div class="input-error-msg" id="errNewEmail" style="display:none;">
                   <i class="fa-solid fa-circle-exclamation"></i>
-                  <span>يرجى كتابة البريد الإلكتروني بشكل صحيح (مثال: student@gmail.com).</span>
+                  <span data-i18n="errEmailValid">يرجى كتابة البريد الإلكتروني بشكل صحيح (مثال: student@gmail.com).</span>
                 </div>
-                <div class="input-hint">An official verification link will be sent to confirm ownership of the new email address.</div>
+                <div class="input-hint" data-i18n="hintNewEmail">سيتم إرسال رابط تأكيد رسمي للتحقق من ملكية البريد الإلكتروني الجديد.</div>
               </div>
 
               <!-- New Mobile Field (Shown when Mobile tab active) -->
               <div class="input-group" id="groupNewMobile" style="display:none;">
                 <label class="input-label" for="txtNewMobile">
-                  <span id="lblNewMobile">New Mobile Number</span>
-                  <span lang="ar" dir="rtl" style="font-family:var(--font-ar); color:var(--text-muted); font-size:12px;">برجاء كتابة رقم الهاتف المحمول الجديد</span>
+                  <span data-i18n="lblNewMobile">رقم الهاتف المحمول الجديد:</span>
+                  <span style="color:var(--text-muted); font-size:12px;" data-i18n="sublblNewMobile">برجاء كتابة رقم الهاتف المحمول الجديد</span>
                 </label>
                 <div class="phone-input-wrap" id="phoneInputWrap" dir="ltr">
                   <div class="country-code-pill">
@@ -1657,19 +1657,19 @@
                 </div>
                 <div class="input-error-msg" id="errNewMobile" style="display:none;">
                   <i class="fa-solid fa-circle-exclamation"></i>
-                  <span>يرجى إضافة رقم الهاتف المصري المكون من 10 أرقام بشكل صحيح (يبدأ بـ 10 أو 11 أو 12 أو 15).</span>
+                  <span data-i18n="errMobileValid">يرجى إضافة رقم الهاتف المصري المكون من 10 أرقام بشكل صحيح (يبدأ بـ 10 أو 11 أو 12 أو 15).</span>
                 </div>
-                <div class="input-hint">Egyptian mobile number, 10 digits starting with 10, 11, 12 or 15 (a leading 0 will be formatted automatically).</div>
+                <div class="input-hint" data-i18n="hintNewMobile">رقم محمول مصري مكون من 10 أرقام يبدأ بـ 10 أو 11 أو 12 أو 15 (يُضاف الصفر تلقائياً).</div>
               </div>
 
               <!-- Submit Action Button -->
               <div style="display:flex; align-items:center; gap:16px; margin-top:8px;">
                 <button type="button" class="btn-submit" id="btnSubmitChange" onclick="submitChangeRequest()">
                   <i class="fa-solid fa-paper-plane"></i>
-                  <span id="btnSubmitText">Submit Request</span>
+                  <span id="btnSubmitText" data-i18n="btnSubmit">إرسال الطلب</span>
                 </button>
-                <span style="font-size:12px; color:var(--text-muted)">
-                  <i class="fa-solid fa-shield"></i> Requests are reviewed by B2G Operations in compliance with DECI data policies.
+                <span style="font-size:12.5px; color:var(--text-muted)" data-i18n="txtPolicyNotice">
+                  <i class="fa-solid fa-shield"></i> تتم مراجعة الطلبات بواسطة فريق العمليات بما يتوافق مع سياسات مبادرة براعم مصر الرقمية.
                 </span>
               </div>
 
@@ -1686,29 +1686,28 @@
                 <i class="fa-solid fa-key"></i>
               </div>
               <div>
-                <h2 class="card-title" id="tSecurity">Change Password &amp; Account Security</h2>
-                <div class="card-subtitle" id="sSecurity">Update your student portal and single sign-on access password</div>
+                <h2 class="card-title" data-i18n="tSecurity">تغيير كلمة المرور وأمان الحساب</h2>
+                <div class="card-subtitle" data-i18n="sSecurity">تحديث كلمة مرور الدخول للمنصة وبوابة التلميذ</div>
               </div>
             </div>
-            <span class="badge-primary-login" style="background:#FEE2E2; color:#B91C1C;">Security</span>
+            <span class="badge-primary-login" style="background:#FEE2E2; color:#B91C1C;" data-i18n="badgeSecurity">الأمان</span>
           </div>
 
           <div class="card-body">
             <form onsubmit="handlePasswordChange(event)" style="display:flex; flex-direction:column; gap:16px;">
               <div class="field-grid">
-                
 
                 <div class="input-group">
-                  <label class="input-label" for="pwdNew">New Password</label>
-                  <input type="password" id="pwdNew" class="input-control" placeholder="Minimum 8 characters" required minlength="8" oninput="checkPasswordStrength(this.value)">
+                  <label class="input-label" for="pwdNew" data-i18n="lblPwdNew">كلمة المرور الجديدة</label>
+                  <input type="password" id="pwdNew" class="input-control" data-i18n-ph="phPwdNew" placeholder="8 أحرف كحد أدنى" required minlength="8" oninput="checkPasswordStrength(this.value)">
                   <div style="height:4px; border-radius:2px; background:#E2E8F0; margin-top:4px; overflow:hidden;">
                     <div id="pwdStrengthBar" style="height:100%; width:0%; transition:var(--transition); background:#CBD5E1;"></div>
                   </div>
                 </div>
 
                 <div class="input-group">
-                  <label class="input-label" for="pwdConfirm">Confirm New Password</label>
-                  <input type="password" id="pwdConfirm" class="input-control" placeholder="Re-type new password" required>
+                  <label class="input-label" for="pwdConfirm" data-i18n="lblPwdConfirm">تأكيد كلمة المرور الجديدة</label>
+                  <input type="password" id="pwdConfirm" class="input-control" data-i18n-ph="phPwdConfirm" placeholder="أعد كتابة كلمة المرور" required>
                 </div>
 
               </div>
@@ -1716,9 +1715,9 @@
               <div style="display:flex; align-items:center; gap:16px; margin-top:8px;">
                 <button type="submit" class="btn-submit" style="background:#1E293B;">
                   <i class="fa-solid fa-lock"></i>
-                  <span>Update Password</span>
+                  <span data-i18n="btnUpdatePwd">تحديث كلمة المرور</span>
                 </button>
-                <span style="font-size:12px; color:var(--text-muted)">Requires re-authenticating across Microsoft Teams.</span>
+                <span style="font-size:12.5px; color:var(--text-muted)" data-i18n="txtPwdNote">يتطلب إعادة تسجيل الدخول عبر مايكروسوفت تيمز.</span>
               </div>
             </form>
           </div>
@@ -1733,55 +1732,314 @@
   <!-- Toast Container -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- JavaScript Logic -->
+  <!-- Complete Bilingual Translation Dictionary & JavaScript Logic -->
   <script>
-    // Master State
+    // Profile Master Data
     const profileData = {
       student: {
         nameAr: "عمر محمد هشام مصطفى",
         nameEn: "Omar Mohamed Hesham Moustafa",
         id: "DEMI4-S-210045",
-        nationalId: "31502220203954",
         email: "omar2202.moh@gmail.com",
         phone: "+20 10 03579851",
-        grade: "Grade 4 Engagement",
-        gov: "الإسكندرية (Alexandria)",
-        area: "المنتزه ثان (Montaza 2)"
+        gradeAr: "الصف الرابع (تفاعلي)",
+        gradeEn: "Grade 4 Engagement",
+        govAr: "محافظة الإسكندرية",
+        govEn: "Alexandria (الإسكندرية)"
       },
       guardian: {
-        name: "Hesham Moustafa Mohamed",
-        relation: "Father (الأب)",
+        nameAr: "هشام مصطفى محمد (الأب / ولي الأمر)",
+        nameEn: "Hesham Moustafa Mohamed (Father / Legal Guardian)",
         email: "rimo.magdy236@gmail.com",
-        phone: "+20 12 23459812",
-        motherPhone: "+20 11 98765432"
+        phone: "+20 12 23459812"
+      }
+    };
+
+    // Dictionary of all UI strings in Arabic and English
+    const i18n = {
+      ar: {
+        pageTitle: "الملف الشخصي للتلميذ · مبادرات مصر الرقمية (iSchool B2G)",
+        langLabel: "English",
+        govBadge: "وزارة الاتصالات وتكنولوجيا المعلومات · مبادرات مصر الرقمية",
+        brandTag: "بوابة التلميذ",
+        activeStatus: "تلميذ نشط · دفعة براعم مصر الرقمية",
+        gradeBadge: "المستوى الرابع (تفاعلي)",
+        govPill: "محافظة الإسكندرية",
+        lblStudentCode: "كود التلميذ:",
+        btnReqChangeHero: "طلب تغيير بيانات الاتصال",
+        verifiedId: "هوية معتمدة",
+        navMenu: "القائمة الرئيسية",
+        navCourses: "المقررات الدراسية",
+        navSessions: "الحصص التدريبية",
+        navSchedule: "جدول المواعيد",
+        navMessages: "الرسائل",
+        navSupport: "الدعم الفني",
+        navProfile: "الملف الشخصي",
+        navLogout: "تسجيل الخروج",
+        tipUploadPhoto: "تحديث الصورة الشخصية",
+
+        // Card 1
+        tStudentInfo: "بيانات التلميذ",
+        sStudentInfo: "بيانات القيد والتسجيل المعتمدة بالمبادرة",
+        badgeProfileData: "الملف الشخصي",
+        lblArName: "الاسم باللغة العربية",
+        lblEnName: "الاسم باللغة الإنجليزية",
+        lblDob: "تاريخ الميلاد",
+        valDob: "2015-02-22 (11 سنة)",
+
+        // Card 2
+        tContactNums: "أرقام التواصل",
+        sContactNums: "الخطوط المسجلة للتنبيهات وإشعارات الواتساب",
+        badgeOtpProtected: "محمي برمز التحقق",
+        lblStudentPhone: "رقم هاتف التلميذ",
+        lblGuardianPhone: "رقم هاتف ولي الأمر (الأب)",
+        lblGuardianName: "اسم ولي الأمر المسجل",
+        valGuardianName: "هشام مصطفى محمد (الأب / ولي الأمر)",
+        badgeLegalGuardian: "ولي الأمر المعتمد",
+        btnRequestChange: "طلب تغيير",
+
+        // Card 3
+        tEmailAccounts: "حسابات البريد الإلكتروني",
+        sEmailAccounts: "بيانات تسجيل الدخول الأساسية وإشعارات ولي الأمر",
+        badgeLoginCreds: "بيانات الدخول",
+        lblStudentEmail: "البريد الإلكتروني الأساسي للتلميذ (تسجيل الدخول)",
+        hintStudentEmail: "يُستخدم لتسجيل الدخول إلى المنصة وحساب مايكروسوفت تيمز التعليمي.",
+        lblGuardianEmail: "البريد الإلكتروني لولي الأمر (التقارير والمتابعة)",
+        hintGuardianEmail: "يستقبل تقارير الحضور الشهرية ونتائج التقييمات الدورية وإشعارات الحصص.",
+
+        // Card 4
+        tEduLocation: "الموقع والمسار التعليمي",
+        sEduLocation: "المحافظة الجغرافية والمستوى التدريبي الحالي",
+        lblGov: "المحافظة",
+        valGov: "الإسكندرية (Alexandria)",
+        lblGrade: "المستوى الدراسي الحالي",
+        valGrade: "الصف الرابع (Grade 4 Engagement)",
+
+        // Card 5
+        tChangeReq: "تغيير البريد الإلكتروني أو رقم الهاتف المحمول",
+        sChangeReq: "إرسال الطلب ينشئ طلباً رسمياً للمراجعة. تظل بياناتك الحالية سارية حتى اكتمال التحديث.",
+        badgeOfficialFlow: "مسار طلب معتمد",
+        tabEmail: "تغيير البريد الإلكتروني",
+        tabMobile: "رقم الهاتف المحمول المسجل",
+        lblSelectTarget: "حدد جهة الاتصال المطلوب تحديثها:",
+        radioTitleStudent: "بيانات التلميذ",
+        radioDescStudent: "تحديث بيانات تسجيل الدخول والوصول للمنصة الخاصة بعمر",
+        radioTitleGuardian: "بيانات ولي الأمر",
+        radioDescGuardian: "تحديث بيانات التواصل للطوارئ والتقارير الدورية",
+        noticeSecurityTitle: "تنبيه أمني هام:",
+        noticeSecurityBody: "رجاء العلم أنه في حالة تغيير البريد الإلكتروني للتلميذ، سيتم استخدام البريد الإلكتروني الجديد لتسجيل الدخول إلى المنصة وحساب مايكروسوفت التعليمي فور اكتمال مراجعة الطلب.",
+        lblCurrentVal: "جهة الاتصال الحالية المسجلة بالنظام:",
+        hintCurrentVal: "(بيانات معتمدة للقراءة فقط)",
+        lblNewEmail: "البريد الإلكتروني الجديد:",
+        sublblNewEmail: "برجاء كتابة البريد الإلكتروني الجديد الذي تود تغييره",
+        hintNewEmail: "سيتم إرسال رابط تأكيد رسمي للتحقق من ملكية البريد الإلكتروني الجديد.",
+        lblNewMobile: "رقم الهاتف المحمول الجديد:",
+        sublblNewMobile: "برجاء كتابة رقم الهاتف المحمول الجديد",
+        hintNewMobile: "رقم محمول مصري مكون من 10 أرقام يبدأ بـ 10 أو 11 أو 12 أو 15 (يُضاف الصفر تلقائياً).",
+        btnSubmit: "إرسال الطلب",
+        txtPolicyNotice: "تتم مراجعة الطلبات بواسطة فريق العمليات بما يتوافق مع سياسات مبادرة براعم مصر الرقمية.",
+        tReqSubmitted: "تم إرسال الطلب بنجاح",
+        sReqSubmitted: "تم تسجيل طلب التغيير وإحالته لفريق العمليات للتحقق من الهوية والاعتماد.",
+        lblSumTarget: "الحساب المستهدف",
+        lblSumField: "الحقل المطلوب",
+        lblSumCurrent: "القيمة الحالية المسجلة",
+        lblSumNew: "القيمة الجديدة المطلوبة",
+        lblTicketRef: "رقم التذكرة المرجعية:",
+        lblSlaNotice: "زمن الاستجابة: خلال 24 ساعة عمل رسمية.",
+        btnSubmitAnother: "تقديم طلب آخر",
+        errEmailValid: "يرجى كتابة البريد الإلكتروني بشكل صحيح (مثال: student@gmail.com).",
+        errMobileValid: "يرجى إضافة رقم الهاتف المصري المكون من 10 أرقام بشكل صحيح (يبدأ بـ 10 أو 11 أو 12 أو 15).",
+
+        // Card 6
+        tSecurity: "تغيير كلمة المرور وأمان الحساب",
+        sSecurity: "تحديث كلمة مرور الدخول للمنصة وبوابة التلميذ",
+        badgeSecurity: "الأمان",
+        lblPwdNew: "كلمة المرور الجديدة",
+        lblPwdConfirm: "تأكيد كلمة المرور الجديدة",
+        phPwdNew: "8 أحرف كحد أدنى",
+        phPwdConfirm: "أعد كتابة كلمة المرور",
+        btnUpdatePwd: "تحديث كلمة المرور",
+        txtPwdNote: "يتطلب إعادة تسجيل الدخول عبر مايكروسوفت تيمز.",
+        toastSwitched: "تم تحويل الواجهة للغة العربية بنجاح"
+      },
+      en: {
+        pageTitle: "Student Profile · iSchool B2G Systems (DECI)",
+        langLabel: "عربي",
+        govBadge: "MCIT & Digital Egypt Initiatives (DECI / DEBI)",
+        brandTag: "Student Portal",
+        activeStatus: "Active Student · DECI Cohort",
+        gradeBadge: "Grade 4 Engagement",
+        govPill: "Alexandria Governorate",
+        lblStudentCode: "Student ID:",
+        btnReqChangeHero: "Request Contact Change",
+        verifiedId: "Verified Identity",
+        navMenu: "Main Menu",
+        navCourses: "Courses",
+        navSessions: "Training Sessions",
+        navSchedule: "Schedule",
+        navMessages: "Messages",
+        navSupport: "Technical Support",
+        navProfile: "Student Profile",
+        navLogout: "Sign Out",
+        tipUploadPhoto: "Upload profile picture",
+
+        // Card 1
+        tStudentInfo: "Student Information",
+        sStudentInfo: "Official student profile and enrollment details",
+        badgeProfileData: "Profile Data",
+        lblArName: "Student Name (Arabic)",
+        lblEnName: "Student Name (English)",
+        lblDob: "Date of Birth",
+        valDob: "2015-02-22 (Age 11)",
+
+        // Card 2
+        tContactNums: "Contact Numbers",
+        sContactNums: "Registered lines for emergency alerts, SMS & WhatsApp",
+        badgeOtpProtected: "OTP Protected",
+        lblStudentPhone: "Student Phone",
+        lblGuardianPhone: "Parent / Guardian Phone",
+        lblGuardianName: "Registered Guardian Full Name",
+        valGuardianName: "Hesham Moustafa Mohamed (Father / Legal Guardian)",
+        badgeLegalGuardian: "Legal Guardian",
+        btnRequestChange: "Request Change",
+
+        // Card 3
+        tEmailAccounts: "Registered Email Accounts",
+        sEmailAccounts: "Primary platform credentials and parent notifications",
+        badgeLoginCreds: "Login Credentials",
+        lblStudentEmail: "Student Login Email (Primary)",
+        hintStudentEmail: "Used for Microsoft Teams & Student Portal Authentication.",
+        lblGuardianEmail: "Parent / 2nd Email (Reports & Follow-up)",
+        hintGuardianEmail: "Receives monthly attendance summaries, exam scorecards, and session notices.",
+
+        // Card 4
+        tEduLocation: "Location & Educational Enrollment",
+        sEduLocation: "Geographic zone and learning curriculum track",
+        lblGov: "Governorate",
+        valGov: "Alexandria (الإسكندرية)",
+        lblGrade: "Current Grade / Level",
+        valGrade: "Grade 4 Engagement",
+
+        // Card 5
+        tChangeReq: "Change Email or Mobile Number",
+        sChangeReq: "Submitting creates an official change request. Your current details stay active until verified.",
+        badgeOfficialFlow: "Official Request Flow",
+        tabEmail: "Email Address Change",
+        tabMobile: "Registered Mobile Number (الرقم المسجل)",
+        lblSelectTarget: "Select which contact needs to be updated:",
+        radioTitleStudent: "Student's Contact",
+        radioDescStudent: "Updates Omar's direct login and platform access",
+        radioTitleGuardian: "Parent / Guardian's Contact",
+        radioDescGuardian: "Updates legal guardian emergency & progress reports",
+        noticeSecurityTitle: "Important Security Notice:",
+        noticeSecurityBody: "Changing the student's email will update their official Microsoft Teams and portal login credentials once approved.",
+        lblCurrentVal: "Current contact as registered in system:",
+        hintCurrentVal: "(Read-only from verified record)",
+        lblNewEmail: "New Email Address:",
+        sublblNewEmail: "Please enter the new email address you wish to change to",
+        hintNewEmail: "An official verification link will be sent to confirm ownership of the new email address.",
+        lblNewMobile: "New Mobile Number:",
+        sublblNewMobile: "Please enter the new mobile phone number",
+        hintNewMobile: "Egyptian mobile number, 10 digits starting with 10, 11, 12 or 15 (a leading 0 is fine).",
+        btnSubmit: "Submit Request",
+        txtPolicyNotice: "Requests are reviewed by B2G Operations in compliance with DECI data policies.",
+        tReqSubmitted: "Request Submitted Successfully",
+        sReqSubmitted: "Your change request has been registered and routed to B2G Operations team for identity verification.",
+        lblSumTarget: "Target Profile",
+        lblSumField: "Profile Field",
+        lblSumCurrent: "Current Stored",
+        lblSumNew: "Requested Update",
+        lblTicketRef: "Reference Ticket:",
+        lblSlaNotice: "SLA: Processed within 24 operational hours.",
+        btnSubmitAnother: "Submit Another Request",
+        errEmailValid: "Please enter a valid email address (e.g. student@gmail.com).",
+        errMobileValid: "Please enter a valid 10-digit Egyptian mobile number (starting with 10, 11, 12, or 15).",
+
+        // Card 6
+        tSecurity: "Change Password & Account Security",
+        sSecurity: "Update your student portal and single sign-on access password",
+        badgeSecurity: "Security",
+        lblPwdNew: "New Password",
+        lblPwdConfirm: "Confirm New Password",
+        phPwdNew: "Minimum 8 characters",
+        phPwdConfirm: "Re-type new password",
+        btnUpdatePwd: "Update Password",
+        txtPwdNote: "Requires re-authenticating across Microsoft Teams.",
+        toastSwitched: "Interface switched to English"
       }
     };
 
     let activeType = 'email'; // 'email' | 'mobile'
     let activeTarget = 'student'; // 'student' | 'guardian'
-    let currentLang = 'en'; // 'en' | 'ar'
+    let currentLang = 'ar'; // Defaulting to Arabic!
 
     // Initialize UI on load
     document.addEventListener('DOMContentLoaded', () => {
+      // Check saved preference or default to Arabic
+      const savedLang = localStorage.getItem('ischool_profile_lang') || 'ar';
+      setLanguage(savedLang, false);
       updateCurrentValueDisplay();
     });
 
-    // Language Toggle
+    // Toggle between Arabic and English
     function toggleLanguage() {
-      currentLang = currentLang === 'en' ? 'ar' : 'en';
-      const html = document.documentElement;
-      const langLabel = document.getElementById('langLabel');
+      const targetLang = currentLang === 'ar' ? 'en' : 'ar';
+      setLanguage(targetLang, true);
+    }
 
-      if (currentLang === 'ar') {
-        html.setAttribute('dir', 'rtl');
-        html.setAttribute('lang', 'ar');
-        langLabel.textContent = 'English';
+    // Set and apply language
+    function setLanguage(lang, showToastMsg = true) {
+      currentLang = lang;
+      localStorage.setItem('ischool_profile_lang', lang);
+      const html = document.documentElement;
+      const dict = i18n[lang] || i18n.ar;
+
+      // Update HTML attributes
+      html.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+      html.setAttribute('lang', lang);
+      document.title = dict.pageTitle;
+
+      // Update Toggle Button label
+      document.getElementById('langLabel').textContent = dict.langLabel;
+
+      // Update all elements with data-i18n
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) {
+          el.textContent = dict[key];
+        }
+      });
+
+      // Update placeholders
+      document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+        const key = el.getAttribute('data-i18n-ph');
+        if (dict[key]) {
+          el.setAttribute('placeholder', dict[key]);
+        }
+      });
+
+      // Update titles
+      document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const key = el.getAttribute('data-i18n-title');
+        if (dict[key]) {
+          el.setAttribute('title', dict[key]);
+        }
+      });
+
+      // Update hero names hierarchy
+      const primaryName = document.getElementById('displayPrimaryName');
+      const secondaryName = document.getElementById('displaySecondaryName');
+      if (lang === 'ar') {
+        primaryName.textContent = profileData.student.nameAr;
+        secondaryName.textContent = profileData.student.nameEn;
       } else {
-        html.setAttribute('dir', 'ltr');
-        html.setAttribute('lang', 'en');
-        langLabel.textContent = 'عربي';
+        primaryName.textContent = profileData.student.nameEn;
+        secondaryName.textContent = profileData.student.nameAr;
       }
-      showToast(currentLang === 'ar' ? 'تم تحويل الواجهة للغة العربية' : 'Switched interface to English');
+
+      if (showToastMsg) {
+        showToast(dict.toastSwitched);
+      }
     }
 
     // Switch between Email and Mobile change tabs
@@ -1854,7 +2112,7 @@
         section.style.boxShadow = '';
       }, 1500);
 
-      // Focus input
+      // Focus appropriate input
       setTimeout(() => {
         if (type === 'email') {
           document.getElementById('txtNewEmail').focus();
@@ -1919,6 +2177,7 @@
     function submitChangeRequest() {
       const btn = document.getElementById('btnSubmitChange');
       const btnText = document.getElementById('btnSubmitText');
+      const dict = i18n[currentLang] || i18n.ar;
       let targetOld = '';
       let targetNew = '';
       let targetField = '';
@@ -1931,13 +2190,13 @@
           emailInput.classList.add('error');
           document.getElementById('errNewEmail').style.display = 'flex';
           emailInput.focus();
-          showToast('Please enter a valid email address.', 'error');
+          showToast(dict.errEmailValid, 'error');
           return;
         }
         targetOld = activeTarget === 'student' ? profileData.student.email : profileData.guardian.email;
         targetNew = val;
-        targetField = activeTarget === 'student' ? 'Student Email' : 'Guardian Email';
-        targetWho = activeTarget === 'student' ? "Student's Profile" : "Guardian's Profile";
+        targetField = currentLang === 'ar' ? (activeTarget === 'student' ? 'بريد التلميذ' : 'بريد ولي الأمر') : (activeTarget === 'student' ? 'Student Email' : 'Guardian Email');
+        targetWho = currentLang === 'ar' ? (activeTarget === 'student' ? 'حساب التلميذ' : 'حساب ولي الأمر') : (activeTarget === 'student' ? "Student's Profile" : "Guardian's Profile");
       } else {
         const mobileInput = document.getElementById('txtNewMobile');
         const val = mobileInput.value.trim();
@@ -1945,23 +2204,23 @@
           document.getElementById('phoneInputWrap').classList.add('error');
           document.getElementById('errNewMobile').style.display = 'flex';
           mobileInput.focus();
-          showToast('Please enter a valid 10-digit Egyptian mobile number.', 'error');
+          showToast(dict.errMobileValid, 'error');
           return;
         }
         const cleaned = val.replace(/^0/, '');
         targetOld = activeTarget === 'student' ? profileData.student.phone : profileData.guardian.phone;
         targetNew = `+20 ${cleaned.slice(0, 2)} ${cleaned.slice(2, 6)} ${cleaned.slice(6)}`;
-        targetField = activeTarget === 'student' ? 'Student Mobile' : 'Guardian Mobile';
-        targetWho = activeTarget === 'student' ? "Student's Profile" : "Guardian's Profile";
+        targetField = currentLang === 'ar' ? (activeTarget === 'student' ? 'هاتف التلميذ' : 'هاتف ولي الأمر') : (activeTarget === 'student' ? 'Student Mobile' : 'Guardian Mobile');
+        targetWho = currentLang === 'ar' ? (activeTarget === 'student' ? 'حساب التلميذ' : 'حساب ولي الأمر') : (activeTarget === 'student' ? "Student's Profile" : "Guardian's Profile");
       }
 
       // Button Loading animation
       btn.disabled = true;
-      btnText.textContent = 'Submitting Request...';
+      btnText.textContent = currentLang === 'ar' ? 'جارٍ إرسال الطلب...' : 'Submitting Request...';
 
       setTimeout(() => {
         btn.disabled = false;
-        btnText.textContent = 'Submit Request';
+        btnText.textContent = dict.btnSubmit;
 
         // Populate summary panel
         document.getElementById('sumTargetWho').textContent = targetWho;
@@ -1974,8 +2233,8 @@
         document.getElementById('changeFormPanel').style.display = 'none';
         document.getElementById('successPanel').style.display = 'flex';
 
-        showToast('Change request submitted for B2G Operations review!');
-      }, 700);
+        showToast(currentLang === 'ar' ? 'تم تقديم طلب التغيير بنجاح وإحالته لفريق العمليات' : 'Change request submitted for B2G Operations review!');
+      }, 600);
     }
 
     // Reset Form for another request
@@ -2013,10 +2272,10 @@
       const p1 = document.getElementById('pwdNew').value;
       const p2 = document.getElementById('pwdConfirm').value;
       if (p1 !== p2) {
-        showToast('New passwords do not match.', 'error');
+        showToast(currentLang === 'ar' ? 'كلمتا المرور غير متطابقتين' : 'New passwords do not match.', 'error');
         return;
       }
-      showToast('Password updated successfully!');
+      showToast(currentLang === 'ar' ? 'تم تحديث كلمة المرور بنجاح' : 'Password updated successfully!');
       e.target.reset();
       checkPasswordStrength('');
     }
@@ -2028,7 +2287,7 @@
         reader.onload = function(e) {
           const container = document.getElementById('avatarDisplay');
           container.innerHTML = `<img src="${e.target.result}" alt="Profile avatar">`;
-          showToast('Profile picture preview updated.');
+          showToast(currentLang === 'ar' ? 'تم تحديث معاينة الصورة الشخصية' : 'Profile picture preview updated.');
         };
         reader.readAsDataURL(input.files[0]);
       }
