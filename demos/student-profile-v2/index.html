@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Profile · iSchool B2G Systems (V2)</title>
+  <meta name="description" content="Redesigned student profile and contact management interface for iSchool B2G initiatives.">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="../../assets/img/iSchool Logo-colors.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #1F5FCC;
+      --primary-hover: #164DB0;
+      --primary-light: #EBF2FE;
+      --primary-soft: #F4F8FF;
+      --accent: #2C6FE0;
+      --accent-glow: rgba(44, 111, 224, 0.15);
+      --success: #128C4A;
+      --success-bg: #EEF8F2;
+      --success-border: #8FC7A6;
+      --warning: #B35F00;
+      --warning-bg: #FFF7EC;
+      --warning-border: #F3CA92;
+      --danger: #D32F2F;
+      --danger-bg: #FDF2F2;
+      --danger-border: #F5B7B7;
+      
+      --text-main: #141B2D;
+      --text-sub: #4A5873;
+      --text-muted: #7E8DA6;
+      --card-bg: #FFFFFF;
+      --page-bg: #F5F7FC;
+      --card-border: #E3EAF5;
+      --input-border: #CFD9E8;
+      --input-bg: #FFFFFF;
+      --input-focus-border: #2C6FE0;
+      --chip-bg: #F0F4FA;
+
+      --font-en: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-ar: 'Cairo', system-ui, -apple-system, sans-serif;
+      
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --shadow-sm: 0 2px 6px rgba(20, 35, 65, 0.04);
+      --shadow-md: 0 8px 24px rgba(20, 35, 65, 0.06);
+      --shadow-lg: 0 16px 40px rgba(20, 35, 65, 0.08);
+      --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-en);
+      background-color: var(--page-bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    html[dir="rtl"] body {
+      font-family: var(--font-ar);
+    }
+
+    /* Layout Wrapper */
+    .app-shell {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      flex: 0 0 80px;
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      padding: 24px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--card-border);
+      position: sticky;
+      top: 20px;
+      height: calc(100vh - 40px);
+    }
+
+    .nav-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 18px;
+      text-decoration: none;
+      position: relative;
+    }
+
+    .nav-btn:hover {
+      background: var(--primary-soft);
+      color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .nav-btn.active {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .nav-btn.logout {
+      margin-top: auto;
+      color: var(--danger);
+    }
+
+    .nav-btn.logout:hover {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    /* Main Container */
+    .main-content {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Top Navigation Header */
+    .topbar {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--card-border);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .gov-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #F8FAFC;
+      border: 1px dashed #CBD5E1;
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      color: var(--text-sub);
+      font-weight: 600;
+    }
+
+    .gov-badge img {
+      height: 24px;
+      width: auto;
+    }
+
+    .brand-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-tag {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .btn-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid var(--card-border);
+      background: #FFFFFF;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .btn-icon:hover {
+      background: var(--primary-soft);
+      color: var(--primary);
+      border-color: var(--primary-light);
+    }
+
+    .badge-count {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      background: #EA580C;
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+      border: 2px solid #FFFFFF;
+    }
+
+    .lang-toggle {
+      background: var(--chip-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+      font-size: 13px;
+    }
+
+    .lang-toggle:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 4px 14px 4px 6px;
+      background: var(--chip-bg);
+      border-radius: 40px;
+      border: 1px solid var(--card-border);
+    }
+
+    .user-avatar-mini {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2C6FE0, #1F5FCC);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 15px;
+      box-shadow: 0 2px 8px rgba(31, 95, 204, 0.3);
+    }
+
+    .user-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text-main);
+    }
+
+    .user-code {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Hero / Student Banner */
+    .profile-hero {
+      background: linear-gradient(135deg, #1E4DA8 0%, #205ECC 50%, #2C6FE0 100%);
+      border-radius: var(--radius-xl);
+      padding: 32px 36px;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-hero::before {
+      content: "";
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 70%);
+      pointer-events: none;
+    }
+
+    .hero-info {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      z-index: 1;
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .student-avatar {
+      width: 104px;
+      height: 104px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      border: 4px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 44px;
+      color: var(--primary);
+      overflow: hidden;
+    }
+
+    .student-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .avatar-badge-btn {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--card-bg);
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 13px;
+    }
+
+    .avatar-badge-btn:hover {
+      background: var(--primary);
+      color: #FFFFFF;
+    }
+
+    .hero-texts {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .hero-tags {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .hero-pill {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hero-pill.green {
+      background: rgba(46, 213, 115, 0.25);
+      color: #A3FFD2;
+    }
+
+    .hero-name-en {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+
+    .hero-name-ar {
+      font-family: var(--font-ar);
+      font-size: 20px;
+      font-weight: 600;
+      opacity: 0.95;
+    }
+
+    .hero-meta {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      font-size: 13px;
+      opacity: 0.85;
+      margin-top: 4px;
+    }
+
+    .hero-meta span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1;
+      align-items: flex-end;
+    }
+
+    .btn-hero {
+      background: #FFFFFF;
+      color: var(--primary);
+      font-weight: 700;
+      border: 0;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-hero:hover {
+      background: #F0F4FA;
+      transform: translateY(-2px);
+    }
+
+    /* Grid Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 20px;
+    }
+
+    .col-6 {
+      grid-column: span 6;
+    }
+
+    .col-12 {
+      grid-column: span 12;
+    }
+
+    /* Modern Card */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-header {
+      padding: 22px 28px 16px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .card-header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .card-icon.emerald {
+      background: #E8F8F0;
+      color: #0E9F57;
+    }
+
+    .card-icon.amber {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+
+    .card-icon.violet {
+      background: #EDE9FE;
+      color: #7C3AED;
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .card-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .card-body {
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Two column field row */
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .field-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: #F8FAFC;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    .field-item:hover {
+      background: #F1F5F9;
+      border-color: #CBD5E1;
+    }
+
+    .field-label-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .field-label-ar {
+      font-family: var(--font-ar);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .field-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      word-break: break-word;
+    }
+
+    .field-value-text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .field-action-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--primary);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .field-action-btn:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+    }
+
+    .verified-badge {
+      font-size: 11px;
+      color: var(--success);
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .badge-primary-login {
+      background: #DBEAFE;
+      color: #1E40AF;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    /* Change Request Section */
+    .change-req-card {
+      border: 2px solid #D6E4FA;
+      background: #FFFFFF;
+      position: relative;
+    }
+
+    .change-req-card::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #1F5FCC, #38BDF8);
+    }
+
+    .tabs-wrapper {
+      display: flex;
+      gap: 8px;
+      background: #F1F5F9;
+      padding: 6px;
+      border-radius: var(--radius-md);
+      align-self: flex-start;
+    }
+
+    .tab-btn {
+      padding: 10px 22px;
+      border-radius: 10px;
+      border: 0;
+      background: transparent;
+      color: var(--text-sub);
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(31, 95, 204, 0.25);
+    }
+
+    .radio-card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .radio-card {
+      border: 1.5px solid var(--input-border);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      background: #FFFFFF;
+      transition: var(--transition);
+    }
+
+    .radio-card:hover {
+      border-color: #93C5FD;
+      background: var(--primary-soft);
+    }
+
+    .radio-card.active {
+      border-color: var(--primary);
+      background: #F0F6FF;
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    .radio-indicator {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid #94A3B8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+
+    .radio-card.active .radio-indicator {
+      border-color: var(--primary);
+    }
+
+    .radio-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: transparent;
+      transition: var(--transition);
+    }
+
+    .radio-card.active .radio-dot {
+      background: var(--primary);
+    }
+
+    .radio-card-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .radio-card-title {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text-main);
+    }
+
+    .radio-card-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Warning Notice */
+    .notice-box {
+      border: 1.5px solid var(--warning-border);
+      background: var(--warning-bg);
+      color: #78350F;
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .notice-box i {
+      font-size: 18px;
+      color: var(--warning);
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .notice-box.arabic {
+      font-family: var(--font-ar);
+      direction: rtl;
+      text-align: right;
+    }
+
+    /* Input Groups */
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .input-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .input-control-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-control {
+      width: 100%;
+      height: 52px;
+      border: 1.5px solid var(--input-border);
+      border-radius: var(--radius-md);
+      padding: 0 18px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--text-main);
+      background: var(--input-bg);
+      transition: var(--transition);
+      outline: none;
+    }
+
+    .input-control:focus {
+      border-color: var(--input-focus-border);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .input-control.error {
+      border-color: var(--danger) !important;
+      background: #FFFBFB;
+    }
+
+    .input-control.locked {
+      background: #F1F5F9;
+      color: #64748B;
+      cursor: not-allowed;
+      border-color: #E2E8F0;
+    }
+
+    .input-lock-icon {
+      position: absolute;
+      right: 18px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* Phone Input Wrap with Egypt Flag */
+    .phone-input-wrap {
+      display: flex;
+      height: 52px;
+      border: 1.5px solid var(--input-border);
+      border-radius: var(--radius-md);
+      background: #FFFFFF;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .phone-input-wrap:focus-within {
+      border-color: var(--input-focus-border);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .phone-input-wrap.error {
+      border-color: var(--danger) !important;
+    }
+
+    .country-code-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 16px;
+      background: #F8FAFC;
+      border-right: 1.5px solid var(--input-border);
+      font-weight: 600;
+      color: var(--text-main);
+      font-size: 14px;
+      user-select: none;
+    }
+
+    html[dir="rtl"] .country-code-pill {
+      border-right: 0;
+      border-left: 1.5px solid var(--input-border);
+    }
+
+    .country-code-pill svg {
+      width: 22px;
+      height: 15px;
+      border-radius: 2px;
+    }
+
+    .phone-field {
+      flex: 1;
+      border: 0;
+      height: 100%;
+      padding: 0 18px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .input-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .input-error-msg {
+      font-size: 12px;
+      color: var(--danger);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-ar);
+    }
+
+    /* Buttons */
+    .btn-submit {
+      align-self: flex-start;
+      height: 50px;
+      padding: 0 44px;
+      background: var(--primary);
+      color: #FFFFFF;
+      border: 0;
+      border-radius: 25px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 14px rgba(31, 95, 204, 0.3);
+      transition: var(--transition);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(31, 95, 204, 0.4);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* Success Card */
+    .success-panel {
+      border: 1.5px solid var(--success-border);
+      background: var(--success-bg);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .success-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .success-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--success);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .success-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #0E6236;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      background: #FFFFFF;
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      border: 1px solid rgba(18, 140, 74, 0.2);
+    }
+
+    .summary-col {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .summary-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #4A6E59;
+      text-transform: uppercase;
+    }
+
+    .summary-val {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      overflow-wrap: anywhere;
+    }
+
+    .btn-reset {
+      align-self: flex-start;
+      height: 42px;
+      padding: 0 24px;
+      border: 1.5px solid var(--success);
+      background: #FFFFFF;
+      color: var(--success);
+      border-radius: 21px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .btn-reset:hover {
+      background: var(--success);
+      color: #FFFFFF;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 9999;
+    }
+
+    .toast {
+      background: #141B2D;
+      color: #FFFFFF;
+      padding: 14px 22px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast.success {
+      border-left: 4px solid #10B981;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+      .app-shell {
+        flex-direction: column;
+      }
+      .sidebar {
+        flex-direction: row;
+        width: 100%;
+        height: auto;
+        position: static;
+        justify-content: center;
+        padding: 12px;
+      }
+      .col-6 {
+        grid-column: span 12;
+      }
+      .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .field-grid, .radio-card-grid {
+        grid-template-columns: 1fr;
+      }
+      .profile-hero {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .hero-actions {
+        align-items: flex-start;
+        width: 100%;
+      }
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-shell">
+
+    <!-- Left Navigation Sidebar -->
+    <aside class="sidebar">
+      <button class="nav-btn" title="Menu" aria-label="Menu">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <a href="#" class="nav-btn" title="Courses" aria-label="Courses">
+        <i class="fa-solid fa-graduation-cap"></i>
+      </a>
+      <a href="#" class="nav-btn" title="Sessions" aria-label="Sessions">
+        <i class="fa-solid fa-video"></i>
+      </a>
+      <a href="#" class="nav-btn" title="Schedule" aria-label="Schedule">
+        <i class="fa-solid fa-calendar-days"></i>
+      </a>
+      <a href="#" class="nav-btn" title="Messages" aria-label="Messages">
+        <i class="fa-solid fa-comment-dots"></i>
+      </a>
+      <a href="#" class="nav-btn" title="Support Helpdesk" aria-label="Support">
+        <i class="fa-solid fa-headset"></i>
+      </a>
+      <a href="#" class="nav-btn active" title="Student Profile" aria-label="Profile">
+        <i class="fa-solid fa-user-shield"></i>
+      </a>
+      <button class="nav-btn logout" title="Sign Out" aria-label="Sign Out" onclick="showToast('Signed out of student session demo.')">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      </button>
+    </aside>
+
+    <!-- Main Container -->
+    <main class="main-content">
+
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="gov-badge">
+            <i class="fa-solid fa-landmark" style="color:#1F5FCC"></i>
+            <span>MCIT &amp; Digital Egypt Initiatives (DECI / DEBI)</span>
+          </div>
+          <div class="brand-title">
+            <span>iSchool</span>
+            <span class="brand-tag">Student Portal</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <button class="btn-icon" aria-label="Notifications" onclick="showToast('You have 4 operational updates.')">
+            <i class="fa-regular fa-bell"></i>
+            <span class="badge-count">4</span>
+          </button>
+
+          <button class="lang-toggle" id="langBtn" onclick="toggleLanguage()">
+            <i class="fa-solid fa-globe"></i>
+            <span id="langLabel">عربي</span>
+          </button>
+
+          <div class="user-pill">
+            <div class="user-avatar-mini">ع</div>
+            <div class="user-details">
+              <span class="user-name">عمر محمد هشام</span>
+              <span class="user-code">DEMI4-S-210045</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Profile Hero Banner -->
+      <section class="profile-hero">
+        <div class="hero-info">
+          <div class="avatar-wrapper">
+            <div class="student-avatar" id="avatarDisplay">
+              <i class="fa-regular fa-user"></i>
+            </div>
+            <label class="avatar-badge-btn" for="avatarUploadInput" title="Upload custom photo">
+              <i class="fa-solid fa-camera"></i>
+              <input type="file" id="avatarUploadInput" accept="image/*" style="display:none" onchange="previewAvatar(this)">
+            </label>
+          </div>
+
+          <div class="hero-texts">
+            <div class="hero-tags">
+              <span class="hero-pill green">
+                <i class="fa-solid fa-circle-check"></i>
+                <span id="txtActiveStatus">Active Student · DECI Cohort</span>
+              </span>
+              <span class="hero-pill">
+                <i class="fa-solid fa-award"></i>
+                <span>Grade 4 Engagement</span>
+              </span>
+              <span class="hero-pill">
+                <i class="fa-solid fa-location-dot"></i>
+                <span>الإسكندرية (Alexandria)</span>
+              </span>
+            </div>
+
+            <h1 class="hero-name-en" id="displayEnName">Omar Mohamed Hesham Moustafa</h1>
+            <div class="hero-name-ar" id="displayArName">عمر محمد هشام مصطفى</div>
+
+            <div class="hero-meta">
+              <span><i class="fa-solid fa-fingerprint"></i> ID: <b>DEMI4-S-210045</b></span>
+              <span><i class="fa-regular fa-envelope"></i> <span id="heroEmailDisplay">omar2202.moh@gmail.com</span></span>
+              <span><i class="fa-solid fa-mobile-screen"></i> <span id="heroPhoneDisplay">+20 10 03579851</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <button class="btn-hero" onclick="scrollToChangeRequest('email', 'student')">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span id="btnReqChangeHero">Request Contact Change</span>
+          </button>
+          <button class="btn-hero" style="background:rgba(255,255,255,0.15); color:#FFFFFF; border:1px solid rgba(255,255,255,0.3)" onclick="showToast('Profile data is verified by Ministry databases.')">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Verified Identity</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Dashboard Grid -->
+      <div class="dashboard-grid">
+
+        <!-- Card 1: Student Information & National Identity -->
+        <section class="card col-6">
+          <div class="card-header">
+            <div class="card-header-title">
+              <div class="card-icon">
+                <i class="fa-solid fa-id-card"></i>
+              </div>
+              <div>
+                <h2 class="card-title" id="tStudentInfo">Student Information</h2>
+                <div class="card-subtitle" id="sStudentInfo">Official civil registry &amp; program enrollment data</div>
+              </div>
+            </div>
+            <span class="badge-primary-login">Civil ID</span>
+          </div>
+
+          <div class="card-body">
+            <div class="field-grid">
+
+              <div class="field-item">
+                <div class="field-label-group">
+                  <span class="field-label">Student Name (Arabic)</span>
+                  <span class="field-label-ar">الاسم باللغة العربية</span>
+                </div>
+                <div class="field-value">
+                  <span class="field-value-text" lang="ar" dir="rtl" style="font-family:var(--font-ar); font-size:16px;">عمر محمد هشام مصطفى</span>
+                </div>
+              </div>
+
+              <div class="field-item">
+                <div class="field-label-group">
+                  <span class="field-label">Student Name (English)</span>
+                  <span class="field-label-ar">الاسم باللغة الإنجليزية</span>
+                </div>
+                <div class="field-value">
+                  <span class="field-value-text">Omar Mohamed Hesham Moustafa</span>
+                </div>
+              </div>
+
+              <div class="field-item">
+                <div class="field-label-group">
+                  <span class="field-label">National ID</span>
+                  <span class="field-label-ar">الرقم القومي</span>
+                </div>
+                <div class="field-value">
+                  <span class="field-value-text" style="letter-spacing:1px; font-family:monospace; font-size:15px;">31502220203954</span>
+                  <span class="verified-badge"><i class="fa-solid fa-circle-check"></i> Verified</span>
+                </div>
+              </div>
+
+              <div class="field-item">
+                <div class="field-label-group">
+                  <span class="field-label">Date of Birth</span>
+                  <span class="field-label-ar">تاريخ الميلاد</span>
+                </div>
+                <div class="field-value">
+                  <span class="field-value-text">2015-02-22 (Age 11)</span>
+                </div>
+              </div>
+
+              <div class="field-item">
+                <div class="field-label-group">
+                  <span class="field-label">Gender</span>
+                  <span class="field-label-ar">النوع</span>
+                </div>
+                <div class="field-value">
+                  <span class="field-value-text">Male (ذكر)</span>
+                </div>
+              </div>
+
+              <div class="field-item">
+                <div class="field-label-group">
+                  <span class="field-label">School Type</span>
+                  <span class="field-label-ar">نوع المدرسة</span>
+                </div>
+                <div class="field-value">
+                  <span class="field-value-text">Official Language (تجريبي لغات)</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- Card 2: Contact Numbers & Communication -->
+        <section class="card col-6">
+          <div class="card-header">
+            <div class="card-header-title">
+              <div class="card-icon emerald">
+                <i class="fa-solid fa-phone-volume"></i>
+              </div>
+              <div>
+                <h2 class="card-title" id="tContactNums">Contact Numbers</h2>
+                <div class="card-subtitle" id="sContactNums">Registered lines for emergency alerts, SMS &amp; WhatsApp</div>
+              </div>
+            </div>
+            <span class="verified-badge"><i class="fa-solid fa-shield-check"></i> OTP Protected</span>
+          </div>
+
+          <div class="card-body">
+            <div class="field-grid">
+
+              <div class="field-item">
+                <div class="field-label-group">
+                  <span class="field-label">Student Phone</span>
+                  <span class="field-label-ar">رقم التلميذ</span>
+                </div>
+                <div class="field-value">
+                  <span class="field-value-text" dir="ltr">
+                    <span style="color:#059669"><i class="fa-brands fa-whatsapp"></i></span>
+                    <b id="valStudentPhone">+20 10 03579851</b>
+                  </span>
+                  <button class="field-action-btn" onclick="scrollToChangeRequest('mobile', 'student')">
+                    <i class="fa-solid fa-pen"></i> Request Change
+                  </button>
+                </div>
+              </div>
+
+              <div class="field-item">
+                <div class="field-label-group">
+                  <span class="field-label">WhatsApp Contact</span>
+                  <span class="field-label-ar">رقم الواتساب المعتمد</span>
+                </div>
+                <div class="field-value">
+                  <span class="field-value-text" dir="ltr">+20 10 03579851</span>
+                  <span class="verified-badge"><i class="fa-solid fa-check"></i> Active</span>
+                </div>
+              </div>
+
+              <div class="field-item">
+                <div class="field-label-group">
+                  <span class="field-label">Father Mobile Number</span>
+                  <span class="field-label-ar">رقم هاتف الأب (ولي الأمر)</span>
+                </div>
+                <div class="field-value">
+                  <span class="field-value-text" dir="ltr">
+                    <b id="valGuardianPhone">+20 12 23459812</b>
+                  </span>
+                  <button class="field-action-btn" onclick="scrollToChangeRequest('mobile', 'guardian')">
+                    <i class="fa-solid fa-pen"></i> Request Change
+                  </button>
+                </div>
+              </div>
+
+              <div class="field-item">
+                <div class="field-label-group">
+                  <span class="field-label">Mother Mobile Number</span>
+                  <span class="field-label-ar">رقم هاتف الأم</span>
+                </div>
+                <div class="field-value">
+                  <span class="field-value-text" dir="ltr">+20 11 98765432</span>
+                  <span style="font-size:11px; color:var(--text-muted)">Secondary</span>
+                </div>
+              </div>
+
+              <div class="field-item" style="grid-column: span 2;">
+                <div class="field-label-group">
+                  <span class="field-label">Registered Guardian Full Name</span>
+                  <span class="field-label-ar">اسم ولي الأمر المسجل</span>
+                </div>
+                <div class="field-value">
+                  <span class="field-value-text">Hesham Moustafa Mohamed (Father / الأب)</span>
+                  <span class="badge-primary-login">Legal Guardian</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- Card 3: Digital Identity & Email Accounts -->
+        <section class="card col-6">
+          <div class="card-header">
+            <div class="card-header-title">
+              <div class="card-icon amber">
+                <i class="fa-solid fa-envelope-open-text"></i>
+              </div>
+              <div>
+                <h2 class="card-title" id="tEmailAccounts">Registered Email Accounts</h2>
+                <div class="card-subtitle" id="sEmailAccounts">Primary platform credentials and parent notifications</div>
+              </div>
+            </div>
+            <span class="badge-primary-login">Login Credentials</span>
+          </div>
+
+          <div class="card-body">
+            <div class="field-grid">
+
+              <div class="field-item" style="grid-column: span 2; background:#F0F6FF; border-color:#BFDBFE;">
+                <div class="field-label-group">
+                  <span class="field-label" style="color:#1D4ED8">Student Login Email (Primary)</span>
+                  <span class="field-label-ar">البريد الإلكتروني الأساسي للتلميذ</span>
+                </div>
+                <div class="field-value">
+                  <span class="field-value-text" dir="ltr">
+                    <i class="fa-solid fa-user-check" style="color:#2563EB"></i>
+                    <b id="valStudentEmail" style="color:#1E3A8A">omar2202.moh@gmail.com</b>
+                  </span>
+                  <button class="field-action-btn" style="background:#FFFFFF; border-color:#93C5FD;" onclick="scrollToChangeRequest('email', 'student')">
+                    <i class="fa-solid fa-pen"></i> Request Change
+                  </button>
+                </div>
+                <div style="font-size:11.5px; color:#3B82F6; margin-top:2px;">
+                  <i class="fa-solid fa-circle-info"></i> Used for Microsoft Teams &amp; Student Portal Authentication.
+                </div>
+              </div>
+
+              <div class="field-item" style="grid-column: span 2;">
+                <div class="field-label-group">
+                  <span class="field-label">Parent / 2nd Email (Reports &amp; Follow-up)</span>
+                  <span class="field-label-ar">البريد الإلكتروني الإضافي لولي الأمر</span>
+                </div>
+                <div class="field-value">
+                  <span class="field-value-text" dir="ltr">
+                    <i class="fa-regular fa-envelope" style="color:#64748B"></i>
+                    <b id="valGuardianEmail">rimo.magdy236@gmail.com</b>
+                  </span>
+                  <button class="field-action-btn" onclick="scrollToChangeRequest('email', 'guardian')">
+                    <i class="fa-solid fa-pen"></i> Request Change
+                  </button>
+                </div>
+                <div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;">
+                  Receives monthly attendance summaries, exam scorecards, and session notices.
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- Card 4: Location & Educational Enrollment -->
+        <section class="card col-6">
+          <div class="card-header">
+            <div class="card-header-title">
+              <div class="card-icon violet">
+                <i class="fa-solid fa-compass"></i>
+              </div>
+              <div>
+                <h2 class="card-title" id="tEduLocation">Location &amp; Educational Enrollment</h2>
+                <div class="card-subtitle" id="sEduLocation">Geographic zone and learning curriculum track</div>
+              </div>
+            </div>
+            <span class="badge-primary-login">DECI 2026</span>
+          </div>
+
+          <div class="card-body">
+            <div class="field-grid">
+
+              <div class="field-item">
+                <div class="field-label-group">
+                  <span class="field-label">Governorate</span>
+                  <span class="field-label-ar">المحافظة</span>
+                </div>
+                <div class="field-value">
+                  <span class="field-value-text" style="font-size:16px;">الإسكندرية (Alexandria)</span>
+                </div>
+              </div>
+
+              <div class="field-item">
+                <div class="field-label-group">
+                  <span class="field-label">District / Area</span>
+                  <span class="field-label-ar">المنطقة والحي</span>
+                </div>
+                <div class="field-value">
+                  <span class="field-value-text">المنتزه ثان (Montaza 2)</span>
+                </div>
+              </div>
+
+              <div class="field-item">
+                <div class="field-label-group">
+                  <span class="field-label">Current Grade / Level</span>
+                  <span class="field-label-ar">المستوى الدراسي الحالي</span>
+                </div>
+                <div class="field-value">
+                  <span class="field-value-text" style="color:var(--primary); font-weight:800;">Grade 4 Engagement</span>
+                </div>
+              </div>
+
+              <div class="field-item">
+                <div class="field-label-group">
+                  <span class="field-label">Study Language</span>
+                  <span class="field-label-ar">لغة الدراسة</span>
+                </div>
+                <div class="field-value">
+                  <span class="field-value-text">English (لغات)</span>
+                </div>
+              </div>
+
+              <div class="field-item" style="grid-column: span 2;">
+                <div class="field-label-group">
+                  <span class="field-label">Assigned Training Group</span>
+                  <span class="field-label-ar">المجموعة التدريبية</span>
+                </div>
+                <div class="field-value">
+                  <span class="field-value-text">
+                    <i class="fa-solid fa-users-viewfinder" style="color:var(--primary)"></i>
+                    <b>ALX-G4-ENG-SAT-02</b> (Saturday 04:00 PM - 06:00 PM)
+                  </span>
+                  <span class="verified-badge"><i class="fa-solid fa-check"></i> Enrolled</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- Card 5: Interactive Contact Change Request Engine -->
+        <section class="card col-12 change-req-card" id="changeRequestSection">
+          <div class="card-header">
+            <div class="card-header-title">
+              <div class="card-icon" style="background:#E0E7FF; color:#4338CA;">
+                <i class="fa-solid fa-envelope-circle-check"></i>
+              </div>
+              <div>
+                <h2 class="card-title" id="tChangeReq">Change Email or Mobile Number</h2>
+                <div class="card-subtitle" id="sChangeReq">Submitting creates an official change request. Your current details stay active until verified.</div>
+              </div>
+            </div>
+            <span class="hero-pill" style="background:#EBF3FF; color:var(--primary)">
+              <i class="fa-solid fa-shield-halved"></i>
+              <span>Official Request Flow</span>
+            </span>
+          </div>
+
+          <div class="card-body">
+
+            <!-- Tab Switcher -->
+            <div class="tabs-wrapper" role="tablist">
+              <button type="button" class="tab-btn active" id="tabEmailBtn" onclick="switchChangeType('email')">
+                <i class="fa-regular fa-envelope"></i>
+                <span>Email Address Change</span>
+              </button>
+              <button type="button" class="tab-btn" id="tabMobileBtn" onclick="switchChangeType('mobile')">
+                <i class="fa-solid fa-mobile-screen"></i>
+                <span>Registered Mobile Number (الرقم المسجل)</span>
+              </button>
+            </div>
+
+            <!-- SUCCESS PANEL (Appears on submit) -->
+            <div class="success-panel" id="successPanel" style="display:none;">
+              <div class="success-header">
+                <div class="success-icon">
+                  <i class="fa-solid fa-check"></i>
+                </div>
+                <div>
+                  <h3 class="success-title" id="tReqSubmitted">Request Submitted Successfully</h3>
+                  <div style="font-size:13px; color:#166534">Your change request has been registered and routed to B2G Operations team for identity verification.</div>
+                </div>
+              </div>
+
+              <div class="summary-grid">
+                <div class="summary-col">
+                  <span class="summary-label">Target Profile</span>
+                  <span class="summary-val" id="sumTargetWho">Student's email</span>
+                </div>
+                <div class="summary-col">
+                  <span class="summary-label">Profile Field</span>
+                  <span class="summary-val" id="sumField">Email</span>
+                </div>
+                <div class="summary-col">
+                  <span class="summary-label">Current Stored</span>
+                  <span class="summary-val" id="sumOld" dir="ltr">omar2202.moh@gmail.com</span>
+                </div>
+                <div class="summary-col">
+                  <span class="summary-label">Requested Update</span>
+                  <span class="summary-val" id="sumNew" dir="ltr" style="color:var(--primary)">new.email@example.com</span>
+                </div>
+              </div>
+
+              <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; font-size:12px; color:#276749;">
+                <span><i class="fa-solid fa-ticket"></i> Reference Ticket: <b id="sumTicketId">REQ-2026-90412</b></span>
+                <span><i class="fa-regular fa-clock"></i> SLA: Processed within 24 operational hours.</span>
+              </div>
+
+              <button type="button" class="btn-reset" onclick="resetChangeForm()">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>Submit Another Request</span>
+              </button>
+            </div>
+
+            <!-- FORM PANEL -->
+            <div id="changeFormPanel" style="display:flex; flex-direction:column; gap:20px;">
+
+              <!-- Target Selector (Student vs Guardian) -->
+              <div class="input-group">
+                <label class="input-label" id="lblSelectTarget">Select which contact needs to be updated:</label>
+                <div class="radio-card-grid">
+
+                  <div class="radio-card active" id="radioTargetStudent" onclick="selectTarget('student')">
+                    <div class="radio-indicator">
+                      <div class="radio-dot"></div>
+                    </div>
+                    <div class="radio-card-content">
+                      <div class="radio-card-title" id="radioTitleStudent">Student's Contact</div>
+                      <div class="radio-card-desc" id="radioDescStudent">Updates Omar's direct login and platform access</div>
+                    </div>
+                  </div>
+
+                  <div class="radio-card" id="radioTargetGuardian" onclick="selectTarget('guardian')">
+                    <div class="radio-indicator">
+                      <div class="radio-dot"></div>
+                    </div>
+                    <div class="radio-card-content">
+                      <div class="radio-card-title" id="radioTitleGuardian">Parent / Guardian's Contact</div>
+                      <div class="radio-card-desc" id="radioDescGuardian">Updates legal guardian emergency &amp; progress reports</div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Warning Notice for Student Email change -->
+              <div class="notice-box arabic" id="studentEmailNotice">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <div>
+                  <b>تنبيه أمني هام:</b>
+                  رجاء العلم أنه في حالة تغيير البريد الإلكتروني للتلميذ، سيتم استخدام البريد الإلكتروني الجديد لتسجيل الدخول إلى المنصة وحساب مايكروسوفت التعليمي فور اكتمال مراجعة الطلب.
+                </div>
+              </div>
+
+              <!-- Current Value (Locked) -->
+              <div class="input-group">
+                <label class="input-label" for="txtCurrentVal" id="lblCurrentVal">
+                  Current contact as registered in system
+                  <span style="font-size:11px; color:var(--text-muted); font-weight:normal;">(Read-only from verified record)</span>
+                </label>
+                <div class="input-control-wrap">
+                  <input type="text" id="txtCurrentVal" class="input-control locked" value="omar2202.moh@gmail.com" readonly tabindex="-1" dir="ltr">
+                  <i class="fa-solid fa-lock input-lock-icon"></i>
+                </div>
+              </div>
+
+              <!-- New Email Field (Shown when Email tab active) -->
+              <div class="input-group" id="groupNewEmail">
+                <label class="input-label" for="txtNewEmail">
+                  <span id="lblNewEmail">New Email Address</span>
+                  <span lang="ar" dir="rtl" style="font-family:var(--font-ar); color:var(--text-muted); font-size:12px;">برجاء كتابة البريد الإلكتروني الجديد الذي تود تغييره</span>
+                </label>
+                <div class="input-control-wrap">
+                  <input type="email" id="txtNewEmail" class="input-control" placeholder="name@example.com" autocomplete="email" dir="ltr" oninput="validateEmailInput()">
+                </div>
+                <div class="input-error-msg" id="errNewEmail" style="display:none;">
+                  <i class="fa-solid fa-circle-exclamation"></i>
+                  <span>يرجى كتابة البريد الإلكتروني بشكل صحيح (مثال: student@gmail.com).</span>
+                </div>
+                <div class="input-hint">An official verification link will be sent to confirm ownership of the new email address.</div>
+              </div>
+
+              <!-- New Mobile Field (Shown when Mobile tab active) -->
+              <div class="input-group" id="groupNewMobile" style="display:none;">
+                <label class="input-label" for="txtNewMobile">
+                  <span id="lblNewMobile">New Mobile Number</span>
+                  <span lang="ar" dir="rtl" style="font-family:var(--font-ar); color:var(--text-muted); font-size:12px;">برجاء كتابة رقم الهاتف المحمول الجديد</span>
+                </label>
+                <div class="phone-input-wrap" id="phoneInputWrap" dir="ltr">
+                  <div class="country-code-pill">
+                    <svg viewBox="0 0 26 18">
+                      <rect width="26" height="6" fill="#CE1126"></rect>
+                      <rect y="6" width="26" height="6" fill="#FFFFFF"></rect>
+                      <rect y="12" width="26" height="6" fill="#000000"></rect>
+                      <circle cx="13" cy="9" r="1.8" fill="#C09300"></circle>
+                    </svg>
+                    <span>+20</span>
+                  </div>
+                  <input type="tel" id="txtNewMobile" class="phone-field" placeholder="10 1234 5678" inputmode="numeric" oninput="validateMobileInput()">
+                </div>
+                <div class="input-error-msg" id="errNewMobile" style="display:none;">
+                  <i class="fa-solid fa-circle-exclamation"></i>
+                  <span>يرجى إضافة رقم الهاتف المصري المكون من 10 أرقام بشكل صحيح (يبدأ بـ 10 أو 11 أو 12 أو 15).</span>
+                </div>
+                <div class="input-hint">Egyptian mobile number, 10 digits starting with 10, 11, 12 or 15 (a leading 0 will be formatted automatically).</div>
+              </div>
+
+              <!-- Submit Action Button -->
+              <div style="display:flex; align-items:center; gap:16px; margin-top:8px;">
+                <button type="button" class="btn-submit" id="btnSubmitChange" onclick="submitChangeRequest()">
+                  <i class="fa-solid fa-paper-plane"></i>
+                  <span id="btnSubmitText">Submit Request</span>
+                </button>
+                <span style="font-size:12px; color:var(--text-muted)">
+                  <i class="fa-solid fa-shield"></i> Requests are reviewed by B2G Operations in compliance with DECI data policies.
+                </span>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Card 6: Password & Account Security -->
+        <section class="card col-12">
+          <div class="card-header">
+            <div class="card-header-title">
+              <div class="card-icon" style="background:#FEE2E2; color:#DC2626;">
+                <i class="fa-solid fa-key"></i>
+              </div>
+              <div>
+                <h2 class="card-title" id="tSecurity">Change Password &amp; Account Security</h2>
+                <div class="card-subtitle" id="sSecurity">Update your student portal and single sign-on access password</div>
+              </div>
+            </div>
+            <span class="badge-primary-login" style="background:#FEE2E2; color:#B91C1C;">Security</span>
+          </div>
+
+          <div class="card-body">
+            <form onsubmit="handlePasswordChange(event)" style="display:flex; flex-direction:column; gap:16px;">
+              <div class="field-grid">
+                
+                <div class="input-group">
+                  <label class="input-label" for="pwdCurrent">Current Password</label>
+                  <input type="password" id="pwdCurrent" class="input-control" placeholder="Enter current password" required>
+                </div>
+
+                <div class="input-group">
+                  <label class="input-label" for="pwdNew">New Password</label>
+                  <input type="password" id="pwdNew" class="input-control" placeholder="Minimum 8 characters" required minlength="8" oninput="checkPasswordStrength(this.value)">
+                  <div style="height:4px; border-radius:2px; background:#E2E8F0; margin-top:4px; overflow:hidden;">
+                    <div id="pwdStrengthBar" style="height:100%; width:0%; transition:var(--transition); background:#CBD5E1;"></div>
+                  </div>
+                </div>
+
+                <div class="input-group">
+                  <label class="input-label" for="pwdConfirm">Confirm New Password</label>
+                  <input type="password" id="pwdConfirm" class="input-control" placeholder="Re-type new password" required>
+                </div>
+
+              </div>
+
+              <div style="display:flex; align-items:center; gap:16px; margin-top:8px;">
+                <button type="submit" class="btn-submit" style="background:#1E293B;">
+                  <i class="fa-solid fa-lock"></i>
+                  <span>Update Password</span>
+                </button>
+                <span style="font-size:12px; color:var(--text-muted)">Requires re-authenticating across Microsoft Teams.</span>
+              </div>
+            </form>
+          </div>
+        </section>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- JavaScript Logic -->
+  <script>
+    // Master State
+    const profileData = {
+      student: {
+        nameAr: "عمر محمد هشام مصطفى",
+        nameEn: "Omar Mohamed Hesham Moustafa",
+        id: "DEMI4-S-210045",
+        nationalId: "31502220203954",
+        email: "omar2202.moh@gmail.com",
+        phone: "+20 10 03579851",
+        grade: "Grade 4 Engagement",
+        gov: "الإسكندرية (Alexandria)",
+        area: "المنتزه ثان (Montaza 2)"
+      },
+      guardian: {
+        name: "Hesham Moustafa Mohamed",
+        relation: "Father (الأب)",
+        email: "rimo.magdy236@gmail.com",
+        phone: "+20 12 23459812",
+        motherPhone: "+20 11 98765432"
+      }
+    };
+
+    let activeType = 'email'; // 'email' | 'mobile'
+    let activeTarget = 'student'; // 'student' | 'guardian'
+    let currentLang = 'en'; // 'en' | 'ar'
+
+    // Initialize UI on load
+    document.addEventListener('DOMContentLoaded', () => {
+      updateCurrentValueDisplay();
+    });
+
+    // Language Toggle
+    function toggleLanguage() {
+      currentLang = currentLang === 'en' ? 'ar' : 'en';
+      const html = document.documentElement;
+      const langLabel = document.getElementById('langLabel');
+
+      if (currentLang === 'ar') {
+        html.setAttribute('dir', 'rtl');
+        html.setAttribute('lang', 'ar');
+        langLabel.textContent = 'English';
+      } else {
+        html.setAttribute('dir', 'ltr');
+        html.setAttribute('lang', 'en');
+        langLabel.textContent = 'عربي';
+      }
+      showToast(currentLang === 'ar' ? 'تم تحويل الواجهة للغة العربية' : 'Switched interface to English');
+    }
+
+    // Switch between Email and Mobile change tabs
+    function switchChangeType(type) {
+      activeType = type;
+      const tabEmail = document.getElementById('tabEmailBtn');
+      const tabMobile = document.getElementById('tabMobileBtn');
+      const groupEmail = document.getElementById('groupNewEmail');
+      const groupMobile = document.getElementById('groupNewMobile');
+
+      if (type === 'email') {
+        tabEmail.classList.add('active');
+        tabMobile.classList.remove('active');
+        groupEmail.style.display = 'flex';
+        groupMobile.style.display = 'none';
+      } else {
+        tabMobile.classList.add('active');
+        tabEmail.classList.remove('active');
+        groupMobile.style.display = 'flex';
+        groupEmail.style.display = 'none';
+      }
+
+      updateCurrentValueDisplay();
+      clearErrors();
+    }
+
+    // Select Student or Guardian target
+    function selectTarget(target) {
+      activeTarget = target;
+      const cardStudent = document.getElementById('radioTargetStudent');
+      const cardGuardian = document.getElementById('radioTargetGuardian');
+      const studentNotice = document.getElementById('studentEmailNotice');
+
+      if (target === 'student') {
+        cardStudent.classList.add('active');
+        cardGuardian.classList.remove('active');
+        studentNotice.style.display = (activeType === 'email') ? 'flex' : 'none';
+      } else {
+        cardGuardian.classList.add('active');
+        cardStudent.classList.remove('active');
+        studentNotice.style.display = 'none';
+      }
+
+      updateCurrentValueDisplay();
+      clearErrors();
+    }
+
+    // Update locked input showing current value
+    function updateCurrentValueDisplay() {
+      const input = document.getElementById('txtCurrentVal');
+      const studentNotice = document.getElementById('studentEmailNotice');
+
+      if (activeType === 'email') {
+        input.value = activeTarget === 'student' ? profileData.student.email : profileData.guardian.email;
+        studentNotice.style.display = (activeTarget === 'student') ? 'flex' : 'none';
+      } else {
+        input.value = activeTarget === 'student' ? profileData.student.phone : profileData.guardian.phone;
+        studentNotice.style.display = 'none';
+      }
+    }
+
+    // Quick Action button to jump to request section
+    function scrollToChangeRequest(type, target) {
+      switchChangeType(type);
+      selectTarget(target);
+      const section = document.getElementById('changeRequestSection');
+      section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      section.style.boxShadow = '0 0 0 3px rgba(44, 111, 224, 0.4)';
+      setTimeout(() => {
+        section.style.boxShadow = '';
+      }, 1500);
+
+      // Focus input
+      setTimeout(() => {
+        if (type === 'email') {
+          document.getElementById('txtNewEmail').focus();
+        } else {
+          document.getElementById('txtNewMobile').focus();
+        }
+      }, 500);
+    }
+
+    // Email validation
+    function isEmailValid(email) {
+      return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(email) && email.indexOf('..') === -1;
+    }
+
+    function validateEmailInput() {
+      const input = document.getElementById('txtNewEmail');
+      const err = document.getElementById('errNewEmail');
+      const val = input.value.trim();
+
+      if (val && !isEmailValid(val)) {
+        input.classList.add('error');
+        err.style.display = 'flex';
+        return false;
+      } else {
+        input.classList.remove('error');
+        err.style.display = 'none';
+        return true;
+      }
+    }
+
+    // Mobile validation (Egyptian formats)
+    function isMobileValid(mobile) {
+      const cleaned = mobile.replace(/[^0-9]/g, '');
+      return /^0?1[0125][0-9]{8}$/.test(cleaned);
+    }
+
+    function validateMobileInput() {
+      const input = document.getElementById('txtNewMobile');
+      const wrap = document.getElementById('phoneInputWrap');
+      const err = document.getElementById('errNewMobile');
+      const val = input.value.trim();
+
+      if (val && !isMobileValid(val)) {
+        wrap.classList.add('error');
+        err.style.display = 'flex';
+        return false;
+      } else {
+        wrap.classList.remove('error');
+        err.style.display = 'none';
+        return true;
+      }
+    }
+
+    function clearErrors() {
+      document.getElementById('txtNewEmail').classList.remove('error');
+      document.getElementById('errNewEmail').style.display = 'none';
+      document.getElementById('phoneInputWrap').classList.remove('error');
+      document.getElementById('errNewMobile').style.display = 'none';
+    }
+
+    // Submit Change Request Logic
+    function submitChangeRequest() {
+      const btn = document.getElementById('btnSubmitChange');
+      const btnText = document.getElementById('btnSubmitText');
+      let targetOld = '';
+      let targetNew = '';
+      let targetField = '';
+      let targetWho = '';
+
+      if (activeType === 'email') {
+        const emailInput = document.getElementById('txtNewEmail');
+        const val = emailInput.value.trim();
+        if (!val || !isEmailValid(val)) {
+          emailInput.classList.add('error');
+          document.getElementById('errNewEmail').style.display = 'flex';
+          emailInput.focus();
+          showToast('Please enter a valid email address.', 'error');
+          return;
+        }
+        targetOld = activeTarget === 'student' ? profileData.student.email : profileData.guardian.email;
+        targetNew = val;
+        targetField = activeTarget === 'student' ? 'Student Email' : 'Guardian Email';
+        targetWho = activeTarget === 'student' ? "Student's Profile" : "Guardian's Profile";
+      } else {
+        const mobileInput = document.getElementById('txtNewMobile');
+        const val = mobileInput.value.trim();
+        if (!val || !isMobileValid(val)) {
+          document.getElementById('phoneInputWrap').classList.add('error');
+          document.getElementById('errNewMobile').style.display = 'flex';
+          mobileInput.focus();
+          showToast('Please enter a valid 10-digit Egyptian mobile number.', 'error');
+          return;
+        }
+        const cleaned = val.replace(/^0/, '');
+        targetOld = activeTarget === 'student' ? profileData.student.phone : profileData.guardian.phone;
+        targetNew = `+20 ${cleaned.slice(0, 2)} ${cleaned.slice(2, 6)} ${cleaned.slice(6)}`;
+        targetField = activeTarget === 'student' ? 'Student Mobile' : 'Guardian Mobile';
+        targetWho = activeTarget === 'student' ? "Student's Profile" : "Guardian's Profile";
+      }
+
+      // Button Loading animation
+      btn.disabled = true;
+      btnText.textContent = 'Submitting Request...';
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btnText.textContent = 'Submit Request';
+
+        // Populate summary panel
+        document.getElementById('sumTargetWho').textContent = targetWho;
+        document.getElementById('sumField').textContent = targetField;
+        document.getElementById('sumOld').textContent = targetOld;
+        document.getElementById('sumNew').textContent = targetNew;
+        document.getElementById('sumTicketId').textContent = 'REQ-2026-' + Math.floor(10000 + Math.random() * 90000);
+
+        // Hide form and show success
+        document.getElementById('changeFormPanel').style.display = 'none';
+        document.getElementById('successPanel').style.display = 'flex';
+
+        showToast('Change request submitted for B2G Operations review!');
+      }, 700);
+    }
+
+    // Reset Form for another request
+    function resetChangeForm() {
+      document.getElementById('txtNewEmail').value = '';
+      document.getElementById('txtNewMobile').value = '';
+      clearErrors();
+      document.getElementById('successPanel').style.display = 'none';
+      document.getElementById('changeFormPanel').style.display = 'flex';
+      updateCurrentValueDisplay();
+    }
+
+    // Password strength check
+    function checkPasswordStrength(pwd) {
+      const bar = document.getElementById('pwdStrengthBar');
+      if (!pwd) {
+        bar.style.width = '0%';
+        bar.style.background = '#CBD5E1';
+        return;
+      }
+      let score = 0;
+      if (pwd.length >= 8) score += 30;
+      if (/[A-Z]/.test(pwd)) score += 25;
+      if (/[0-9]/.test(pwd)) score += 25;
+      if (/[^A-Za-z0-9]/.test(pwd)) score += 20;
+
+      bar.style.width = score + '%';
+      if (score < 50) bar.style.background = '#EF4444';
+      else if (score < 80) bar.style.background = '#F59E0B';
+      else bar.style.background = '#10B981';
+    }
+
+    function handlePasswordChange(e) {
+      e.preventDefault();
+      const p1 = document.getElementById('pwdNew').value;
+      const p2 = document.getElementById('pwdConfirm').value;
+      if (p1 !== p2) {
+        showToast('New passwords do not match.', 'error');
+        return;
+      }
+      showToast('Password updated successfully!');
+      e.target.reset();
+      checkPasswordStrength('');
+    }
+
+    // Avatar preview upload
+    function previewAvatar(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const container = document.getElementById('avatarDisplay');
+          container.innerHTML = `<img src="${e.target.result}" alt="Profile avatar">`;
+          showToast('Profile picture preview updated.');
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    // Toast alert helper
+    function showToast(msg, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<i class="fa-solid fa-circle-check" style="color:${type==='error'?'#EF4444':'#10B981'}"></i><span>${msg}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+  </script>
+
+</body>
+</html>
