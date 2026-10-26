@@ -599,7 +599,7 @@ const RESPONDERS = ['Mai.Kamal','Youssef.Samir','Hana.Mostafa','Karim.Lotfy'];
 const LABELS = ['Follow-up','Escalated','Parent request','Repeated','VIP'];
 const CANNED = ['Absence appeal received','Technical troubleshooting steps','Data updated confirmation','Session reschedule options'];
 const CANNED_TEXT = {
-  'Absence appeal received':'Thank you, we received the absence appeal and the attached document. Our academic team will review it shortly.',
+  'Absence appeal received':'Thank you, we received the absence appeal and the attached document. Our operations team will review it shortly.',
   'Technical troubleshooting steps':'Please log out, clear the browser cache, then sign in again using the latest version of Chrome. Let us know if the issue persists.',
   'Data updated confirmation':'Your data has been updated successfully. Please check your profile and let us know if anything looks incorrect.',
   'Session reschedule options':'We can offer the following make-up slots for the missed session. Please reply with the option that suits you.'
@@ -754,7 +754,7 @@ function buildSeed(){
         t.details = t.subtopic === 'Name correction' ? 'Please correct the student name spelling on the certificate.' : t.subtopic === 'Grade change' ? 'The student moved to the next grade; please update the grade.' : 'The student transferred to a new school.';
         if (rnd() < 0.5) t.attachments.push({name:`birth_certificate_${id}.pdf`, ref:`demo://tickets/${id}/birth_certificate.pdf`});
       } else {
-        t.topic = absIdx % 2 ? VIRTUAL : PRACTICAL; t.subtopic = t.topic === PRACTICAL ? 'Missed practical session' : 'Missed virtual session'; t.department = 'Academic Affairs';
+        t.topic = absIdx % 2 ? VIRTUAL : PRACTICAL; t.subtopic = t.topic === PRACTICAL ? 'Missed practical session' : 'Missed virtual session'; t.department = 'Operations';
         t.details = pick(absDetails);
         const sd = new Date(created - (1 + Math.floor(rnd()*3)) * 86400e3); sd.setHours(pick([16,17,18,19]), pick([0,30]), 0, 0);
         t.sessionDate = sd.getTime();
@@ -788,7 +788,7 @@ function buildSeed(){
         t.conversation.push({at: created + 3*60000, dir:'out', by: t.responder, text: CANNED_TEXT[t.cannedResponse], attachments: ra});
       }
       if (rnd() < 0.45) {
-        const nt = code === 'A' ? pick(['Checked attendance log — session marked absent.','Document is readable; matches session date.','Waiting for academic team decision.']) : pick(['Escalated to tech team via Slack.','Called the guardian, no answer.','Duplicate of an older ticket — merged.','Verified with student records.']);
+        const nt = code === 'A' ? pick(['Checked attendance log — session marked absent.','Document is readable; matches session date.','Waiting for operations team decision.']) : pick(['Escalated to tech team via Slack.','Called the guardian, no answer.','Duplicate of an older ticket — merged.','Verified with student records.']);
         t.notes.push({at: created + 5*60000, by: t.assignee || CURRENT_USER, text: nt});
       }
       if (code === 'A' && t.excuseReview) t.history.push({at: created + 20*60000, by: t.assignee || CURRENT_USER, text: `Appeal review set to ${t.excuseReview}`});
@@ -843,6 +843,7 @@ function migrate(d){
   const rv = {Approved:'Valid', Declined:'Not Valid'};
   d.tickets.forEach(t => {
     if (t.topic === 'Absence Excuse') { t.topic = t.id % 2 ? VIRTUAL : PRACTICAL; if (!t.subtopic || t.subtopic === 'Missed session') t.subtopic = t.topic === PRACTICAL ? 'Missed practical session' : 'Missed virtual session'; }
+    if (isAppeal(t.topic)) { t.department = 'Operations'; }
     if (rv[t.excuseReview]) t.excuseReview = rv[t.excuseReview];
     if (t.status === 'Resolved') t.status = 'Completed';
     (t.history || []).forEach(h => { h.text = String(h.text).replace('Status changed to Resolved', 'Status changed to Completed'); });
@@ -852,6 +853,7 @@ function migrate(d){
 }
 let db = migrate(storage.load());
 if (!db || db.version !== 1 || !Array.isArray(db.tickets)) { db = buildSeed(); storage.save(db); }
+else { storage.save(db); }
 let prefs = db.prefs || {compact:false, unavailable:false};
 const ui = {q:'', page:1, applied: emptyFilters()};
 
@@ -1236,6 +1238,7 @@ function renderEdit(){
         ${ki('Grade', 'Grade ' + esc(s.grade))}
         ${ki('Timezone', '—')}
         ${isAbs || t.sessionDate ? ki('Session Date', t.sessionDate ? fmtDT(t.sessionDate) : '—') : ''}
+        ${isAbs ? ki('Appeal Review', `<span class="tk-chip ${REVIEW_CLS(t.excuseReview || '')}">${REVIEW_LABEL(t.excuseReview)}</span> <span style="font-size:12px;color:var(--muted)">(editable in table column)</span>`) : ''}
         ${ch ? `<div class="tk-change full">
             <div class="tk-info in">
               ${ki('Contact Owner', `<b>${esc(ch.owner)}</b>`)}
@@ -1258,9 +1261,6 @@ function renderEdit(){
           <button type="button" class="tk-x" data-clear="eAssignee" aria-label="Clear assignee"${asg ? '' : ' hidden'}>${icon('close')}</button>
         </fieldset></div>
       <label class="tk-f"><span>Status</span>${tkSelect('eStatus', STATUSES, t.status, 'Select status', true)}</label>
-      <div class="tk-f" id="eAbsSec"${isAppeal(t.topic) ? '' : ' hidden'}><span>Appeal Review</span>
-        <div class="tk-sel ${t.excuseReview ? '' : 'ph'}" data-wrap="eReview"><select id="eReview">${['','Valid','Not Valid'].map(v => `<option value="${v}"${(t.excuseReview||'') === v ? ' selected' : ''}>${REVIEW_LABEL(v)}</option>`).join('')}</select><span class="tk-chev">${icon('chev')}</span></div>
-        <small class="tk-hint">Separate from the ticket status — approving or declining does not resolve the ticket.</small></div>
       <label class="tk-f"><span>Priority</span>${tkSelect('eUrgency', URGENCY, t.urgency, 'Select priority', false)}</label>
       <label class="tk-f"><span>Labels</span>${tkSelect('eLabel', EDIT_LABELS, label, 'Select label', false, 'gray')}</label>
       <div class="tk-f"><span>Response Attachment</span>
@@ -1324,11 +1324,11 @@ function saveEdit(){
       t.topic = newTopic;
       if (isAppeal(newTopic) && t.excuseReview == null) t.excuseReview = '';
       if (!isAppeal(newTopic)) t.excuseReview = null;
+      if (isAppeal(newTopic) && !$('#eDept').value) {
+        $('#eDept').value = 'Operations';
+        syncSelLook($('#eDept'));
+      }
     }
-  }
-  if (isAppeal(t.topic)) {
-    const rv = $('#eReview').value;
-    if ((t.excuseReview || '') !== rv) { changes.push(`Appeal review: ${REVIEW_LABEL(t.excuseReview)} → ${REVIEW_LABEL(rv)} (status unchanged)`); t.excuseReview = rv; }
   }
   const lv = $('#eLabel').value; const newLabs = lv ? [lv] : [];
   if ((t.labels || []).join('|') !== newLabs.join('|')) { changes.push(`Labels: ${(t.labels || []).join(', ') || '—'} → ${lv || '—'}`); t.labels = newLabs; }
@@ -1348,12 +1348,11 @@ function saveEdit(){
 }
 // re-render the edit modal without losing unsaved field edits
 function keepDraft(fn){
-  const ids = ['eTopic','eReview','eDept','eAssignee','eStatus','eUrgency','eLabel','eReplyText','eNoteText'];
+  const ids = ['eTopic','eDept','eAssignee','eStatus','eUrgency','eLabel','eReplyText','eNoteText'];
   const vals = {}; ids.forEach(i => { const el = document.getElementById(i); if (el) vals[i] = el.value; });
   const sc0 = $('#editModal .tk-scroll'); const scroll = sc0 ? sc0.scrollTop : 0;
   fn();
   ids.forEach(i => { const el = document.getElementById(i); if (el && vals[i] != null) { el.value = vals[i]; if (el.tagName === 'SELECT') syncSelLook(el); } });
-  if ($('#eAbsSec') && $('#eTopic')) $('#eAbsSec').hidden = !isAppeal($('#eTopic').value);
   syncSendState();
   const sc = $('#editModal .tk-scroll'); if (sc) sc.scrollTop = scroll;
 }
@@ -1393,7 +1392,10 @@ function bindEdit(){
     if (!edit) return;
     const t = ticketById(edit.id);
     if (e.target.tagName === 'SELECT') syncSelLook(e.target);
-    if (e.target.id === 'eTopic') { $('#eAbsSec').hidden = !isAppeal(e.target.value); }
+    if (e.target.id === 'eTopic' && isAppeal(e.target.value)) {
+      const deptEl = $('#eDept');
+      if (deptEl && !deptEl.value) { deptEl.value = 'Operations'; syncSelLook(deptEl); }
+    }
     if (e.target.id === 'eRespAtt' && e.target.files.length) addRespFiles(t, e.target.files);
     if (e.target.id === 'eReplyAtt' && e.target.files.length) {
       const files = Array.from(e.target.files);
