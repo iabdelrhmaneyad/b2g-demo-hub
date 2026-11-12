@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manage groups – iSchool demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6fb; --panel:#fff; --line:#e6e9f2; --line2:#eef0f6;
+  --ink:#1f2a48; --ink2:#4a5677; --muted:#8a93ad;
+  --blue:#1d5bd8; --blue-soft:#e6eefc; --blue-ink:#2a59c9;
+  --orange:#f08a24; --red:#d43b3b; --red-soft:#fdeceb; --green:#1f9d63; --green-soft:#e5f6ee;
+  --amber:#b7791f; --amber-soft:#fdf3e1;
+  --radius:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:Poppins,system-ui,sans-serif;font-size:13px;color:var(--ink);background:var(--bg)}
+button,input,select,textarea{font:inherit;color:inherit}
+.mono{font-family:"JetBrains Mono",monospace;font-size:11px}
+a.code{color:var(--blue-ink);text-decoration:none;cursor:pointer}
+a.code:hover{text-decoration:underline}
+
+/* layout */
+.app{display:grid;grid-template-columns:200px 1fr;height:100vh}
+aside{background:#fff;border-right:1px solid var(--line);padding:12px 10px;overflow:auto}
+.logo{display:flex;align-items:center;justify-content:space-between;padding:2px 6px 12px}
+.logo b{font-size:22px;color:var(--blue);letter-spacing:-.5px}
+.logo b span{color:var(--orange)}
+.org-switch{font-size:12px;color:var(--ink2);padding:4px 6px}
+.org-switch.small{color:var(--blue);font-size:11px}
+.org{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px;margin:6px 0 10px}
+.org .av{width:26px;height:26px;border-radius:50%;background:#fde7d6;color:#c2621a;display:grid;place-items:center;font-size:10px;font-weight:600}
+.org div{line-height:1.25}.org small{color:var(--muted);font-size:10px}
+.search{border:1px solid var(--line);border-radius:8px;padding:6px 8px;color:var(--muted);margin-bottom:8px}
+.nav a{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;color:var(--ink2);text-decoration:none;font-size:12.5px}
+.nav a .i{width:14px;height:14px;border-radius:3px;background:#c9d0e2}
+.nav .sub{margin-left:12px;border-left:2px solid var(--line);padding-left:4px}
+.nav .sub a{padding:5px 8px}
+.nav .sub a.on{background:var(--blue-soft);color:var(--blue);border-left:2px solid var(--blue);margin-left:-6px;padding-left:12px}
+main{display:flex;flex-direction:column;min-width:0}
+.topbar{height:50px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 16px;gap:22px}
+.topbar a{color:var(--ink2);text-decoration:none}
+.topbar a.on{color:var(--blue)}
+.topbar .sp{flex:1}
+.topbar .gs{border:1px solid var(--line);border-radius:20px;padding:5px 12px;color:var(--muted);font-size:12px;background:#f8f9fc}
+.user{display:flex;gap:6px;align-items:center}
+.user .av{width:22px;height:22px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:grid;place-items:center;font-size:10px;font-weight:600}
+.content{padding:18px 16px;overflow:auto;flex:1}
+.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+h1{font-size:20px;font-weight:500;margin:0}
+
+/* buttons */
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 12px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.btn:hover{border-color:#c8d0e4}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{background:#174cb8}
+.btn.danger{background:var(--red);border-color:var(--red);color:#fff}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{padding:4px 9px;font-size:12px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* card / toolbar */
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.toolbar{display:flex;gap:10px;align-items:center;padding:8px 10px;background:#f7f9fd;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.toolbar .views{display:flex;gap:6px;align-items:center;color:var(--ink2);padding-right:10px;border-right:1px solid var(--line)}
+.field{border:1px solid var(--line);border-radius:8px;background:#fff;padding:5px 9px;display:flex;align-items:center;gap:6px;min-width:150px}
+.field small{color:var(--muted);font-size:10px}
+.field input,.field select{border:0;outline:0;background:transparent;flex:1;min-width:0}
+.bulkbar{display:none;align-items:center;gap:10px;padding:8px 12px;background:var(--blue-soft);border-bottom:1px solid #cfdcf8;color:var(--blue-ink)}
+.bulkbar.show{display:flex}
+.bulkbar .sp{flex:1}
+
+table{width:100%;border-collapse:collapse}
+th{font-weight:400;color:var(--ink2);text-align:left;padding:10px 10px;border-bottom:1px solid var(--line);white-space:nowrap;background:#fff;position:sticky;top:0}
+th.link{color:var(--blue-ink)}
+td{padding:10px 10px;border-bottom:1px solid var(--line2);vertical-align:middle}
+tbody tr:hover{background:#fafbfe}
+tbody tr.sel{background:#f3f7ff}
+.tablewrap{max-height:calc(100vh - 230px);overflow:auto}
+.sched{color:var(--ink);border-bottom:1px dashed #b9c2da;line-height:1.5}
+.lesson{display:flex;flex-direction:column;line-height:1.25}
+.lesson b{font-weight:500}
+.lesson small{color:var(--muted);font-size:11px}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px}
+.pill.amber{background:var(--amber-soft);color:var(--amber)}
+.pill.green{background:var(--green-soft);color:var(--green)}
+.pill.blue{background:var(--blue-soft);color:var(--blue)}
+.kebab{border:0;background:transparent;cursor:pointer;border-radius:6px;width:26px;height:26px;color:var(--ink2);font-size:16px;line-height:1}
+.kebab:hover,.kebab.on{background:var(--blue-soft);color:var(--blue)}
+.foot{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;color:var(--ink2);font-size:12px;border-top:1px solid var(--line)}
+input[type=checkbox]{accent-color:var(--blue);width:14px;height:14px;cursor:pointer}
+
+/* dropdown menu */
+.menu{position:fixed;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(20,30,70,.12);padding:5px;min-width:180px;z-index:50;display:none}
+.menu.show{display:block}
+.menu button{display:flex;gap:9px;align-items:center;width:100%;border:0;background:none;text-align:left;padding:7px 10px;border-radius:7px;cursor:pointer;color:var(--ink)}
+.menu button:hover{background:#f3f6fc}
+.menu button.del{color:var(--red)}
+.menu button:disabled{color:#b8bfd1;cursor:not-allowed;background:none}
+.menu hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+.menu .hint{font-size:10.5px;color:var(--muted);display:block}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(25,32,56,.35);opacity:0;pointer-events:none;transition:.2s;z-index:30}
+.scrim.show{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(500px,100%);background:#fff;z-index:40;transform:translateX(100%);transition:.25s;padding:18px 20px;overflow:auto;box-shadow:-10px 0 30px rgba(20,30,70,.12)}
+.drawer.show{transform:none}
+.eyebrow{font-size:10px;color:var(--orange);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.eyebrow:before{content:"● "}
+.dh{display:flex;justify-content:space-between;align-items:flex-start}
+.dh h2{font-size:17px;font-weight:500;margin:4px 0 4px}
+.dsum{display:flex;justify-content:space-between;margin:16px 0 4px}
+.dsum p{margin:0;font-size:14px}
+.dsum small{color:var(--muted)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-top:14px}
+.tabs button{border:0;background:none;padding:8px 10px;cursor:pointer;color:var(--ink2);border-bottom:2px solid transparent}
+.tabs button.on{color:var(--blue);border-bottom-color:var(--blue)}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:14px 10px;padding:16px 0}
+.kv dt{color:var(--ink2)}.kv dd{margin:0}
+.hist{list-style:none;padding:14px 0;margin:0}
+.hist li{position:relative;padding:0 0 16px 18px;border-left:2px solid var(--line);margin-left:5px}
+.hist li:before{content:"";position:absolute;left:-6px;top:3px;width:10px;height:10px;border-radius:50%;background:var(--blue)}
+.hist li small{display:block;color:var(--muted)}
+.empty{color:var(--muted);padding:24px 0;text-align:center}
+
+/* modal */
+.modal{position:fixed;inset:0;display:none;place-items:center;z-index:60;background:rgba(25,32,56,.4);padding:16px}
+.modal.show{display:grid}
+.dialog{background:#fff;border-radius:14px;width:min(560px,100%);max-height:92vh;overflow:auto;box-shadow:0 20px 50px rgba(20,30,70,.25)}
+.dialog header{padding:16px 20px 6px;display:flex;justify-content:space-between}
+.dialog header h3{margin:0;font-size:16px;font-weight:500}
+.dialog header p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.dialog .body{padding:10px 20px}
+.dialog footer{padding:12px 20px 16px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--line);margin-top:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+.full{grid-column:1/-1}
+label.f{display:flex;flex-direction:column;gap:5px;color:var(--ink2);font-size:12px}
+label.f input,label.f select,label.f textarea{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff;outline:0}
+label.f input:focus,label.f select:focus,label.f textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+.section-t{font-size:11px;letter-spacing:.4px;color:var(--muted);text-transform:uppercase;margin:14px 0 6px}
+.note{border-radius:8px;padding:9px 11px;font-size:12px;line-height:1.45;margin-top:10px}
+.note.amber{background:var(--amber-soft);color:#8a5a12}
+.note.blue{background:var(--blue-soft);color:var(--blue-ink)}
+.lessonpick{border:1px solid var(--line);border-radius:10px;max-height:190px;overflow:auto}
+.lessonpick label{display:flex;gap:10px;align-items:center;padding:8px 11px;border-bottom:1px solid var(--line2);cursor:pointer}
+.lessonpick label:last-child{border-bottom:0}
+.lessonpick label:hover{background:#f7f9fd}
+.lessonpick label.on{background:var(--blue-soft)}
+.lessonpick .n{width:24px;height:24px;border-radius:6px;background:#eef1f7;display:grid;place-items:center;font-size:11px;flex:none}
+.lessonpick label.on .n{background:var(--blue);color:#fff}
+.lessonpick .done{margin-left:auto;font-size:10.5px;color:var(--green)}
+.radio-row{display:flex;gap:8px;flex-wrap:wrap}
+.radio-row label{border:1px solid var(--line);border-radius:8px;padding:8px 11px;cursor:pointer;display:flex;gap:7px;align-items:center;flex:1;min-width:140px}
+.radio-row label.on{border-color:var(--blue);background:var(--blue-soft)}
+.preview{border:1px solid var(--line);border-radius:10px;margin-top:10px;max-height:160px;overflow:auto}
+.preview table td,.preview table th{padding:6px 10px;font-size:12px}
+.diff{color:var(--muted);text-decoration:line-through;margin-right:6px}
+
+/* toast */
+.toasts{position:fixed;bottom:18px;left:18px;display:flex;flex-direction:column;gap:8px;z-index:90}
+.toast{background:#1f2a48;color:#fff;padding:10px 16px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.2);animation:up .25s}
+@keyframes up{from{opacity:0;transform:translateY(10px)}}
+
+@media(max-width:860px){
+  .app{grid-template-columns:1fr} aside{display:none}
+  .topbar a:not(.on){display:none}
+  .grid2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="logo"><b><span>i</span>School</b><span style="color:var(--muted)">▣</span></div>
+    <div class="org-switch">◎ All organizations</div>
+    <div class="org-switch small">⇄ Switch organization</div>
+    <div class="org"><div class="av">OO</div><div>Operations Test Org<br><small>B2G · Overview</small></div></div>
+    <div class="search">⌕ Search pages</div>
+    <nav class="nav">
+      <a><span class="i"></span>Dashboard</a>
+      <a><span class="i"></span>Operations</a>
+      <a><span class="i"></span>Content</a>
+      <a><span class="i"></span>Users</a>
+      <a><span class="i"></span>Reports</a>
+      <a><span class="i"></span>Classes</a>
+      <a style="color:var(--ink)"><span class="i" style="background:var(--blue)"></span>Groups</a>
+      <div class="sub">
+        <a>Classes</a><a class="on">Manage groups</a><a>Late classes</a><a>Tutor presence</a><a>Buffer offer</a>
+      </div>
+      <a><span class="i"></span>Community</a>
+      <a><span class="i"></span>General Support</a>
+      <a><span class="i"></span>Moderation Reports</a>
+      <a><span class="i"></span>Tutor Support</a>
+      <a><span class="i"></span>Settings</a>
+    </nav>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <a>Groups ▾</a><a>Classes</a><a class="on">Manage groups</a><a>Late classes</a><a>Tutor presence</a><a>Buffer offer</a>
+      <span class="sp"></span>
+      <span class="gs">⌕ Search pages and o… <span class="mono">Ctrl K</span></span>
+      <span class="user"><span class="av">A</span>abdelrhman.elagan</span>
+    </div>
+
+    <div class="content">
+      <div class="head">
+        <h1>Manage groups</h1>
+        <div style="display:flex;gap:8px">
+          <button class="btn" id="postponeAllBtn">⏱ Postpone groups</button>
+          <button class="btn primary" id="addBtn">Add ▾</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="toolbar">
+          <span class="views">★ Views ▾</span>
+          <div class="field"><input id="fCode" placeholder="Group code"></div>
+          <div class="field"><small>Venue</small><select id="fVenue"><option value="">Any</option><option selected>Online</option><option>Physical</option></select></div>
+          <div class="field"><small>Grade</small><select id="fGrade"><option value="">Any</option></select></div>
+        </div>
+        <div class="bulkbar" id="bulkbar">
+          <b id="selCount">0 selected</b>
+          <span class="sp"></span>
+          <button class="btn sm" id="bulkPostpone">⏱ Postpone selected</button>
+          <button class="btn sm ghost" id="clearSel">Clear</button>
+        </div>
+        <div class="tablewrap">
+          <table>
+            <thead><tr>
+              <th style="width:34px"><input type="checkbox" id="selAll"></th>
+              <th>#</th><th>Group</th><th>Schedule</th><th>Start date</th><th>Grade</th><th>Current lesson</th>
+              <th class="link">Tutor</th><th class="link">Co-teacher</th><th>Students</th><th></th>
+            </tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div class="foot"><span id="count"></span><span>Page 1 of 1</span></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Row menu -->
+<div class="menu" id="rowMenu">
+  <button disabled>👤 Add student</button>
+  <hr>
+  <button data-act="edit">✎ Edit group</button>
+  <button data-act="postpone">📅 Postpone</button>
+  <button data-act="lesson">📘 Change lesson</button>
+  <hr>
+  <button class="del" data-act="delete">🗑 Delete</button>
+</div>
+<!-- Add menu -->
+<div class="menu" id="addMenu">
+  <button data-act="new">＋ New group<span class="hint"></span></button>
+  <button data-act="postponeAll">⏱ Postpone groups…</button>
+</div>
+
+<!-- Drawer -->
+<div class="scrim" id="scrim"></div>
+<div class="drawer" id="drawer"></div>
+
+<!-- Modal shell -->
+<div class="modal" id="modal"><div class="dialog" id="dialog"></div></div>
+<div class="toasts" id="toasts"></div>
+
+<script>
+/* ---------- data ---------- */
+const TODAY = new Date('2026-11-12T00:00:00');
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DAYS_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const CURRICULUM = {
+  '4': {track:'Scratch Jr. track', lessons:['Meet the Sprite','Moving Around','Events & Clicks','Loops that Dance','Sounds & Music','Telling a Story','Simple Games','Animation Studio','Mini Project','Showcase Day']},
+  '5': {track:'Scratch track', lessons:['Welcome to Scratch','Motion & Coordinates','Events & Broadcasts','Loops & Patterns','Conditionals','Variables & Score','Clones','Build a Maze Game','Debugging Lab','Final Project']},
+  '5 Physical 1': {track:'Robotics track', lessons:['Meet the Robot','Motors & Movement','Sensors 101','Line Follower','Obstacle Avoider','Light & Sound','Remote Control','Team Challenge','Robot Design','Demo Day']},
+  '6': {track:'Python basics track', lessons:['Hello, Python','Variables & Types','Input & Output','If / Else','While Loops','For Loops & Ranges','Lists','Functions','Turtle Graphics','Capstone Project']},
+  '7': {track:'Web track', lessons:['How the Web Works','HTML Structure','Text & Links','Images & Media','CSS Basics','Layout with Flexbox','Forms','Intro to JavaScript','DOM Events','Publish a Site']}
+};
+const GRADES = Object.keys(CURRICULUM);
+const fmt = d => d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+const iso = d => d.toISOString().slice(0,10);
+const parse = s => new Date(s+'T00:00:00');
+const fmtTime = t => {let [h,m]=t.split(':').map(Number);const ap=h>=12?'pm':'am';h=h%12||12;return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')} ${ap}`};
+const now = () => new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+
+let seq = 100318, slotSeq = 20160;
+let groups = [];
+function mk(code, grade, slots, start, lesson, venue='Online'){
+  return {code, grade, slots, start, lesson, venue, seats:10, students:0, tutor:null, cot:null, slot:'SLT #'+(slotSeq--),
+    history:[{t:'10 Nov, 09:12', who:'system', what:'Group created · starts at lesson '+(lesson+1)}]};
+}
+groups.push(mk('G-100317','5 Physical 1',[{d:0,t:'13:00'},{d:1,t:'10:00'}],'2026-11-16',0,'Online'));
+const seedGrades=['6','6','6','6','6','5','5','5','5','4','4','4','7','7','7','6','5','4','7','6'];
+seedGrades.forEach((g,i)=>groups.push(mk('G-'+(99924-i),g,[{d:2,t:'13:00'}],'2026-11-10',i%4===0?1:0)));
+groups.find(g=>g.code==='G-99923').history.push({t:'11 Nov, 14:40',who:'abdelrhman.elagan',what:'Slot SLT #20140 attached'});
+
+const selected = new Set();
+let menuFor = null;
+
+/* ---------- render ---------- */
+const $ = s => document.querySelector(s);
+const fGrade = $('#fGrade');
+GRADES.forEach(g=>fGrade.insertAdjacentHTML('beforeend',`<option>${g}</option>`));
+
+function visible(){
+  const c=$('#fCode').value.trim().toLowerCase(), v=$('#fVenue').value, g=fGrade.value;
+  return groups.filter(x=>(!c||x.code.toLowerCase().includes(c))&&(!v||x.venue===v)&&(!g||x.grade===g));
+}
+function lessonLabel(gr){const cur=CURRICULUM[gr.grade];return {n:gr.lesson+1,total:cur.lessons.length,name:cur.lessons[gr.lesson]}}
+function status(gr){
+  const s=parse(gr.start);
+  if(s>TODAY) return `<span class="pill blue">Starts ${fmt(s).slice(0,6)}</span>`;
+  return '';
+}
+function render(){
+  const rows=visible();
+  $('#tbody').innerHTML = rows.map((g,i)=>{
+    const L=lessonLabel(g);
+    return `<tr class="${selected.has(g.code)?'sel':''}">
+      <td><input type="checkbox" data-sel="${g.code}" ${selected.has(g.code)?'checked':''}></td>
+      <td style="color:var(--muted)">${i+1}</td>
+      <td><a class="code mono" data-open="${g.code}">${g.code}</a></td>
+      <td><span class="sched">${g.slots.map(s=>`${DAYS[s.d]} ${fmtTime(s.t)}`).join('<br>')}</span></td>
+      <td>${fmt(parse(g.start))} ${g.postponed?'<span class="pill amber">Postponed</span>':''}</td>
+      <td>${g.grade}</td>
+      <td><div class="lesson"><b>L${L.n} · ${L.name}</b><small>${L.n} of ${L.total} · ${CURRICULUM[g.grade].track}</small></div></td>
+      <td>${g.tutor||''}</td>
+      <td>—</td>
+      <td>${g.students} / ${g.seats}</td>
+      <td><button class="kebab ${menuFor===g.code?'on':''}" data-menu="${g.code}">⋮</button></td>
+    </tr>`}).join('') || `<tr><td colspan="11" class="empty">No groups match these filters.</td></tr>`;
+  $('#count').textContent = `1–${rows.length} of ${rows.length} items`;
+  const vis=rows.map(r=>r.code);
+  $('#selAll').checked = vis.length && vis.every(c=>selected.has(c));
+  $('#bulkbar').classList.toggle('show', selected.size>0);
+  $('#selCount').textContent = `${selected.size} group${selected.size===1?'':'s'} selected`;
+  if(openCode) renderDrawer();
+}
+['#fCode','#fVenue','#fGrade'].forEach(s=>$(s).addEventListener('input',render));
+
+/* ---------- selection ---------- */
+document.addEventListener('change',e=>{
+  if(e.target.dataset.sel){const c=e.target.dataset.sel;e.target.checked?selected.add(c):selected.delete(c);render()}
+  if(e.target.id==='selAll'){visible().forEach(g=>e.target.checked?selected.add(g.code):selected.delete(g.code));render()}
+});
+$('#clearSel').onclick=()=>{selected.clear();render()};
+$('#bulkPostpone').onclick=()=>openPostpone([...selected],'selected');
+
+/* ---------- menus ---------- */
+function showMenu(menu, btn){
+  document.querySelectorAll('.menu').forEach(m=>m.classList.remove('show'));
+  const r=btn.getBoundingClientRect();
+  menu.classList.add('show');
+  const mw=menu.offsetWidth, mh=menu.offsetHeight;
+  let top=r.bottom+4; if(top+mh>innerHeight-8) top=r.top-mh-4;
+  menu.style.top=top+'px'; menu.style.left=Math.max(8,r.right-mw)+'px';
+}
+function closeMenus(){document.querySelectorAll('.menu').forEach(m=>m.classList.remove('show'));if(menuFor){menuFor=null;render()}}
+document.addEventListener('click',e=>{
+  const m=e.target.closest('[data-menu]');
+  if(m){e.stopPropagation();const c=m.dataset.menu;closeMenus();menuFor=c;render();showMenu($('#rowMenu'),document.querySelector(`[data-menu="${c}"]`));return}
+  const o=e.target.closest('[data-open]'); if(o){openDrawer(o.dataset.open);return}
+  if(!e.target.closest('.menu')&&!e.target.closest('#addBtn')) closeMenus();
+});
+$('#rowMenu').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-act]');if(!b)return;
+  const c=menuFor; closeMenus();
+  ({edit:()=>openEdit(c),postpone:()=>openPostpone([c],'single'),lesson:()=>openEdit(c,true),delete:()=>openDelete(c)})[b.dataset.act]();
+});
+$('#addBtn').onclick=e=>{e.stopPropagation();showMenu($('#addMenu'),e.currentTarget)};
+$('#addMenu').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-act]');if(!b)return;closeMenus();
+  b.dataset.act==='new'?openCreate():openPostpone(null,'all');
+});
+$('#postponeAllBtn').onclick=()=>openPostpone(null,'all');
+
+/* ---------- drawer ---------- */
+let openCode=null, drawerTab='details';
+function openDrawer(c){openCode=c;drawerTab='details';renderDrawer();$('#drawer').classList.add('show');$('#scrim').classList.add('show')}
+function closeDrawer(){openCode=null;$('#drawer').classList.remove('show');$('#scrim').classList.remove('show')}
+$('#scrim').onclick=closeDrawer;
+function renderDrawer(){
+  const g=groups.find(x=>x.code===openCode); if(!g){closeDrawer();return}
+  const L=lessonLabel(g), s0=g.slots[0];
+  let body='';
+  if(drawerTab==='details') body=`<dl class="kv">
+      <dt>Tutor</dt><dd>${g.tutor||'Unassigned'}</dd>
+      <dt>Slot</dt><dd><span class="mono" style="color:var(--blue-ink)">${g.slot}</span><br>${g.slots.map(s=>`${DAYS_FULL[s.d]} ${fmtTime(s.t)}`).join('<br>')}</dd>
+      <dt>Grade</dt><dd>${g.grade} <small style="color:var(--muted)">· ${CURRICULUM[g.grade].track}</small></dd>
+      <dt>Current lesson</dt><dd>L${L.n} · ${L.name}<br><small style="color:var(--muted)">${L.n-1} of ${L.total} lessons completed</small></dd>
+      <dt>Start date</dt><dd>${fmt(parse(g.start))}${g.postponed?` <span class="pill amber">Postponed</span>`:''}</dd>
+      <dt>Venue</dt><dd>${g.venue}</dd>
+      <dt>Seats</dt><dd>${g.students} of ${g.seats}</dd>
+    </dl>
+    <div style="display:flex;gap:8px"><button class="btn sm" onclick="openEdit('${g.code}')">✎ Edit group</button><button class="btn sm" onclick="openPostpone(['${g.code}'],'single')">📅 Postpone</button></div>`;
+  else if(drawerTab==='students') body=`<div class="empty">No students enrolled yet.</div>`;
+  else body=`<ul class="hist">${[...g.history].reverse().map(h=>`<li>${h.what}<small>${h.t} · ${h.who}</small></li>`).join('')}</ul>`;
+  $('#drawer').innerHTML=`
+    <div class="dh"><div><div class="eyebrow">Group</div><h2>${DAYS_FULL[s0.d]} ${fmtTime(s0.t)} · Grade ${g.grade}</h2><span class="mono" style="color:var(--ink2)">${g.code}</span></div>
+      <div style="display:flex;gap:6px;align-items:center"><button class="btn sm" onclick="openEdit('${g.code}')">Actions ▾</button><button class="btn ghost sm" onclick="closeDrawer()">✕</button></div></div>
+    <div class="dsum"><div><p>Every ${g.slots.map(s=>`${DAYS_FULL[s.d]} · ${fmtTime(s.t)}`).join(', ')}</p><small>Since ${fmt(parse(g.start))} · ${g.venue} · Grade ${g.grade}</small></div><small>${g.students} of ${g.seats} seats</small></div>
+    <div class="tabs">${['details','students','history'].map(t=>`<button class="${drawerTab===t?'on':''}" onclick="drawerTab='${t}';renderDrawer()">${t[0].toUpperCase()+t.slice(1)}</button>`).join('')}</div>
+    ${body}`;
+}
+
+/* ---------- modal helpers ---------- */
+function openModal(html){$('#dialog').innerHTML=html;$('#modal').classList.add('show')}
+function closeModal(){$('#modal').classList.remove('show')}
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeMenus()}});
+function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;$('#toasts').append(t);setTimeout(()=>t.remove(),3200)}
+const gradeOpts = sel => GRADES.map(g=>`<option ${g===sel?'selected':''}>${g}</option>`).join('');
+const dayOpts = sel => DAYS_FULL.map((d,i)=>`<option value="${i}" ${i===sel?'selected':''}>${d}</option>`).join('');
+
+function lessonPicker(grade, current, mode){
+  const cur=CURRICULUM[grade];
+  return cur.lessons.map((n,i)=>`<label class="${i===current?'on':''}"><input type="radio" name="lesson" value="${i}" ${i===current?'checked':''} hidden>
+    <span class="n">${i+1}</span><span>${n}</span>${mode==='edit'&&i<current?'<span class="done">✓ covered</span>':''}</label>`).join('');
+}
+function wireLessonPicker(root, onChange){
+  root.addEventListener('change',e=>{if(e.target.name==='lesson'){root.querySelectorAll('label').forEach(l=>l.classList.toggle('on',l.querySelector('input').checked));onChange&&onChange()}});
+}
+
+/* ---------- create ---------- */
+function openCreate(){
+  const def='6';
+  openModal(`
+    <header><div><h3>New group</h3><p>Set the grade, schedule and the lesson this group starts from.</p></div><button class="btn ghost sm" onclick="closeModal()">✕</button></header>
+    <div class="body">
+      <div class="grid2">
+        <label class="f">Grade<select id="cGrade">${gradeOpts(def)}</select></label>
+        <label class="f">Venue<select id="cVenue"><option>Online</option><option>Physical</option></select></label>
+        <label class="f">Day<select id="cDay">${dayOpts(2)}</select></label>
+        <label class="f">Time<input type="time" id="cTime" value="13:00"></label>
+        <label class="f">Start date<input type="date" id="cStart" value="2026-11-17"></label>
+        <label class="f">Seats<input type="number" id="cSeats" value="10" min="1" max="30"></label>
+      </div>
+      <div class="section-t">Starting lesson · <span id="cTrack">${CURRICULUM[def].track}</span></div>
+      <div class="lessonpick" id="cLessons">${lessonPicker(def,0,'create')}</div>
+      <div class="note blue" id="cNote">The first class on the start date will be <b>Lesson 1</b>.</div>
+    </div>
+    <footer><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" id="cSave">Create group</button></footer>`);
+  const lp=$('#cLessons');
+  const note=()=>{const i=+lp.querySelector('input:checked').value;$('#cNote').innerHTML=i===0?`The first class on the start date will be <b>Lesson 1</b>.`:`Group skips lessons 1–${i} and the first class will be <b>Lesson ${i+1} · ${CURRICULUM[$('#cGrade').value].lessons[i]}</b>. Useful for students transferring mid-track.`};
+  wireLessonPicker(lp,note);
+  $('#cGrade').onchange=e=>{lp.innerHTML=lessonPicker(e.target.value,0,'create');$('#cTrack').textContent=CURRICULUM[e.target.value].track;note()};
+  $('#cSave').onclick=()=>{
+    const lesson=+lp.querySelector('input:checked').value;
+    const g=mk('G-'+(seq++),$('#cGrade').value,[{d:+$('#cDay').value,t:$('#cTime').value}],$('#cStart').value,lesson,$('#cVenue').value);
+    g.seats=+$('#cSeats').value; g.history=[{t:now(),who:'abdelrhman.elagan',what:`Group created · starts at L${lesson+1} · ${CURRICULUM[g.grade].lessons[lesson]}`}];
+    groups.unshift(g); closeModal(); render(); toast(`${g.code} created — starts at lesson ${lesson+1}`);
+  };
+}
+
+/* ---------- edit ---------- */
+function openEdit(code, focusLesson){
+  const g=groups.find(x=>x.code===code); const s=g.slots[0];
+  openModal(`
+    <header><div><h3>Edit group <span class="mono" style="color:var(--blue-ink)">${g.code}</span></h3><p>Change grade, current lesson, schedule or capacity.</p></div><button class="btn ghost sm" onclick="closeModal()">✕</button></header>
+    <div class="body">
+      <div class="grid2">
+        <label class="f">Grade<select id="eGrade">${gradeOpts(g.grade)}</select></label>
+        <label class="f">Venue<select id="eVenue"><option ${g.venue==='Online'?'selected':''}>Online</option><option ${g.venue==='Physical'?'selected':''}>Physical</option></select></label>
+        <label class="f">Day<select id="eDay">${dayOpts(s.d)}</select></label>
+        <label class="f">Time<input type="time" id="eTime" value="${s.t}"></label>
+        <label class="f">Start date<input type="date" id="eStart" value="${g.start}"></label>
+        <label class="f">Seats<input type="number" id="eSeats" value="${g.seats}" min="${g.students||1}" max="30"></label>
+      </div>
+      ${g.slots.length>1?`<div class="note blue">This group has ${g.slots.length} weekly slots; only the first is editable in this demo.</div>`:''}
+      <div class="section-t">Assigned lesson (next class) · <span id="eTrack">${CURRICULUM[g.grade].track}</span></div>
+      <div class="lessonpick" id="eLessons">${lessonPicker(g.grade,g.lesson,'edit')}</div>
+      <div id="eNote"></div>
+    </div>
+    <footer><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" id="eSave">Save changes</button></footer>`);
+  const lp=$('#eLessons');
+  const note=()=>{
+    const gr=$('#eGrade').value, i=+lp.querySelector('input:checked').value; let msg='';
+    if(gr!==g.grade) msg=`<div class="note amber">Changing grade from <b>${g.grade}</b> to <b>${gr}</b> switches the curriculum to <b>${CURRICULUM[gr].track}</b>. Pick the lesson the group should continue from.</div>`;
+    else if(i<g.lesson) msg=`<div class="note amber">Moving back from L${g.lesson+1} to L${i+1} — lessons ${i+1}–${g.lesson} will be repeated.</div>`;
+    else if(i>g.lesson) msg=`<div class="note amber">Skipping ahead from L${g.lesson+1} to L${i+1} — lessons ${g.lesson+1}–${i} will be marked as skipped.</div>`;
+    $('#eNote').innerHTML=msg;
+  };
+  wireLessonPicker(lp,note);
+  $('#eGrade').onchange=e=>{const v=e.target.value;lp.innerHTML=lessonPicker(v,v===g.grade?g.lesson:0,'edit');$('#eTrack').textContent=CURRICULUM[v].track;note()};
+  if(focusLesson) setTimeout(()=>lp.scrollIntoView({block:'center'}),50);
+  $('#eSave').onclick=()=>{
+    const ch=[]; const nv={grade:$('#eGrade').value,venue:$('#eVenue').value,d:+$('#eDay').value,t:$('#eTime').value,start:$('#eStart').value,seats:+$('#eSeats').value,lesson:+lp.querySelector('input:checked').value};
+    if(nv.grade!==g.grade) ch.push(`Grade ${g.grade} → ${nv.grade}`);
+    if(nv.lesson!==g.lesson||nv.grade!==g.grade) ch.push(`Lesson L${g.lesson+1} ${CURRICULUM[g.grade].lessons[g.lesson]} → L${nv.lesson+1} ${CURRICULUM[nv.grade].lessons[nv.lesson]}`);
+    if(nv.d!==s.d||nv.t!==s.t) ch.push(`Schedule ${DAYS[s.d]} ${fmtTime(s.t)} → ${DAYS[nv.d]} ${fmtTime(nv.t)}`);
+    if(nv.start!==g.start) ch.push(`Start date ${fmt(parse(g.start))} → ${fmt(parse(nv.start))}`);
+    if(nv.venue!==g.venue) ch.push(`Venue ${g.venue} → ${nv.venue}`);
+    if(nv.seats!==g.seats) ch.push(`Seats ${g.seats} → ${nv.seats}`);
+    if(!ch.length){closeModal();return}
+    Object.assign(g,{grade:nv.grade,venue:nv.venue,start:nv.start,seats:nv.seats,lesson:nv.lesson}); g.slots[0]={d:nv.d,t:nv.t};
+    ch.forEach(c=>g.history.push({t:now(),who:'abdelrhman.elagan',what:c}));
+    closeModal(); render(); toast(`${g.code} updated · ${ch.length} change${ch.length>1?'s':''}`);
+  };
+}
+
+/* ---------- postpone (single / selected / all) ---------- */
+function openPostpone(codes, mode){
+  let scope = mode==='all' ? 'filtered' : 'list';
+  const listCodes = codes||[];
+  const targets=()=> scope==='list' ? groups.filter(g=>listCodes.includes(g.code)) : scope==='filtered' ? visible() : groups;
+  const title = mode==='single' ? `Postpone ${codes[0]}` : mode==='selected' ? `Postpone ${codes.length} selected groups` : 'Postpone groups';
+  const base = mode==='single' ? groups.find(g=>g.code===codes[0]).start : '2026-11-24';
+  openModal(`
+    <header><div><h3>${title}</h3><p>Set a new starting date. Lesson progress is kept — the group resumes from its current lesson.</p></div><button class="btn ghost sm" onclick="closeModal()">✕</button></header>
+    <div class="body">
+      ${mode==='all'?`<div class="section-t">Apply to</div>
+      <div class="radio-row" id="pScope">
+        <label class="on"><input type="radio" name="scope" value="filtered" checked> Groups in current view <b id="nF"></b></label>
+        <label><input type="radio" name="scope" value="every"> All groups <b>(${groups.length})</b></label>
+      </div>`:''}
+      <div class="section-t">Postpone by</div>
+      <div class="radio-row" id="pMode">
+        <label class="on"><input type="radio" name="pm" value="date" checked> New start date</label>
+        <label><input type="radio" name="pm" value="shift"> Shift by weeks</label>
+      </div>
+      <div class="grid2" style="margin-top:12px">
+        <label class="f" id="wDate">New starting date<input type="date" id="pDate" value="${base>iso(TODAY)?iso(new Date(parse(base).getTime()+7*864e5)):'2026-11-24'}" min="${iso(TODAY)}"></label>
+        <label class="f" id="wShift" style="display:none">Weeks<input type="number" id="pWeeks" value="1" min="1" max="12"></label>
+        <label class="f">Reason<select id="pReason"><option>Public holiday</option><option>Exam period</option><option>Tutor unavailable</option><option>Low enrollment</option><option>Other</option></select></label>
+        <label class="f full" style="flex-direction:row;align-items:center;gap:8px;color:var(--ink)"><input type="checkbox" id="pSlot"> Move weekly slot to the weekday of the new date</label>
+        <label class="f full" style="flex-direction:row;align-items:center;gap:8px;color:var(--ink)"><input type="checkbox" id="pNotify" checked> Notify enrolled students &amp; tutors</label>
+      </div>
+      <div class="section-t">Preview · <span id="pCount"></span></div>
+      <div class="preview"><table><thead><tr><th>Group</th><th>Current start</th><th>New start</th><th>Resumes at</th></tr></thead><tbody id="pPrev"></tbody></table></div>
+    </div>
+    <footer><button class="btn" onclick="closeModal()">Cancel</button><button class="btn primary" id="pSave">Postpone</button></footer>`);
+  const newStart=g=>{
+    if(document.querySelector('[name=pm]:checked').value==='date') return $('#pDate').value;
+    return iso(new Date(parse(g.start).getTime()+(+$('#pWeeks').value||1)*7*864e5+12*36e5));
+  };
+  const upd=()=>{
+    if(mode==='all'){scope=document.querySelector('[name=scope]:checked').value;$('#nF').textContent=`(${visible().length})`}
+    const pm=document.querySelector('[name=pm]:checked').value;
+    $('#wDate').style.display=pm==='date'?'':'none';$('#wShift').style.display=pm==='shift'?'':'none';
+    document.querySelectorAll('.radio-row label').forEach(l=>l.classList.toggle('on',l.querySelector('input').checked));
+    const t=targets();
+    $('#pCount').textContent=`${t.length} group${t.length===1?'':'s'}`;
+    $('#pPrev').innerHTML=t.map(g=>{const L=lessonLabel(g);return `<tr><td class="mono">${g.code}</td><td>${fmt(parse(g.start))}</td><td><b>${newStart(g)?fmt(parse(newStart(g))):'—'}</b></td><td>L${L.n} · ${L.name}</td></tr>`}).join('');
+    $('#pSave').textContent=`Postpone ${t.length} group${t.length===1?'':'s'}`;
+    $('#pSave').disabled=!t.length;
+  };
+  $('#dialog').addEventListener('input',upd); $('#dialog').addEventListener('change',upd); upd();
+  $('#pSave').onclick=()=>{
+    const t=targets(), reason=$('#pReason').value, moveSlot=$('#pSlot').checked;
+    for(const g of t){
+      const ns=newStart(g); if(!ns) return toast('Pick a new start date');
+      g.history.push({t:now(),who:'abdelrhman.elagan',what:`Postponed ${fmt(parse(g.start))} → ${fmt(parse(ns))} · ${reason}${$('#pNotify').checked?' · notified':''}`});
+      g.start=ns; g.postponed=true;
+      if(moveSlot) g.slots[0].d=parse(ns).getDay();
+    }
+    selected.clear(); closeModal(); render(); toast(`${t.length} group${t.length===1?'':'s'} postponed`);
+  };
+}
+
+/* ---------- delete ---------- */
+function openDelete(code){
+  openModal(`<header><div><h3>Delete ${code}?</h3><p>This removes the group and its schedule. This can't be undone.</p></div></header>
+    <footer><button class="btn" onclick="closeModal()">Cancel</button><button class="btn danger" id="dOk">Delete</button></footer>`);
+  $('#dOk').onclick=()=>{groups=groups.filter(g=>g.code!==code);selected.delete(code);if(openCode===code)closeDrawer();closeModal();render();toast(`${code} deleted`)};
+}
+
+render();
+</script>
+</body>
+</html>
