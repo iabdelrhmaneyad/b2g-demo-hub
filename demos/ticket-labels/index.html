@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iSchool — Support Labels (Prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#1a6fe8; --blue-d:#145ccc; --blue-50:#eaf2ff; --blue-100:#d8e6fb;
+  --text:#1f2a37; --muted:#6b7a90; --ph:#9fb7dc; --line:#e3e8ef; --line2:#cfdcf0;
+  --thead:#e7edf4; --green:#1f9d55; --green-50:#e6f7ec; --yellow:#b7791f; --yellow-50:#fff1c2;
+  --red:#e5484d; --red-50:#fff0f0; --grey-chip:#eceff3;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:"Readex Pro","Segoe UI",Tahoma,sans-serif;color:var(--text);font-size:14px;background:#fff}
+button,input,textarea{font-family:inherit;color:inherit}
+button{cursor:pointer}
+svg{flex:none}
+.ic{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.app{display:grid;grid-template-columns:192px 1fr;height:100vh}
+.side{border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden}
+.logo{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 8px}
+.logo b{font-size:25px;font-weight:700;color:var(--blue);letter-spacing:-.5px}
+.logo b span{color:#f5a623}
+.org{padding:6px 16px;font-size:13px;display:flex;align-items:center;gap:8px}
+.org.sw{color:var(--blue);font-size:11px;padding-top:0}
+.intake{margin:8px 10px;border:1px solid var(--line2);border-radius:14px;padding:9px 12px;display:flex;gap:10px;align-items:center}
+.intake .thumb{width:24px;height:18px;border-radius:3px;background:linear-gradient(135deg,#c7d6ea,#8ea7c7)}
+.intake b{font-weight:500;font-size:13px;display:block}
+.intake small{font-size:11px;color:var(--muted)}
+.sp{margin:6px 10px 8px;border:1px solid var(--line2);border-radius:8px;padding:5px 10px;display:flex;gap:8px;align-items:center;color:var(--ph);font-size:13px}
+.nav{overflow:auto;flex:1;padding:0 6px 20px}
+.ni{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:8px;font-size:13.5px;color:#2b3a4f;border:0;background:none;width:100%;text-align:left}
+.ni:hover{background:#f3f6fb}
+.ni .chev{margin-left:auto;color:#7d8ba0}
+.ni.open{font-weight:500}
+.sub{margin:2px 0 6px 25px;border-left:1px solid var(--line2);padding-left:6px}
+.si{white-space:nowrap;display:flex;align-items:center;gap:6px;width:100%;border:0;background:none;text-align:left;padding:6px 8px;font-size:13.5px;color:#2b3a4f;border-radius:6px;position:relative}
+.si:hover{background:#f3f6fb}
+.si.on{background:var(--blue-50);color:var(--blue)}
+.si.on::before{content:"";position:absolute;left:-7px;top:4px;bottom:4px;width:2px;background:var(--blue);border-radius:2px}
+.si .new{font-size:9.5px;background:var(--blue);color:#fff;border-radius:4px;padding:1px 5px;margin-left:auto}
+.si .lk{margin-left:auto;color:var(--muted)}
+
+.main{display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.top{height:46px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 20px;gap:12px}
+.crumb{font-size:13.5px;color:#34465e;display:flex;gap:8px;align-items:center}
+.crumb .on{color:var(--text);display:flex;gap:4px;align-items:center}
+.grow{flex:1}
+.gsearch{border:1px solid var(--line2);background:#f5f8fd;border-radius:999px;padding:4px 8px 4px 12px;font-size:12.5px;color:#4a5b72;display:flex;gap:8px;align-items:center}
+.gsearch kbd{font-family:inherit;font-size:10px;border:1px solid var(--line2);border-radius:5px;padding:1px 5px;background:#fff}
+.tb-ic{color:#4a5b72;display:grid;place-items:center;width:28px;position:relative}
+.bell b{position:absolute;top:-8px;right:-4px;background:var(--blue);color:#fff;font-size:9px;border-radius:8px;padding:1px 4px}
+.me{display:flex;gap:8px;align-items:center;font-size:13.5px}
+.av{width:22px;height:22px;border-radius:50%;background:#e8eef7;display:grid;place-items:center;font-size:11px;position:relative;color:#43546b}
+.av::after{content:"";position:absolute;right:-1px;bottom:-1px;width:7px;height:7px;border-radius:50%;background:#22c55e;border:1.5px solid #fff}
+
+.bar2{height:42px;display:flex;align-items:center;justify-content:flex-end;gap:16px;padding:0 20px;font-size:12px;color:#34465e;border-bottom:1px solid var(--line)}
+.bar2 .pg{border:1px solid var(--line);border-radius:6px;width:36px;height:24px;display:grid;place-items:center;color:var(--muted)}
+.content{flex:1;overflow:auto;padding-bottom:70px}
+.filters{display:flex;align-items:center;gap:14px;padding:12px 14px}
+.fsearch{border:1px solid var(--line2);border-radius:6px;width:175px;height:40px;display:flex;align-items:center;gap:10px;padding:0 12px;color:#4a5b72}
+.fsearch input{border:0;outline:0;width:100%;font-size:13px}
+.fsearch input::placeholder{color:var(--ph)}
+.tgl{display:flex;align-items:center;gap:8px;color:#34465e;font-size:13.5px;border:0;background:none;padding:0}
+.tgl i{width:32px;height:16px;border-radius:999px;background:#c7ced8;position:relative;transition:.2s}
+.tgl i::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:.2s}
+.tgl.on i{background:var(--green)}
+.tgl.on i::after{left:18px}
+.btn{border:0;border-radius:8px;height:38px;padding:0 16px;font-size:13.5px;font-weight:500;display:inline-flex;gap:6px;align-items:center}
+.btn-p{background:var(--blue);color:#fff}
+.btn-p:hover{background:var(--blue-d)}
+.btn-o{background:#fff;border:1px solid var(--line2);color:var(--text)}
+.btn-o:hover{background:#f5f8fd}
+.btn-d{background:var(--red);color:#fff}
+.btn-pill{border-radius:999px;height:36px;padding:0 56px;font-size:15px}
+
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--thead);text-align:left;font-weight:500;font-size:14.5px;padding:13px 10px;white-space:nowrap}
+tbody td{padding:16px 10px 22px;vertical-align:top;border-bottom:1px solid #c9d3e0;font-size:13.5px}
+.edit{color:var(--blue);border:0;background:none;padding:2px 0 0 10px}
+.id{font-size:15px}
+.sm{font-size:11px;color:#55657b;line-height:1.35}
+.dt{font-size:13px;display:flex;gap:4px;align-items:center;white-space:nowrap}
+.tm{font-size:11px;color:#55657b;display:flex;gap:4px;align-items:center;margin-top:8px}
+.took{display:inline-flex;align-items:center;gap:6px;background:var(--yellow-50);color:var(--yellow);font-size:11px;border-radius:4px;padding:5px 20px 5px 8px;margin-top:10px;white-space:nowrap}
+.gchip{display:inline-block;background:var(--grey-chip);color:#5b6b80;font-size:11px;border-radius:4px;padding:2px 8px;margin-top:6px}
+.status{display:inline-flex;align-items:center;gap:5px;background:var(--green-50);color:var(--green);font-size:11.5px;border-radius:6px;padding:3px 8px}
+.status::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+.status.off{background:#eef1f5;color:#7a8799}
+.lchips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.lchip{display:inline-flex;align-items:center;gap:5px;background:var(--blue-50);color:var(--blue);font-size:11.5px;border-radius:5px;padding:3px 8px;white-space:nowrap}
+.lchip.off{background:#eef1f5;color:#8a96a8;text-decoration:line-through}
+.lchip .rm{border:0;background:none;padding:0;color:inherit;font-size:13px;line-height:1;opacity:.7}
+.ldot{width:7px;height:7px;border-radius:50%;flex:none}
+.iconbtn{border:1px solid var(--line);background:#fff;border-radius:6px;width:30px;height:30px;display:grid;place-items:center;color:#4a5b72}
+.iconbtn.danger{color:var(--red)}
+.iconbtn.danger:hover{background:var(--red-50)}
+tr.inactive td{color:#97a3b4}
+.info{display:flex;gap:10px;align-items:center;background:var(--blue-50);color:#21508f;border:1px solid var(--blue-100);border-radius:8px;padding:10px 14px;font-size:13px;margin:0 14px 12px}
+.empty{padding:50px;text-align:center;color:var(--muted)}
+.newb{font-size:9.5px;background:var(--blue);color:#fff;border-radius:4px;padding:1px 5px;margin-left:6px;vertical-align:middle}
+
+.ov{position:fixed;inset:0;background:rgba(40,48,60,.55);display:none;align-items:center;justify-content:center;z-index:40;padding:24px}
+.ov.show{display:flex}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:460px;max-height:95vh;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.modal.wide{max-width:834px}
+.mh{position:relative;text-align:center;font-size:17px;font-weight:500;padding:16px 50px;border-bottom:1px solid var(--line)}
+.mh .x{position:absolute;right:14px;top:12px;border:0;background:none;font-size:22px;line-height:1}
+.mb{padding:18px 22px;overflow:auto}
+.mf{display:flex;justify-content:center;gap:10px;padding:14px 22px 20px}
+.f{margin-bottom:16px}
+.f > label{display:block;font-size:13.5px;color:#3b4a5e;margin-bottom:6px}
+.inp{width:100%;min-height:40px;border:1px solid var(--line2);border-radius:12px;padding:8px 14px;font-size:14.5px;display:flex;align-items:center;justify-content:space-between;background:#fff;outline:0}
+.inp:focus,.inp.focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,111,232,.12)}
+.inp .ph{color:var(--ph)}
+.inp .cl{border:0;background:none;color:#4a5b72;font-size:16px;padding:0}
+.assignee{border-radius:0;border-color:var(--line);position:relative;padding:10px 14px 6px;font-size:13px}
+.assignee .lbl{position:absolute;top:-8px;left:20px;background:#fff;font-size:11px;color:#3b4a5e;padding:0 6px}
+.idtag{background:#eef1f5;border-radius:4px;font-size:10px;padding:1px 4px;margin:0 4px}
+.err{color:var(--red);font-size:12px;margin-top:6px;display:none}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.sws{display:flex;gap:8px}
+.swc{width:26px;height:26px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px var(--line)}
+.swc.on{box-shadow:0 0 0 2px var(--blue)}
+.swi{width:36px;height:20px;border-radius:999px;background:#c7ced8;border:0;position:relative;padding:0;transition:.2s}
+.swi::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s}
+.swi.on{background:var(--green)}
+.swi.on::after{left:18px}
+
+.tg{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tg .l{border-right:1px solid var(--line);padding-right:16px}
+.lsum{border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px}
+.lsum .k{font-size:11px;color:#55657b}
+.bub{border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:13px;margin-bottom:10px;max-width:84%;direction:rtl;text-align:right}
+.bub.r{background:#f2f6fd;margin-left:auto;border-color:#e2ebf8}
+.bub .mt{font-size:10.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;margin-bottom:4px}
+.reply{width:100%;min-height:76px;border:1px solid var(--line);border-radius:6px;padding:10px;resize:vertical;font-size:13px}
+.up{border:1px solid var(--line2);border-radius:8px;padding:14px;font-size:11.5px;color:#4a5b72;display:flex;gap:10px;align-items:center}
+.sendr{display:flex;justify-content:flex-end;margin-top:8px}
+.sendr span{background:#a9c7f0;color:#fff;border-radius:999px;padding:2px 10px;font-size:13px}
+.hist{border-top:1px solid var(--line);padding-top:16px;font-size:14.5px;display:flex;gap:8px;align-items:center}
+
+.ms{position:relative}
+.msf{cursor:pointer;flex-wrap:wrap;gap:5px;justify-content:flex-start;padding:7px 56px 7px 12px;position:relative}
+.msf.has{background:#eef2f7;border-color:#cfd8e4}
+.msf .tail{position:absolute;right:12px;top:50%;transform:translateY(-50%);display:flex;gap:10px;align-items:center;color:#4a5b72}
+.pop{position:absolute;left:0;right:0;bottom:calc(100% - 22px);background:#fff;border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.18);z-index:5;display:none;overflow:hidden;border:1px solid var(--line)}
+.pop.show{display:block}
+.psearch{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);color:#7d8ba0}
+.psearch input{border:0;outline:0;width:100%;font-size:14px}
+.psearch input::placeholder{color:var(--ph)}
+.pcount{font-size:13px;color:#55657b;padding:6px 14px 2px}
+.plist{max-height:230px;overflow:auto;padding:2px 0 6px}
+.popt{display:flex;align-items:center;gap:12px;padding:8px 26px;cursor:pointer;font-size:14.5px}
+.popt:hover{background:#f5f8fd}
+.popt input{appearance:none;width:16px;height:16px;border:1px solid #cfd8e4;border-radius:4px;background:#f3f6fa;display:grid;place-items:center;margin:0}
+.popt input:checked{background:var(--blue);border-color:var(--blue)}
+.popt input:checked::after{content:"";width:8px;height:4px;border:2px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+.pfoot{border-top:1px solid var(--line);padding:9px 14px;font-size:12px;color:#55657b;display:flex;justify-content:space-between;align-items:center;background:#fafbfd}
+.pfoot a{color:var(--blue);cursor:pointer;font-weight:500}
+
+.proto{position:fixed;left:200px;bottom:14px;z-index:60;background:#1f2a37;color:#fff;border-radius:999px;padding:6px 6px 6px 16px;display:flex;align-items:center;gap:10px;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.proto button{border:0;background:none;color:#c3cbd6;border-radius:999px;padding:6px 14px;font-size:12px}
+.proto button.on{background:#fff;color:var(--text);font-weight:500}
+.toasts{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;z-index:99}
+.toast{background:#fff;border:1px solid var(--line);border-left:4px solid var(--green);padding:11px 16px;border-radius:8px;font-size:13px;box-shadow:0 8px 20px rgba(0,0,0,.12);animation:in .2s}
+@keyframes in{from{opacity:0;transform:translateY(6px)}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z" fill="currentColor" stroke="none"/><path d="M3 22h18" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2" fill="currentColor" stroke="none"/><rect x="6" y="9" width="12" height="9" fill="#fff" stroke="none"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="currentColor" stroke="none"/><path d="M12 7v5l3 2" stroke="#fff"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" stroke="none"/><path d="M7.5 12.5l3 3 6-6" stroke="#fff"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5M4 15v5h16v-5"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="currentColor" stroke="none"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></symbol>
+</svg>
+
+<div class="app">
+  <aside class="side">
+    <div class="logo"><b><span>i</span>School<sup style="font-size:9px">®</sup></b><span style="color:#4a5b72">▢</span></div>
+    <div class="org">🌐 All organizations <svg class="ic" style="margin-left:auto;width:14px"><use href="#i-chev"/></svg></div>
+    <div class="org sw">↻ Switch organization</div>
+    <div class="intake"><div class="thumb"></div><div><b>DEMI 3rd Intake</b><small>B2G · Overview</small></div></div>
+    <div class="sp"><svg class="ic" style="width:13px"><use href="#i-search"/></svg>Search pages</div>
+    <nav class="nav" id="nav"></nav>
+  </aside>
+
+  <div class="main">
+    <header class="top">
+      <div class="crumb" id="crumb"></div>
+      <div class="grow"></div>
+      <div class="gsearch"><svg class="ic" style="width:13px"><use href="#i-search"/></svg>Search pages and o... <kbd>Ctrl K</kbd></div>
+      <div class="tb-ic">⇥</div><div class="tb-ic">▤</div>
+      <div class="tb-ic bell">🔔<b>99+</b></div>
+      <div class="me"><div class="av" id="av">A</div><span id="meName"></span></div>
+    </header>
+    <div class="bar2" id="bar2"></div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<!-- Add / Edit label -->
+<div class="ov" id="mLabel">
+  <div class="modal">
+    <div class="mh"><span id="mlTitle">Add Label</span><button class="x" data-close>×</button></div>
+    <div class="mb">
+      <div class="f"><label>Label name <span style="color:var(--red)">*</span></label>
+        <input class="inp" id="mlName" maxlength="40" placeholder="e.g. Refund Request"><div class="err" id="mlErr"></div></div>
+      <div class="f"><label>Description</label>
+        <input class="inp" id="mlDesc" maxlength="90" placeholder="When should agents use this label?">
+        <div class="hint">Helps agents pick the right label.</div></div>
+      <div class="f"><label>Color</label><div class="sws" id="mlColors"></div></div>
+      <div class="f"><label>Preview</label><div id="mlPrev"></div></div>
+      <div class="f" style="display:flex;gap:10px;align-items:center;margin-bottom:0">
+        <button class="swi on" id="mlActive" type="button"></button>
+        <span style="font-size:13.5px">Active — available in the ticket <b>Labels</b> list</span></div>
+    </div>
+    <div class="mf"><button class="btn btn-o" data-close>Cancel</button><button class="btn btn-p" id="mlSave">Add label</button></div>
+  </div>
+</div>
+
+<!-- Confirm -->
+<div class="ov" id="mConfirm">
+  <div class="modal">
+    <div class="mh"><span id="cfT"></span><button class="x" data-close>×</button></div>
+    <div class="mb" id="cfB"></div>
+    <div class="mf" id="cfF"></div>
+  </div>
+</div>
+
+<!-- Edit ticket -->
+<div class="ov" id="mTicket">
+  <div class="modal wide">
+    <div class="mh"><span id="tTitle"></span><button class="x" data-close>×</button></div>
+    <div class="mb">
+      <div class="tg">
+        <div class="l">
+          <div class="lsum"><div class="k">Labels</div><div class="lchips" id="tSum"></div></div>
+          <div class="f"><label>Topic</label><div class="inp"><span>Report a Problem / inquiry</span><svg class="ic" style="width:13px"><use href="#i-chev"/></svg></div></div>
+          <div class="f"><label>Department</label><div class="inp"><span>CS</span><button class="cl">×</button></div></div>
+          <div class="f"><div class="inp assignee"><span class="lbl">Assignee</span><span style="display:flex;align-items:center;color:#4a5b72"><svg class="ic" style="width:13px"><use href="#i-user"/></svg>&nbsp;<span class="idtag">2936</span><span style="color:var(--text)" id="tAssignee"></span></span><button class="cl">×</button></div></div>
+          <div class="f"><label>Status</label><div class="inp"><span>Completed</span><button class="cl">×</button></div></div>
+          <div class="f"><label>Priority</label><div class="inp"><span class="ph">Select priority</span><svg class="ic" style="width:13px"><use href="#i-chev"/></svg></div></div>
+          <div class="f ms" id="ms">
+            <label>Labels</label>
+            <div class="pop" id="pop">
+              <div class="psearch"><svg class="ic"><use href="#i-search"/></svg><input id="pq" placeholder="Search"></div>
+              <div class="pcount" id="pcount"></div>
+              <div class="plist" id="plist"></div>
+              <div class="pfoot" id="pfoot"></div>
+            </div>
+            <div class="inp msf" id="msf" tabindex="0"></div>
+            <div class="hint" id="mshint"></div>
+          </div>
+          <div class="f"><label>Response Attachment</label><div class="up"><svg class="ic" style="color:var(--blue);width:18px;height:18px"><use href="#i-upload"/></svg>Choose File, or drag and drop</div></div>
+          <div class="hist"><svg class="ic" style="width:13px"><use href="#i-chev"/></svg>History</div>
+        </div>
+        <div>
+          <div class="bub"><div class="mt"><span id="tContact"></span><span>Nov 15, 15:05</span></div>البنت مش عارفة تدخل السيشن والرابط مش شغال، ياريت حد يتواصل معانا</div>
+          <div class="bub r"><div class="mt"><span>Response</span></div>تم استلام طلبكم بنجاح، وسيتم الرد عليكم في أقرب وقت ممكن</div>
+          <div style="font-size:11px;color:#55657b;margin:14px 0 6px">Reply to student</div>
+          <textarea class="reply" id="tReply"></textarea>
+          <div style="text-align:right;font-size:13px;color:#3b4a5e;margin:6px 0">Maximum 5 images</div>
+          <div class="up"><svg class="ic" style="color:var(--blue);width:18px;height:18px"><use href="#i-upload"/></svg>Add attachment</div>
+          <div class="sendr"><span>Send reply</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="mf"><button class="btn btn-p btn-pill" id="tConfirm">Confirm</button></div>
+  </div>
+</div>
+
+<div class="proto">Prototype · view as
+  <button data-role="leader" class="on">CS Team Leader</button>
+  <button data-role="agent">CS Agent</button>
+</div>
+<div class="toasts" id="toasts"></div>
+
+<script>
+const COLORS=['#1a6fe8','#1f9d55','#d97706','#e5484d','#7c3aed','#0891b2','#db2777','#64748b'];
+let seq=1;
+const L=(name,color,desc,active=true,by='lamis.amr',at='02 Oct 2026')=>({id:seq++,name,color,desc,active,by,at,isNew:false});
+const S={
+  role:'leader', page:'labels', q:'', showInactive:true,
+  labels:[
+    L('PC Specs',COLORS[0],'Device / hardware requirement questions'),
+    L('Withdrawal Conditions',COLORS[3],'Student wants to withdraw or pause'),
+    L('Join Session',COLORS[1],'Trouble joining a live session'),
+    L('Success & Certification Conditions',COLORS[4],'Passing criteria and certificates'),
+    L('Forget Password / Login Issue',COLORS[2],'Account access problems'),
+    L('Learning Journey',COLORS[5],'Track / level placement questions'),
+    L('Confirm Session Time',COLORS[6],'Schedule confirmation requests'),
+    L('Old Platform Migration',COLORS[7],'Legacy — replaced by Login Issue',false,'lamis.amr','11 Mar 2026'),
+  ],
+  tickets:[
+    {id:560207,name:'عائشة سمير عبدالباقي علي محمد',phone:'+201015881733',mail:'samirabdbaky@gmail.com',code:'DEMI5-S-396419',grade:6,tutor:'Hoda Hussain Abdelkhala Mostafa Waked',tid:18866,tl:'—',c:'04:18 PM',r:'04:21 PM',took:'3m',ass:'lamis.amr',am:'lamis.amr@ischooltech.com',ap:'+201018874924',labels:[1]},
+    {id:560183,name:'مريم حماده محمد محمد إبراهيم',phone:'+201008878621',mail:'mariamhamadamohammad@gmail.com',code:'DEMI5-S-411256',grade:5,tutor:'Ali elsayed ali elokda',tid:21709,tl:'Marwa Elsayed Khalil Elsayed',tlid:246,c:'03:47 PM',r:'04:19 PM',took:'32m',ass:'lamis.amr',am:'lamis.amr@ischooltech.com',ap:'+201018874924',labels:[]},
+    {id:560182,name:'حمزه محمد قرني كأمل عبدالخالق',phone:'+201127104106',mail:'hm3663998@gmail.com',code:'DEMI5-S-410219',grade:4,tutor:'Islam Yasien Negm Cover Morning',tid:14782,tl:'youmna tarek',tlid:133,c:'03:27 PM',r:'03:48 PM',took:'20m',ass:'lamis.amr',am:'lamis.amr@ischooltech.com',ap:'+201018874924',labels:[5,8]},
+    {id:560180,name:'علاء محمد علي عمر سيد',phone:'+201148024084',mail:'sescotec@gmail.com',code:'DEMI5-S-394049',grade:5,tutor:'Ahmed Sayed Farhan Mohamed',tid:18899,tl:'Sara Esmael Mohammed Adly',tlid:2111,c:'03:05 PM',r:'03:27 PM',took:'22m',ass:'Habiba Mohamed Ahmed',am:'habiba.mohamed@ischooltech.com',ap:'+201508243078',labels:[4]},
+    {id:560179,name:'اريسيما مينا فوزي نعمان ميخائيل',phone:'',mail:'arepsimamina@gmail.com',code:'DEMI5-S-389410',grade:4,tutor:'ziad yasser mohamed abdelraouf',tid:8035,tl:'Youstina William Ghattas',tlid:121,c:'03:03 PM',r:'03:26 PM',took:'23m',ass:'Habiba Mohamed Ahmed',am:'habiba.mohamed@ischooltech.com',ap:'+201508243078',labels:[]},
+  ],
+  t:null, draft:[], editId:null
+};
+const $=id=>document.getElementById(id);
+const lead=()=>S.role==='leader';
+const lab=id=>S.labels.find(l=>l.id===id);
+const used=id=>S.tickets.filter(t=>t.labels.includes(id)).length;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ic=(n,st='')=>`<svg class="ic" style="${st}"><use href="#i-${n}"/></svg>`;
+const chip=(l,extra='')=>`<span class="lchip ${l.active?'':'off'}" style="${l.active?`background:${l.color}14;color:${l.color}`:''}"><span class="ldot" style="background:${l.active?l.color:'#b6c0cd'}"></span>${esc(l.name)}${extra}</span>`;
+const toast=m=>{const t=document.createElement('div');t.className='toast';t.textContent=m;$('toasts').appendChild(t);setTimeout(()=>t.remove(),2800)};
+const open=id=>$(id).classList.add('show');
+const close=id=>$(id).classList.remove('show');
+document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o||e.target.closest('[data-close]'))o.classList.remove('show')}));
+
+/* Sidebar */
+function renderNav(){
+  const top=['Dashboard','Operations','Content','Users','Reports','Sessions','Meetings','Groups','Community'];
+  const after=['HR','Tutor Support','Department Su...','Settings','Competitions'];
+  const icons={Dashboard:'▦',Operations:'▣',Content:'▮',Users:'👥',Reports:'◑',Sessions:'▣',Meetings:'▶',Groups:'👥',Community:'💬',HR:'💼','Tutor Support':'?','Department Su...':'?',Settings:'⚙',Competitions:'🏆'};
+  const nochev=['Dashboard','Meetings'];
+  const item=n=>`<button class="ni"><span style="width:16px;text-align:center;color:#3c4d63;font-size:12px">${icons[n]}</span>${n}${nochev.includes(n)?'':`<svg class="ic chev" style="width:13px"><use href="#i-chev"/></svg>`}</button>`;
+  const sub=[['Support Responses','x'],['Support Topics','x'],['Support','tickets'],['Support Labels','labels'],['Support Dashboard','x'],['CSAT Dashboard','x'],['Surveys','x'],['FAQs','x']];
+  $('nav').innerHTML=top.map(item).join('')+
+    `<button class="ni open"><span style="width:16px;text-align:center;color:var(--blue)">?</span>General Support<svg class="ic chev" style="width:13px;transform:rotate(180deg)"><use href="#i-chev"/></svg></button>
+     <div class="sub">${sub.map(([n,p])=>`<button class="si ${S.page===p?'on':''}" data-p="${p}">${n}${p==='labels'?(lead()?'<span class="new">NEW</span>':`<span class="lk">${ic('lock','width:12px;height:12px')}</span>`):''}</button>`).join('')}</div>`+
+    after.map(item).join('');
+  $('nav').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{if(b.dataset.p==='x')return toast('Not part of this prototype');S.page=b.dataset.p;S.q='';render()});
+}
+
+/* Tickets page */
+function renderTickets(){
+  $('crumb').innerHTML=`General Support ${ic('chev','width:12px')} › <span class="on">Support ${ic('chev','width:12px')}</span>`;
+  $('bar2').innerHTML=`<span>▤ Import</span><span>1 - 12 of 166919</span><span style="color:#b6c0cd">‹</span><span class="pg">1</span><span>/ 13910 &nbsp;›</span><span>↻</span><span>⇥</span><span>▦</span><span style="color:var(--blue)">☰</span>`;
+  $('content').innerHTML=`
+  <div class="filters"><div class="fsearch">${ic('search','width:13px')}<input placeholder="Search"></div><button class="tgl"><i></i>Unavailable</button></div>
+  <table><thead><tr><th style="width:44px"></th><th>#</th><th>Contact</th><th>Tutor</th><th>Team Leader</th><th>Session Date</th><th>Creation Date</th><th>Resolve Date</th><th>Topic</th><th>Department</th><th>Status</th><th>Assignee</th></tr></thead>
+  <tbody>${S.tickets.map(t=>`<tr>
+    <td><button class="edit" data-t="${t.id}" title="Edit">${ic('pen','width:15px;height:15px')}</button></td>
+    <td class="id">${t.id}</td>
+    <td><div dir="rtl" style="text-align:left;font-size:13px">${esc(t.name)}</div><div class="sm">${t.phone?t.phone+'<br>':''}${t.mail}<br>${t.code}</div><div class="sm" style="margin-top:6px">Grade ${t.grade}</div></td>
+    <td>${esc(t.tutor)}<div class="sm">${t.tid}</div></td>
+    <td>${esc(t.tl)}${t.tlid?`<div class="sm">${t.tlid}</div>`:''}</td>
+    <td>—</td>
+    <td><div class="dt">${ic('cal','width:11px')} 15 Nov 2026</div><div class="tm">${ic('clock','width:10px')} ${t.c}</div></td>
+    <td><div class="dt">${ic('check','width:11px')} 15 Nov 2026</div><div class="tm">${ic('clock','width:10px')} ${t.r}</div><div class="took">${ic('clock','width:10px')} Took ${t.took}</div></td>
+    <td>Report a Problem / inquiry<div><span class="gchip">Not session-related</span></div>
+      ${t.labels.length?`<div class="lchips">${t.labels.map(lab).filter(Boolean).map(l=>chip(l)).join('')}</div>`:''}</td>
+    <td>CS</td>
+    <td><span class="status">Completed</span></td>
+    <td style="white-space:nowrap">${esc(t.ass)}<div class="sm">${t.am}<br>${t.ap}</div></td>
+  </tr>`).join('')}</tbody></table>`;
+  $('content').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>openTicket(+b.dataset.t));
+}
+
+/* Support Labels page (admin) */
+function renderLabels(){
+  $('crumb').innerHTML=`General Support ${ic('chev','width:12px')} › <span class="on">Support Labels ${ic('chev','width:12px')}</span>`;
+  let rows=lead()?S.labels:S.labels.filter(l=>l.active);
+  if(lead()&&!S.showInactive) rows=rows.filter(l=>l.active);
+  if(S.q) rows=rows.filter(l=>(l.name+' '+l.desc).toLowerCase().includes(S.q.toLowerCase()));
+  const act=S.labels.filter(l=>l.active).length;
+  $('bar2').innerHTML=lead()
+    ? `<span style="margin-right:auto;color:#55657b">${S.labels.length} labels · <span style="color:var(--green)">${act} active</span> · ${S.labels.length-act} inactive</span><span>1 - ${rows.length} of ${rows.length}</span><span>↻</span>`
+    : `<span>1 - ${rows.length} of ${rows.length}</span>`;
+  $('content').innerHTML=`
+  <div class="filters">
+    <div class="fsearch">${ic('search','width:13px')}<input id="lq" placeholder="Search" value="${esc(S.q)}"></div>
+    ${lead()?`<button class="tgl ${S.showInactive?'on':''}" id="tInactive"><i></i>Show inactive</button>`:''}
+    <div class="grow"></div>
+    ${lead()?`<button class="btn btn-p" id="addL">${ic('plus','width:15px')} Add Label</button>`:''}
+  </div>
+  ${lead()?'':`<div class="info">${ic('lock')}<div><b>View only.</b> These are the labels available when editing a ticket. Only the CS Team Leader can add, edit or remove labels.</div></div>`}
+  ${rows.length?`<table><thead><tr>
+      ${lead()?'<th style="width:44px"></th>':''}<th>#</th><th>Label</th><th>Description</th><th>Used on tickets</th>${lead()?'<th>Status</th><th>Created By</th><th>Creation Date</th><th>Actions</th>':''}
+    </tr></thead><tbody>${rows.map((l,i)=>`
+    <tr class="${l.active?'':'inactive'}">
+      ${lead()?`<td><button class="edit" data-e="${l.id}" title="Edit">${ic('pen','width:15px;height:15px')}</button></td>`:''}
+      <td class="id">${i+1}</td>
+      <td>${chip(l)}${l.isNew?'<span class="newb">NEW</span>':''}</td>
+      <td style="max-width:320px">${esc(l.desc||'—')}</td>
+      <td>${used(l.id)}</td>
+      ${lead()?`
+      <td><div style="display:flex;gap:10px;align-items:center"><button class="swi ${l.active?'on':''}" data-tg="${l.id}" title="${l.active?'Deactivate':'Activate'}"></button><span class="status ${l.active?'':'off'}">${l.active?'Active':'Inactive'}</span></div></td>
+      <td>${esc(l.by)}<div class="sm">CS Team Leader</div></td>
+      <td><div class="dt">${ic('cal','width:11px')} ${l.at}</div></td>
+      <td><button class="iconbtn danger" data-d="${l.id}" title="Remove">${ic('trash','width:15px')}</button></td>`:''}
+    </tr>`).join('')}</tbody></table>`:`<div class="empty">No labels found.</div>`}`;
+  $('lq').oninput=e=>{S.q=e.target.value;renderLabels();const n=$('lq');n.focus();n.setSelectionRange(n.value.length,n.value.length)};
+  if(!lead())return;
+  $('tInactive').onclick=()=>{S.showInactive=!S.showInactive;renderLabels()};
+  $('addL').onclick=()=>openLabel(null);
+  $('content').querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>openLabel(+b.dataset.e));
+  $('content').querySelectorAll('[data-tg]').forEach(b=>b.onclick=()=>toggle(+b.dataset.tg));
+  $('content').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>remove(+b.dataset.d));
+}
+
+function confirmBox(title,body,btns){
+  $('cfT').textContent=title;$('cfB').innerHTML=body;const f=$('cfF');f.innerHTML='';
+  btns.forEach(b=>{const e=document.createElement('button');e.className='btn '+(b.c||'btn-o');e.textContent=b.t;e.onclick=()=>{close('mConfirm');b.fn&&b.fn()};f.appendChild(e)});
+  open('mConfirm');
+}
+function toggle(id){
+  const l=lab(id);
+  if(!l.active){l.active=true;toast(`“${l.name}” activated — now available to CS agents`);return render()}
+  const n=used(id);
+  confirmBox('Deactivate label?',`<p>${chip(l)}</p><p style="color:#55657b;line-height:1.6">Agents will no longer see this label in the ticket <b>Labels</b> list.${n?` It stays on the <b>${n}</b> ticket${n>1?'s':''} already using it (shown as inactive).`:''} You can re-activate it any time.</p>`,
+   [{t:'Cancel'},{t:'Deactivate',c:'btn-p',fn:()=>{l.active=false;toast(`“${l.name}” deactivated`);render()}}]);
+}
+function remove(id){
+  const l=lab(id),n=used(id);
+  confirmBox('Remove label?',`<p>${chip(l)}</p>${n
+    ?`<div class="info" style="margin:0;background:#fff7e6;border-color:#fcd9a3;color:#92400e">${ic('info')}<div>Used on <b>${n}</b> ticket${n>1?'s':''}. Removing it also removes it from those tickets. To keep reporting history, deactivate it instead.</div></div>`
+    :`<p style="color:#55657b">Not used on any ticket. It will be permanently removed.</p>`}`,
+   [{t:'Cancel'},...(n&&l.active?[{t:'Deactivate instead',fn:()=>{l.active=false;toast(`“${l.name}” deactivated`);render()}}]:[]),
+    {t:'Remove',c:'btn-d',fn:()=>{S.labels=S.labels.filter(x=>x.id!==id);S.tickets.forEach(t=>t.labels=t.labels.filter(x=>x!==id));toast(`“${l.name}” removed`);render()}}]);
+}
+
+/* Add / edit label */
+let mlColor=COLORS[0],mlOn=true;
+function openLabel(id){
+  S.editId=id;const l=id?lab(id):null;
+  $('mlTitle').textContent=l?'Edit Label':'Add Label';$('mlSave').textContent=l?'Save changes':'Add label';
+  $('mlName').value=l?l.name:'';$('mlDesc').value=l?l.desc:'';
+  mlColor=l?l.color:COLORS[S.labels.length%COLORS.length];mlOn=l?l.active:true;
+  $('mlErr').style.display='none';drawML();open('mLabel');setTimeout(()=>$('mlName').focus(),50);
+}
+function drawML(){
+  $('mlColors').innerHTML=COLORS.map(c=>`<button class="swc ${c===mlColor?'on':''}" style="background:${c}" data-c="${c}"></button>`).join('');
+  $('mlColors').querySelectorAll('button').forEach(b=>b.onclick=()=>{mlColor=b.dataset.c;drawML()});
+  $('mlPrev').innerHTML=chip({name:$('mlName').value.trim()||'Label name',color:mlColor,active:true});
+  $('mlActive').classList.toggle('on',mlOn);
+}
+$('mlName').oninput=drawML;
+$('mlName').onkeydown=e=>{if(e.key==='Enter')$('mlSave').click()};
+$('mlActive').onclick=()=>{mlOn=!mlOn;drawML()};
+$('mlSave').onclick=()=>{
+  const name=$('mlName').value.trim().replace(/\s+/g,' '),desc=$('mlDesc').value.trim();
+  const fail=m=>{$('mlErr').textContent=m;$('mlErr').style.display='block'};
+  if(name.length<2)return fail('Please enter a label name (at least 2 characters).');
+  const d=S.labels.find(l=>l.name.toLowerCase()===name.toLowerCase()&&l.id!==S.editId);
+  if(d)return fail(`“${d.name}” already exists${d.active?'':' as inactive — activate it instead'}.`);
+  if(S.editId){Object.assign(lab(S.editId),{name,desc,color:mlColor,active:mlOn});toast(`“${name}” updated`)}
+  else{S.labels.forEach(l=>l.isNew=false);const l=L(name,mlColor,desc,mlOn,'lamis.amr','15 Nov 2026');l.isNew=true;S.labels.push(l);
+    toast(mlOn?`“${name}” added — now available to all CS agents`:`“${name}” added as inactive`)}
+  close('mLabel');render();
+};
+
+/* Edit ticket + labels select */
+function openTicket(id){
+  const t=S.tickets.find(x=>x.id===id);S.t=t;S.draft=[...t.labels];
+  $('tTitle').textContent=`Edit Ticket #${t.id}`;$('tAssignee').textContent=t.ass;$('tContact').textContent=t.name;
+  $('tReply').placeholder=`Reply to ${t.name}`;$('pq').value='';closePop();drawField();open('mTicket');
+}
+function drawField(){
+  const saved=S.t.labels.map(lab).filter(Boolean);
+  $('tSum').innerHTML=saved.length?saved.map(l=>chip(l)).join(''):'<span class="sm">No labels</span>';
+  const sel=S.draft.map(lab).filter(Boolean), msf=$('msf');
+  msf.classList.toggle('has',sel.length>0);
+  msf.innerHTML=(sel.length?sel.map(l=>chip(l,`<button class="rm" data-rm="${l.id}">×</button>`)).join(''):'<span class="ph">Select labels</span>')
+    +`<span class="tail">${sel.length?'<button class="cl" id="msClr" style="border:0;background:none;font-size:16px;padding:0">×</button>':''}${ic('chev','width:13px')}</span>`;
+  msf.querySelectorAll('[data-rm]').forEach(b=>b.onclick=e=>{e.stopPropagation();S.draft=S.draft.filter(x=>x!==+b.dataset.rm);drawField();drawList()});
+  const c=$('msClr');if(c)c.onclick=e=>{e.stopPropagation();S.draft=[];drawField();drawList()};
+  const off=sel.filter(l=>!l.active).length;
+  $('mshint').innerHTML=off?`${off} selected label${off>1?'s are':' is'} inactive — it can't be re-added once removed.`:'';
+}
+function drawList(){
+  const q=$('pq').value.trim().toLowerCase();
+  const opts=S.labels.filter(l=>l.active&&l.name.toLowerCase().includes(q));
+  $('pcount').textContent=`${S.draft.length} selected`;
+  $('plist').innerHTML=opts.length?opts.map(l=>`<label class="popt"><input type="checkbox" data-id="${l.id}" ${S.draft.includes(l.id)?'checked':''}>${esc(l.name)}${l.isNew?'<span class="newb">NEW</span>':''}</label>`).join('')
+    :`<div class="sm" style="padding:14px 26px">No labels found${q?` for “${esc(q)}”`:''}.</div>`;
+  $('plist').querySelectorAll('input').forEach(cb=>cb.onchange=()=>{const id=+cb.dataset.id;S.draft=cb.checked?[...S.draft,id]:S.draft.filter(x=>x!==id);drawField();$('pcount').textContent=`${S.draft.length} selected`});
+  $('pfoot').innerHTML=lead()?`<span>Active labels only</span><a id="goManage">Manage labels →</a>`:`<span style="display:flex;gap:6px;align-items:center">${ic('lock','width:12px')} Need a new label? Ask your CS Team Leader.</span>`;
+  const g=$('goManage');if(g)g.onclick=()=>{close('mTicket');S.page='labels';render()};
+}
+function closePop(){$('pop').classList.remove('show');$('msf').classList.remove('focus')}
+$('msf').onclick=()=>{if($('pop').classList.contains('show'))return closePop();$('pop').classList.add('show');$('msf').classList.add('focus');drawList();$('pq').focus()};
+$('pq').oninput=drawList;
+document.addEventListener('mousedown',e=>{if(!e.target.closest('#ms'))closePop()});
+$('tConfirm').onclick=()=>{S.t.labels=[...S.draft];close('mTicket');toast(`Ticket #${S.t.id} updated`);render()};
+
+/* Role + render */
+function setUser(){$('meName').textContent=lead()?'lamis.amr (Team Leader)':'habiba.mohamed (CS Agent)';$('av').textContent=lead()?'L':'H'}
+document.querySelectorAll('.proto button').forEach(b=>b.onclick=()=>{
+  S.role=b.dataset.role;document.querySelectorAll('.proto button').forEach(x=>x.classList.toggle('on',x===b));
+  setUser();render();
+});
+function render(){renderNav();S.page==='labels'?renderLabels():renderTickets()}
+setUser();render();
+</script>
+</body>
+</html>
