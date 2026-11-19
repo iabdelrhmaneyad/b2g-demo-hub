@@ -1,0 +1,1035 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مساعد iSchool · عرض الطالب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&display=swap">
+<style>
+body{margin:0;background:#f5f8fc}
+a{color:#0461d6}a:hover{color:#0346b0}
+button{font:inherit;cursor:pointer}
+input,textarea,select{font:inherit}
+.dot{width:7px;height:7px;border-radius:50%;background:#8fa6b3;animation:csb-blink 1s infinite}
+.dot.b{animation-delay:.15s}.dot.c{animation-delay:.3s}
+@keyframes csb-blink{0%,100%{opacity:.25}50%{opacity:1}}
+.chip:hover{background:#e3f1fb}
+.tk:hover{background:#f5f8fc}
+.opt:hover{background:#e3f1fb}
+.node:hover{border-color:#0ab4fb}
+.row:hover{background:#f5f8fc}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+summary{cursor:pointer}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<template id="tpl">
+
+<div dir="rtl" style="font-family: 'Alexandria', 'Rubik', system-ui, sans-serif; color: #1f2a56; background: #f5f8fc; min-height: 960px; box-sizing: border-box; padding: 12px 20px 32px; display: flex; flex-direction: column; gap: 16px">
+
+  <!-- ===================== DEMO BAR ===================== -->
+  <section aria-label="أدوات العرض التجريبي" style="background: #1f2a56; color: #ffffff; border-radius: 16px; padding: 12px 16px; display: flex; flex-direction: column; gap: 12px">
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+      <span style="font-size: 12px; font-weight: 700; letter-spacing: .6px; color: #ffb81a">عرض تجريبي للطالب · مساعد iSchool</span>
+      
+      <template data-if="isStudent">
+        <label for="pick-student" style="font-size: 13px; color: #c9d6f2">الطالب:</label>
+        <select id="pick-student" value="{{sid}}" onChange="{{onPickStudent}}" style="border: 0; border-radius: 8px; padding: 7px 10px; font-size: 13px; background: #ffffff; color: #1f2a56; max-width: 380px">
+          <template data-for="studentOptions" data-as="o">
+            <option value="{{o.id}}">{{o.label}}</option>
+          </template>
+        </select>
+        <button onClick="{{newRequest}}" style="border: 0; border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 600; background: #ffb81a; color: #1f2a56">+ إضافة طلب دعم</button>
+      </template>
+      <span style="flex: 1"></span>
+      <span style="font-size: 12.5px; color: #c9d6f2">{{demoProgress}}</span>
+      <button onClick="{{toggleSteps}}" aria-expanded="{{stepsOpenStr}}" style="border: 1px solid rgba(255,255,255,.35); border-radius: 999px; padding: 6px 12px; font-size: 12.5px; background: transparent; color: #ffffff">{{stepsToggleLabel}}</button>
+      <button onClick="{{resetDemo}}" style="border: 1px solid rgba(255,255,255,.35); border-radius: 999px; padding: 6px 12px; font-size: 12.5px; background: transparent; color: #ffffff">إعادة ضبط العرض</button>
+    </div>
+    <template data-if="stepsOpen">
+      <ol style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+        <template data-for="demoSteps" data-as="d">
+          <li style="background: {{d.bg}}; border: 1px solid {{d.border}}; border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; min-width: 0">
+            <div style="display: flex; align-items: center; gap: 8px">
+              <span style="width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; background: {{d.dotBg}}; color: {{d.dotFg}}; flex: none">{{d.mark}}</span>
+              <span style="font-size: 11px; color: #c9d6f2">{{d.where}}</span>
+            </div>
+            <div style="font-size: 13px; font-weight: 600; line-height: 1.5">{{d.title}}</div>
+            <div style="font-size: 11.5px; color: #c9d6f2; line-height: 1.5">{{d.hint}}</div>
+            <button onClick="{{d.go}}" style="align-self: flex-start; margin-top: auto; border: 0; border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 600; background: #ffffff; color: #1f2a56">{{d.goLabel}}</button>
+          </li>
+        </template>
+      </ol>
+    </template>
+  </section>
+
+  <template data-if="isStudent">
+  <header style="background: #ffffff; border-radius: 999px; box-shadow: 0 1px 2px rgba(31,42,86,.04), 0 4px 14px rgba(31,42,86,.05); padding: 10px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+    <div style="font-weight: 800; font-size: 26px; color: #046ded; letter-spacing: -0.5px; direction: ltr">iSchool<span style="color: #ffb81a">.</span></div>
+    <span style="font-size: 13px; color: #5b7280; padding-inline-start: 14px; border-inline-start: 1px solid #e6ecf2">{{headerSub}}</span>
+    <span style="flex: 1"></span>
+    <div style="display: flex; align-items: center; gap: 10px">
+      <div>
+        <div style="font-weight: 600; font-size: 15px">{{me.name}}</div>
+        <div style="font-size: 12px; color: #5b7280; direction: ltr; text-align: end">{{me.sub}}</div>
+      </div>
+      <div aria-hidden="true" style="width: 44px; height: 44px; border-radius: 50%; background: #e3f1fb; color: #046ded; display: grid; place-items: center; font-weight: 800">{{me.initial}}</div>
+    </div>
+  </header>
+  </template>
+
+  <!-- ===================== STUDENT ===================== -->
+  <template data-if="isStudent">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 0 8px">
+      <div>
+        <h1 style="margin: 0; font-size: 30px; font-weight: 800">مركز المساعدة</h1>
+        <div style="display: flex; gap: 10px; margin-top: 12px">
+          <span style="background: #046ded; color: #ffffff; border-radius: 999px; padding: 6px 16px; font-size: 15px; font-weight: 600">طلبات الدعم</span>
+          <span style="color: #5b7280; padding: 6px 4px; font-size: 15px">الأسئلة الشائعة</span>
+        </div>
+      </div>
+      <button onClick="{{newRequest}}" style="background: #046ded; color: #ffffff; border: 0; border-radius: 999px; padding: 14px 28px; font-size: 17px; font-weight: 600; min-height: 52px">+ إضافة طلب دعم</button>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: stretch">
+      <nav aria-label="طلباتي" style="flex: 1 1 280px; max-width: 340px; background: #ffffff; border: 1px solid #e6ecf2; border-radius: 16px; padding: 10px; display: flex; flex-direction: column; gap: 6px; box-sizing: border-box; align-self: flex-start">
+        <template data-for="items" data-as="t">
+          <button class="tk" onClick="{{t.open}}" aria-current="{{t.current}}" style="text-align: start; border: 1.5px solid {{t.border}}; background: {{t.bg}}; border-radius: 12px; padding: 14px 16px; color: #1f2a56">
+            <div style="display: flex; justify-content: space-between; gap: 8px; align-items: baseline">
+              <span style="font-weight: 600; font-size: 15px">{{t.title}}</span>
+              <span style="font-size: 12px; color: #5b7280; direction: ltr">{{t.ref}}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; gap: 8px">
+              <span style="font-size: 12.5px; color: #5b7280">{{t.date}}</span>
+              <span style="border-radius: 999px; padding: 3px 12px; font-size: 12.5px; font-weight: 600; background: {{t.sBg}}; color: {{t.sFg}}">{{t.sLabel}}</span>
+            </div>
+          </button>
+        </template>
+        <template data-if="noItems">
+          <div style="padding: 16px; font-size: 13px; color: #5b7280; text-align: center">لا توجد طلبات بعد.</div>
+        </template>
+      </nav>
+
+      <!-- main panel -->
+      <section aria-label="المحتوى" style="flex: 999 1 560px; min-width: 0; background: #ffffff; border: 1px solid #e6ecf2; border-radius: 16px; display: flex; flex-direction: column; min-height: 760px; overflow: hidden">
+
+        <!-- bot conversation -->
+        <template data-if="isConvo">
+          <div style="padding: 16px 22px; border-bottom: 1px solid #e6ecf2; display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+            <span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 50%; background: #046ded; color: #ffffff; display: grid; place-items: center; font-size: 15px; font-weight: 800">i</span>
+            <div>
+              <h2 style="margin: 0; font-size: 17px; font-weight: 700">{{cv.title}} <span style="direction: ltr; unicode-bidi: isolate">{{cv.ref}}</span></h2>
+              <div style="font-size: 12px; color: #5b7280">{{cv.handlerLine}}</div>
+            </div>
+            <span style="flex: 1"></span>
+            <span style="border-radius: 999px; padding: 4px 14px; font-size: 12.5px; font-weight: 600; background: {{cv.sBg}}; color: {{cv.sFg}}">{{cv.sLabel}}</span>
+          </div>
+          <div ref="{{threadRef}}" style="flex: 1; min-height: 0; max-height: 640px; overflow-y: auto; padding: 20px 22px; display: flex; flex-direction: column; gap: 14px">
+            <template data-for="cv.msgs" data-as="m">
+              <template data-if="m.isBot">
+                <div style="align-self: flex-end; max-width: 86%; background: #ffffff; border: 1px solid #e6ecf2; border-radius: 16px; border-start-end-radius: 5px; padding: 14px 18px; box-shadow: 0 1px 2px rgba(31,42,86,.04)">
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px">
+                    <span style="font-size: 12.5px; font-weight: 700">مساعد iSchool</span>
+                    <span style="font-size: 11px; font-weight: 600; color: #0461d6; background: #e3f1fb; border-radius: 6px; padding: 1px 7px">رد آلي</span>
+                    <span style="flex: 1"></span>
+                    <span style="font-size: 11.5px; color: #5b7280">{{m.time}}</span>
+                  </div>
+                  <template data-if="m.hasTitle">
+                    <div style="font-weight: 700; font-size: 15px; color: #0346b0; margin-bottom: 6px; line-height: 1.6">{{m.title}}</div>
+                  </template>
+                  <div style="font-size: 15px; line-height: 1.85; white-space: pre-line">{{m.text}}</div>
+                </div>
+              </template>
+              <template data-if="m.isMe">
+                <div style="align-self: flex-start; max-width: 75%; display: flex; flex-direction: column; align-items: flex-start; gap: 4px">
+                  <div style="background: #046ded; color: #ffffff; border-radius: 16px; border-start-start-radius: 5px; padding: 10px 16px; font-size: 15px; line-height: 1.7; white-space: pre-line">{{m.text}}</div>
+                  <span style="font-size: 11.5px; color: #5b7280">أنت · {{m.time}}</span>
+                </div>
+              </template>
+              <template data-if="m.isSys">
+                <div style="align-self: center; max-width: 90%; text-align: center; font-size: 13px; font-weight: 600; border-radius: 999px; padding: 6px 16px; background: {{m.bg}}; color: {{m.fg}}">{{m.text}}</div>
+              </template>
+            </template>
+            <template data-if="cv.typing">
+              <div aria-label="المساعد يكتب" style="align-self: flex-end; background: #ffffff; border: 1px solid #e6ecf2; border-radius: 16px; padding: 12px 16px; display: flex; gap: 5px"><i class="dot"></i><i class="dot b"></i><i class="dot c"></i></div>
+            </template>
+
+            <!-- controls, inside the chat -->
+            <template data-if="cv.showControls">
+              <div style="align-self: flex-end; width: min(560px, 92%); background: #f3f8ff; border: 1px solid #cfe0f5; border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px">
+                <template data-if="cv.isMenu">
+                  <div style="font-size: 14px; font-weight: 700">{{cv.menuPrompt}}</div>
+                  <template data-for="cv.questions" data-as="q">
+                    <template data-if="q.isHeader"><div style="font-size: 12px; color: #5b7280; font-weight: 600; margin-top: 4px">{{q.label}}</div></template>
+                    <template data-if="q.isItem">
+                      <button class="opt" onClick="{{q.pick}}" style="text-align: start; border: 1.5px solid #bcd8fb; background: #ffffff; color: #0346b0; border-radius: 12px; padding: 10px 14px; font-size: 14px; font-weight: 600; line-height: 1.6; min-height: 44px">{{q.label}}</button>
+                    </template>
+                  </template>
+                </template>
+                <template data-if="cv.isConfirm">
+                  <div style="font-size: 14.5px; font-weight: 700">{{cv.confirmQ}}</div>
+                  <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                    <button class="chip" onClick="{{cv.yes}}" style="border: 1.5px solid #046ded; color: #0461d6; background: #ffffff; border-radius: 999px; padding: 9px 16px; font-size: 14px; font-weight: 600; min-height: 44px">{{cv.yesLabel}}</button>
+                    <button class="chip" onClick="{{cv.no}}" style="border: 1.5px solid #d5e0ec; color: #5b7280; background: #ffffff; border-radius: 999px; padding: 9px 16px; font-size: 14px; font-weight: 600; min-height: 44px">{{cv.noLabel}}</button>
+                  </div>
+                  <template data-if="cv.hasOthers">
+                    <details style="font-size: 13px; color: #5b7280">
+                      <summary>أو اختر استفسارًا آخر</summary>
+                      <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px">
+                        <template data-for="cv.others" data-as="q">
+                          <button class="opt" onClick="{{q.pick}}" style="text-align: start; border: 1px solid #d5e0ec; background: #ffffff; color: #1f2a56; border-radius: 10px; padding: 8px 12px; font-size: 13.5px; line-height: 1.6">{{q.label}}</button>
+                        </template>
+                      </div>
+                    </details>
+                  </template>
+                </template>
+                <template data-if="cv.isOffer">
+                  <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                    <button class="chip" onClick="{{cv.offerYes}}" style="border: 1.5px solid #b3261e; color: #b3261e; background: #ffffff; border-radius: 999px; padding: 9px 16px; font-size: 14px; font-weight: 600; min-height: 44px">{{cv.offerYesLabel}}</button>
+                    <button class="chip" onClick="{{cv.offerNo}}" style="border: 1.5px solid #d5e0ec; color: #5b7280; background: #ffffff; border-radius: 999px; padding: 9px 16px; font-size: 14px; font-weight: 600; min-height: 44px">{{cv.offerNoLabel}}</button>
+                  </div>
+                </template>
+                <template data-if="cv.isBox">
+                  <label for="cs-box" style="font-size: 14px; font-weight: 700">تفاصيل استفسارك</label>
+                  <textarea id="cs-box" value="{{boxDraft}}" onChange="{{onBox}}" rows="4" placeholder="اكتب استفسارك هنا…" style="border: 1px solid #bcd8fb; border-radius: 12px; padding: 12px 14px; font-size: 15px; color: #1f2a56; background: #ffffff; resize: vertical; outline-color: #046ded"></textarea>
+                  <label style="display: flex; align-items: center; gap: 10px; border: 1px dashed #bcd8fb; background: #ffffff; border-radius: 12px; padding: 10px 14px; font-size: 13.5px; color: #0461d6; cursor: pointer">
+                    <span aria-hidden="true" style="font-size: 18px">📎</span>
+                    <span>إرفاق صور توضّح المشكلة (اختياري) · الحد الأقصى 5 صور</span>
+                    <input class="sr" type="file" accept="image/*" multiple="{{ true }}" onChange="{{onBoxFiles}}">
+                  </label>
+                  <template data-if="hasBoxFiles">
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px">
+                      <template data-for="boxFiles" data-as="bf">
+                        <span style="display: inline-flex; align-items: center; gap: 6px; background: #ffffff; border: 1px solid #d5e0ec; border-radius: 999px; padding: 4px 6px 4px 10px; font-size: 12.5px; color: #1f2a56">🖼 {{bf.name}}<button onClick="{{bf.remove}}" aria-label="حذف {{bf.name}}" style="border: 0; background: #f5f8fc; color: #5b7280; border-radius: 50%; width: 22px; height: 22px; font-size: 11px; padding: 0">✕</button></span>
+                      </template>
+                    </div>
+                  </template>
+                  <template data-if="boxFileErr">
+                    <div role="alert" style="font-size: 13px; color: #b3261e">الحد الأقصى 5 صور، تم إرفاق أول 5 فقط.</div>
+                  </template>
+                  <template data-if="boxErr">
+                    <div role="alert" style="font-size: 13px; color: #b3261e">برجاء كتابة تفاصيل الاستفسار قبل الإرسال.</div>
+                  </template>
+                  <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap">
+                    <span style="font-size: 12px; color: #5b7280">سيتم إنشاء طلب «الإبلاغ عن مشكلة» بعد الإرسال فقط.</span>
+                    <button onClick="{{cv.submitBox}}" style="border: 0; background: #046ded; color: #ffffff; border-radius: 999px; padding: 10px 22px; font-size: 15px; font-weight: 600; min-height: 44px">إرسال الاستفسار</button>
+                  </div>
+                </template>
+                <template data-if="cv.isDone">
+                  <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap">
+                    <span style="font-size: 13.5px; color: #5b7280">{{cv.doneText}}</span>
+                  </div>
+                </template>
+              </div>
+            </template>
+          </div>
+          <template data-if="cv.isFollow">
+            <div role="status" style="margin: 0 16px 16px; border: 1px solid #f6dca5; background: #fffbf1; border-radius: 14px; padding: 14px 18px; display: flex; gap: 12px; align-items: center">
+              <span aria-hidden="true" style="width: 36px; height: 36px; border-radius: 50%; background: #fff4dc; color: #8a5300; display: grid; place-items: center; font-size: 18px; flex: none">⏳</span>
+              <div>
+                <div style="font-size: 15px; font-weight: 700; color: #8a5300">طلبك مع فريق خدمة العملاء · Pending</div>
+                <div style="font-size: 13px; color: #6b5a3a; margin-top: 2px">سيتم الرد عليك هنا في نفس الطلب في أقرب وقت، ولا تحتاج لإرسال رسائل أخرى.</div>
+              </div>
+            </div>
+          </template>
+        </template>
+
+        <!-- ticket -->
+        <template data-if="isTicket">
+          <div style="padding: 16px 22px; border-bottom: 1px solid #e6ecf2; display: flex; align-items: center; gap: 12px; flex-wrap: wrap">
+            <h2 style="margin: 0; font-size: 18px; font-weight: 700">الإبلاغ عن مشكلة / استفسار <span style="direction: ltr; unicode-bidi: isolate">#{{tk.id}}</span></h2>
+            <span style="flex: 1"></span>
+            <span style="border-radius: 999px; padding: 4px 14px; font-size: 12.5px; font-weight: 600; background: {{tk.sBg}}; color: {{tk.sFg}}">{{tk.status}}</span>
+          </div>
+          <div style="flex: 1; padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; max-height: 520px">
+            <div style="align-self: flex-start; max-width: 85%; background: #f3f7fc; border: 1px solid #e6ecf2; border-radius: 14px; padding: 14px 18px">
+              <div style="font-size: 12.5px; color: #5b7280; margin-bottom: 6px">تفاصيل الطلب</div>
+              <div style="font-size: 15px; line-height: 1.8">Sub Topic: {{tk.sub}}</div>
+              <div style="font-size: 15px; line-height: 1.8; white-space: pre-line">Details: {{tk.details}}</div>
+            </div>
+            <template data-for="tk.msgs" data-as="m">
+              <template data-if="m.isMe">
+                <div style="align-self: flex-start; max-width: 75%; background: #046ded; color: #ffffff; border-radius: 16px; padding: 10px 16px; font-size: 15px; line-height: 1.7; white-space: pre-line">{{m.text}}</div>
+              </template>
+              <template data-if="m.isAgent">
+                <div style="align-self: flex-end; max-width: 82%; background: #ffffff; border: 1px solid #e6ecf2; border-radius: 14px; padding: 12px 16px">
+                  <div style="font-size: 12.5px; color: #5b7280; margin-bottom: 4px">فريق الدعم</div>
+                  <div style="font-size: 15px; line-height: 1.8; white-space: pre-line">{{m.text}}</div>
+                </div>
+              </template>
+            </template>
+            <template data-if="tk.hasHistory">
+              <details style="border: 1px dashed #bcd8fb; border-radius: 12px; padding: 10px 14px; font-size: 13.5px">
+                <summary style="font-weight: 600; color: #0346b0">سجل المحادثة مع مساعد iSchool ({{tk.historyCount}} رسالة) · مرفق للفريق</summary>
+                <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px">
+                  <template data-for="tk.history" data-as="h">
+                    <div style="display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 8px; line-height: 1.6">
+                      <span style="color: #5b7280">{{h.who}}</span>
+                      <span style="white-space: pre-line">{{h.text}}</span>
+                    </div>
+                  </template>
+                </div>
+              </details>
+            </template>
+          </div>
+          <div style="margin: 0 16px 16px; border: 1px solid #d5e0ec; border-radius: 14px; padding: 14px 18px">
+            <label for="tk-reply" style="display: block; font-size: 15px; font-weight: 600">ردك</label>
+            <div style="font-size: 12.5px; color: #5b7280; margin: 2px 0 8px">أرسل رسالة متابعة إلى فريق الدعم.</div>
+            <textarea id="tk-reply" value="{{tkDraft}}" onChange="{{onTkDraft}}" placeholder="اكتب ردك هنا" rows="2" style="width: 100%; box-sizing: border-box; border: 0; resize: vertical; font-size: 15px; color: #1f2a56; background: transparent; outline: none"></textarea>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px">
+              <span style="font-size: 13px; color: #5b7280">📎 الحد الأقصى 5 صور</span>
+              <button onClick="{{sendTk}}" style="background: #046ded; color: #ffffff; border: 0; border-radius: 999px; padding: 10px 22px; font-size: 15px; font-weight: 600; min-height: 44px; opacity: {{tkSendOpacity}}">إرسال الرد</button>
+            </div>
+          </div>
+        </template>
+
+        <!-- existing ticket form (bot disabled) -->
+        <template data-if="isForm">
+          <div style="padding: 24px 28px; display: flex; flex-direction: column; gap: 20px">
+            <div style="display: flex; align-items: center; gap: 10px">
+              <h2 style="margin: 0; font-size: 22px; font-weight: 800">إضافة طلب دعم</h2>
+            </div>
+            <div>
+              <div id="lb-type" style="font-size: 15px; margin-bottom: 8px">اختر</div>
+              <button onClick="{{toggleType}}" aria-labelledby="lb-type" aria-expanded="{{form.openType}}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; border: 1px solid #d5e0ec; background: #ffffff; border-radius: 16px; padding: 16px 20px; font-size: 16px; color: {{form.typeColor}}; min-height: 58px"><span>{{form.typeText}}</span><span aria-hidden="true" style="color: #5b7280">⌄</span></button>
+              <template data-if="form.openType">
+                <div role="listbox" style="margin-top: 8px; border: 1px solid #e6ecf2; border-radius: 16px; padding: 10px; box-shadow: 0 8px 24px rgba(31,42,86,.08)">
+                  <template data-for="typeOptions" data-as="o">
+                    <button class="opt" role="option" onClick="{{o.pick}}" style="width: 100%; text-align: start; border: 0; background: #eef5fb; border-radius: 12px; padding: 14px 16px; font-size: 16px; color: #1f2a56">{{o.label}}</button>
+                  </template>
+                </div>
+              </template>
+            </div>
+            <template data-if="form.hasType">
+              <div>
+                <div id="lb-sub" style="font-size: 15px; margin-bottom: 8px">يرجى اختيار التصنيف الفرعي المناسب قبل إرسال الطلب</div>
+                <button onClick="{{toggleSub}}" aria-labelledby="lb-sub" aria-expanded="{{form.openSub}}" style="width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: start; border: 1px solid #d5e0ec; background: #ffffff; border-radius: 16px; padding: 16px 20px; font-size: 16px; color: {{form.subColor}}; min-height: 58px"><span>{{form.subText}}</span><span aria-hidden="true" style="color: #5b7280">⌄</span></button>
+                <template data-if="form.openSub">
+                  <div role="listbox" style="margin-top: 8px; border: 1px solid #e6ecf2; border-radius: 16px; padding: 10px; box-shadow: 0 8px 24px rgba(31,42,86,.08); display: flex; flex-direction: column; gap: 4px">
+                    <template data-for="subOptions" data-as="o">
+                      <button class="opt" role="option" onClick="{{o.pick}}" style="width: 100%; text-align: start; border: 0; background: transparent; border-radius: 12px; padding: 14px 16px; font-size: 16px; color: #1f2a56">{{o.label}}</button>
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </template>
+            <template data-if="form.hasSub">
+              <div>
+                <label for="f-details" style="display: block; font-size: 15px; margin-bottom: 8px">يرجى كتابة تفاصيل المشكلة لمساعدتنا في حلها</label>
+                <textarea id="f-details" value="{{form.details}}" onChange="{{onDetails}}" placeholder="اكتب هنا..." rows="5" style="width: 100%; box-sizing: border-box; border: 1px solid #bcd8fb; border-radius: 16px; padding: 16px 20px; font-size: 16px; color: #1f2a56; resize: vertical; outline-color: #046ded"></textarea>
+              </div>
+              <label style="display: flex; align-items: center; gap: 10px; border: 1px solid #bcd8fb; border-radius: 16px; padding: 16px 20px; font-size: 14px; color: #5b7280; cursor: pointer">
+                <span aria-hidden="true" style="color: #046ded; font-size: 20px">⤒</span>
+                <span>{{form.fileText}}</span>
+                <input class="sr" type="file" accept="image/*" onChange="{{onFile}}">
+              </label>
+              <template data-if="form.err">
+                <div role="alert" style="font-size: 13px; color: #b3261e">برجاء كتابة تفاصيل المشكلة.</div>
+              </template>
+              <button onClick="{{submitForm}}" style="width: 100%; border: 0; border-radius: 999px; padding: 16px; font-size: 18px; font-weight: 600; color: #ffffff; background: {{form.submitBg}}; min-height: 56px">تأكيد</button>
+            </template>
+          </div>
+        </template>
+
+        <template data-if="isEmpty">
+          <div style="flex: 1; display: grid; place-items: center; padding: 40px; text-align: center; color: #5b7280">
+            <div>
+              <div style="font-size: 18px; font-weight: 700; color: #1f2a56">أهلًا بك في مركز المساعدة</div>
+              <div style="margin-top: 6px; font-size: 14px">اضغط «إضافة طلب دعم» لبدء محادثة مع مساعد iSchool، أو اختر طلبًا من القائمة. خطوات العرض التجريبي في الشريط بالأعلى.</div>
+            </div>
+          </div>
+        </template>
+      </section>
+
+      <aside style="flex: 1 1 280px; max-width: 340px; display: flex; flex-direction: column; gap: 16px">
+        <template data-if="hasInfo">
+          <div style="background: #ffffff; border: 1px solid #e6ecf2; border-radius: 16px; padding: 18px 20px">
+            <h3 style="margin: 0 0 14px; font-size: 17px; font-weight: 700">معلومات الطلب</h3>
+            <template data-for="infoRows" data-as="r">
+              <div style="font-size: 12.5px; color: #5b7280">{{r.k}}</div>
+              <div style="font-size: 15px; margin: 2px 0 12px; line-height: 1.6">{{r.v}}</div>
+            </template>
+          </div>
+        </template>
+        <div style="background: #ffffff; border: 1px dashed #bcd8fb; border-radius: 16px; padding: 16px 18px">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px">
+            <h3 style="margin: 0; font-size: 14px; font-weight: 700">بيانات النظام لهذا الطالب</h3>
+            <span style="font-size: 11px; font-weight: 700; color: #8a5300; background: #fff4dc; border-radius: 6px; padding: 2px 8px">للتجربة</span>
+          </div>
+          <template data-for="sysRows" data-as="r">
+            <div style="display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 8px; font-size: 12.5px; padding: 5px 0; border-top: 1px solid #eef2f6">
+              <span style="color: #5b7280">{{r.k}}</span>
+              <span style="font-weight: 600">{{r.v}}</span>
+            </div>
+          </template>
+        </div>
+      </aside>
+    </div>
+  </template>
+
+  
+</div>
+</template>
+<script>
+/* Minimal runtime for the prototype: renders the x-dc template with {{holes}}, loops (data-for) and conditions (data-if),
+   wires events, and patches the page in place so typing keeps focus. */
+(function () {
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+  var BOOL = { checked: 1, disabled: 1, readonly: 1, multiple: 1, selected: 1, hidden: 1 };
+
+  function lookup(scope, path) {
+    path = String(path).trim();
+    if (path === 'true') return true;
+    if (path === 'false') return false;
+    if (path === 'null') return null;
+    if (/^-?\d+(\.\d+)?$/.test(path)) return +path;
+    var parts = path.split('.'), v = scope;
+    for (var i = 0; i < parts.length; i++) { if (v == null) return undefined; v = v[parts[i]]; }
+    return v;
+  }
+  var WHOLE = /^\s*\{\{\s*([^}]+?)\s*\}\}\s*$/;
+  var HOLE = /\{\{\s*([^}]+?)\s*\}\}/g;
+  function interp(str, scope) { return str.replace(HOLE, function (m, p) { var v = lookup(scope, p); return v == null ? '' : String(v); }); }
+
+  function evtName(attr, el) {
+    var n = attr.slice(2);
+    if (n === 'change') {
+      var tag = el.tagName.toLowerCase(), type = (el.getAttribute('type') || 'text').toLowerCase();
+      if (tag === 'textarea' || (tag === 'input' && ['checkbox', 'radio', 'file'].indexOf(type) < 0)) return 'input';
+      return 'change';
+    }
+    if (n === 'focus') return 'focusin';
+    return n;
+  }
+
+  function renderInto(src, scope, out) {
+    for (var c = src.firstChild; c; c = c.nextSibling) {
+      if (c.nodeType === 3) { out.appendChild(document.createTextNode(interp(c.nodeValue, scope))); continue; }
+      if (c.nodeType !== 1) continue;
+      var tag = c.tagName.toLowerCase();
+      if (tag === 'template' && c.hasAttribute('data-for')) {
+        var list = lookup(scope, c.getAttribute('data-for')) || [], as = c.getAttribute('data-as');
+        for (var i = 0; i < list.length; i++) {
+          var sc = Object.create(scope); sc[as] = list[i]; sc.$index = i;
+          renderInto(c.content, sc, out);
+        }
+        continue;
+      }
+      if (tag === 'template' && c.hasAttribute('data-if')) {
+        if (lookup(scope, c.getAttribute('data-if'))) renderInto(c.content, scope, out);
+        continue;
+      }
+      var el = c.namespaceURI === SVG_NS ? document.createElementNS(SVG_NS, c.tagName) : document.createElement(tag);
+      var attrs = c.attributes;
+      for (var a = 0; a < attrs.length; a++) {
+        var name = attrs[a].name, raw = attrs[a].value, m = WHOLE.exec(raw);
+        if (name.indexOf('hint-') === 0) continue;
+        var val = m ? lookup(scope, m[1]) : interp(raw, scope);
+        if (name.indexOf('on') === 0 && name.length > 2) { (el.__h || (el.__h = {}))[evtName(name, c)] = val; continue; }
+        if (name === 'ref') { el.__ref = val; continue; }
+        if (name === 'value' && (tag === 'input' || tag === 'textarea' || tag === 'select')) { el.__val = val == null ? '' : String(val); continue; }
+        if (BOOL[name]) { if (val === true || val === 'true' || val === '') el.setAttribute(name, ''); continue; }
+        if (val == null || val === false) continue;
+        el.setAttribute(name, String(val));
+      }
+      renderInto(tag === 'template' ? c.content : c, scope, el);
+      out.appendChild(el);
+    }
+  }
+
+  function syncAttrs(live, next) {
+    var i, a;
+    for (i = live.attributes.length - 1; i >= 0; i--) {
+      a = live.attributes[i].name;
+      if (a === 'open') continue;
+      if (!next.hasAttribute(a)) live.removeAttribute(a);
+    }
+    for (i = 0; i < next.attributes.length; i++) {
+      a = next.attributes[i];
+      if (live.getAttribute(a.name) !== a.value) live.setAttribute(a.name, a.value);
+    }
+  }
+  function applyProps(live, next) {
+    live.__h = next.__h; live.__ref = next.__ref; live.__val = next.__val;
+    var tag = live.tagName.toLowerCase();
+    if (tag === 'input') {
+      var type = (live.getAttribute('type') || 'text').toLowerCase();
+      if (type === 'checkbox' || type === 'radio') live.checked = live.hasAttribute('checked');
+      else if (type !== 'file' && live.__val !== undefined && live.value !== live.__val) live.value = live.__val;
+    }
+    if (tag === 'textarea' && live.__val !== undefined && live.value !== live.__val) live.value = live.__val;
+    if (tag === 'select' && live.__val !== undefined && live.value !== live.__val) live.value = live.__val;
+  }
+  function same(a, b) {
+    if (a.nodeType !== b.nodeType) return false;
+    if (a.nodeType === 1) return a.tagName === b.tagName && a.namespaceURI === b.namespaceURI;
+    return true;
+  }
+  function morph(liveParent, nextParent, refs) {
+    var l = liveParent.firstChild, n = nextParent.firstChild;
+    while (n) {
+      var nNext = n.nextSibling;
+      if (!l) { liveParent.appendChild(n); finalize(n, refs); n = nNext; continue; }
+      if (!same(l, n)) { var lNext = l.nextSibling; liveParent.replaceChild(n, l); finalize(n, refs); l = lNext; n = nNext; continue; }
+      if (l.nodeType === 3) { if (l.nodeValue !== n.nodeValue) l.nodeValue = n.nodeValue; }
+      else if (l.nodeType === 1) { syncAttrs(l, n); morph(l, n, refs); applyProps(l, n); if (l.__ref) refs.push(l); }
+      l = l.nextSibling; n = nNext;
+    }
+    while (l) { var nx = l.nextSibling; liveParent.removeChild(l); l = nx; }
+  }
+  function finalize(node, refs) {
+    if (node.nodeType !== 1) return;
+    var all = [node].concat(Array.prototype.slice.call(node.querySelectorAll('*')));
+    for (var i = all.length - 1; i >= 0; i--) { applyProps(all[i], all[i]); if (all[i].__ref) refs.push(all[i]); }
+  }
+
+  window.mountDC = function (Component, root, tpl, props) {
+    var comp = new Component(props || {});
+    var lastState = null, pending = false, cbs = [], mounted = false;
+    function render() {
+      pending = false;
+      var vals = comp.renderVals();
+      var frag = document.createElement('div');
+      renderInto(tpl.content, vals, frag);
+      var refs = [];
+      morph(root, frag, refs);
+      refs.forEach(function (el) { el.__ref(el); });
+      var prev = lastState; lastState = comp.state;
+      if (!mounted) { mounted = true; if (comp.componentDidMount) comp.componentDidMount(); }
+      else if (comp.componentDidUpdate) comp.componentDidUpdate(comp.props, prev);
+      var run = cbs; cbs = []; run.forEach(function (f) { f(); });
+    }
+    comp.setState = function (u, cb) {
+      var v = typeof u === 'function' ? u(this.state, this.props) : u;
+      this.state = Object.assign({}, this.state, v);
+      if (cb) cbs.push(cb);
+      if (!pending) { pending = true; Promise.resolve().then(render); }
+    };
+    comp.forceUpdate = function (cb) { comp.setState({}, cb); };
+    ['click', 'input', 'change', 'keydown', 'focusin'].forEach(function (type) {
+      root.addEventListener(type, function (ev) {
+        var el = ev.target;
+        while (el && el !== root) {
+          if (el.__h && typeof el.__h[type] === 'function') { el.__h[type](ev); return; }
+          el = el.parentNode;
+        }
+      });
+    });
+    lastState = comp.state;
+    render();
+    return comp;
+  };
+  window.DCLogic = function DCLogic(props) { this.props = props || {}; this.state = {}; };
+})();
+
+</script>
+<script>
+
+var AR_DIG = '٠١٢٣٤٥٦٧٨٩';
+function arNum(s) { return String(s).replace(/\d/g, function (d) { return AR_DIG[+d]; }); }
+function clone(o) { return JSON.parse(JSON.stringify(o)); }
+function B(en, ar) { return { en: en, ar: ar }; }
+
+var ORGS = {
+  demi3: { label: 'Demi 3rd Intake', program: 'Demi', name: 'براعم مصر الرقمية', intake: 'الدفعة الأساسية، الدفعة الثالثة للعام الدراسي 2025/2026', nameEn: 'Digital Egypt Buds (DEMI)', intakeEn: 'main intake' },
+  demiS: { label: 'Demi Summer', program: 'Demi', name: 'براعم مصر الرقمية', intake: 'الدفعة الصيفية للعام الدراسي 2026', nameEn: 'Digital Egypt Buds (DEMI)', intakeEn: 'summer intake' },
+  deci: { label: 'Deci Intake', program: 'Deci', name: 'أشبال مصر الرقمية', intake: 'الدفعة الأساسية، الدفعة الرابعة للعام الدراسي 2025/2026', nameEn: 'Digital Egypt Cubs (DECI)', intakeEn: 'main intake' },
+  deciS: { label: 'Deci Summer', program: 'Deci', name: 'أشبال مصر الرقمية', intake: 'الدفعة الصيفية للعام الدراسي 2026', nameEn: 'Digital Egypt Cubs (DECI)', intakeEn: 'summer intake' }
+};
+var ORG_ORDER = ['demi3', 'demiS', 'deci', 'deciS'];
+var FLAG_META = {
+  0: { en: 'No flag assigned', short: 'No flag', bg: '#f5f8fc', fg: '#5b7280' },
+  1: { en: 'Graduated – Eligible to Continue', short: 'Graduated · can continue', bg: '#f3fbf5', fg: '#0b7a2e' },
+  2: { en: 'Graduated – Not Eligible to Continue', short: 'Graduated · can’t continue', bg: '#f3f8ff', fg: '#0461d6' },
+  3: { en: 'Not Graduated – Participation Certificate Eligible', short: 'Participation certificate', bg: '#fffbf1', fg: '#8a5300' },
+  4: { en: 'Not Graduated – Not Eligible for Participation Certificate', short: 'No certificate', bg: '#fff6f6', fg: '#b3261e' }
+};
+var TOPICS = ['Report a Problem', 'Problem During Virtual Session', 'Tutor Attendance Issue During Session', 'Session Time Slot Availability Request', 'Practical Session Absence Appeal', 'Change Practical Session Area', 'Change Practical Session Day and Time', 'Unify Siblings Practical Session Schedule and Location', 'No Evaluation or Comment After Session', 'Session Started Late or Ended Early'];
+var TOPIC_AR = { 'Report a Problem': 'الإبلاغ عن مشكلة' };
+
+var EMAIL = 'كما يُرجى متابعة البريد الإلكتروني (Email) باستمرار، حيث سيتم إرسال أي تحديثات أو تعليمات خاصة بالخطوات التالية من خلاله.';
+var DEFAULT_MSGS = {
+  greeting: B('Welcome {Student First Name}, good evening 💙\nHope you are well.', 'أهلًا وسهلًا {Student First Name}، مساء الخير 💙\nيارب تكون بخير.'),
+  menuPrompt: B('Pick your question:', 'اختر استفسارك من القائمة التالية:'),
+  confirmQ: B('Has your question been answered?', 'هل تمت الإجابة عن استفسارك؟'),
+  yes: B('Yes, the problem is solved.', 'نعم، تم حل المشكلة.'),
+  no: B('No, I still need help.', 'لا، ما زلت أحتاج للمساعدة.'),
+  nextIntro: B('Please pick your question again from the list:', 'برجاء اختيار استفسارك مرة أخرى من القائمة:'),
+  offer: B('You can contact the Customer Service team and write the details of your question', 'يمكنك التواصل مع فريق خدمة العملاء وكتابة تفاصيل استفسارك'),
+  offerYes: B('Yes, contact Customer Service', 'نعم، أريد التواصل مع فريق خدمة العملاء'),
+  offerNo: B('No, thanks', 'لا، شكرًا'),
+  boxPrompt: B('Please write your question details in the box below, then tap Send.', 'برجاء كتابة تفاصيل استفسارك في المربع التالي، ثم اضغط «إرسال الاستفسار».'),
+  forced: B('Please write your question. It will be sent to the Customer Service team and answered as soon as possible.', 'برجاء كتابة استفسار حضرتك، وسوف يتم تحويل استفسارك إلى فريق خدمة العملاء، وسيتم الرد في أقرب وقت.'),
+  submitted: B('Your question was sent to the Customer Service team. They will reply here in this request as soon as possible.', 'تم إرسال استفسارك بنجاح إلى فريق خدمة العملاء، وسيتم الرد عليك هنا في نفس الطلب في أقرب وقت.'),
+  closing: B('Very happy to talk with you, and thank you for your time.\niSchool Customer Service team 💙', 'سعيد جدًا بالتواصل مع حضرتك، وشكرًا لوقتك.\nفريق خدمة عملاء iSchool 💙')
+};
+var GAP = function (what) { return '[' + what + ' – مطلوب من فريق خدمة العملاء]'; };
+var Q_CONT = { q: B('Can I apply to continue in the next program if I got a participation certificate?', 'هل يحق لي التقدم للاستمرار في البرنامج القادم في حالة حصولي على شهادة مشاركة؟'), a: B('', GAP('الرد') + '\nولمعرفة أي فرص متاحة لتحسين مستواك أو استكمال رحلتك في المبادرة، يُرجى متابعة البريد الإلكتروني والصفحة الرسمية للمبادرة باستمرار.') };
+var INFO_FAIL = 'نشكرك على مشاركتك في {intake} من مبادرة {program}، المقدَّمة من وزارة الاتصالات وتكنولوجيا المعلومات، والمنفَّذة من خلال شركة أي سكول للتدريب والتعليم.\nبعد مراجعة نتائجك النهائية ومطابقتها مع معايير التخرج من المستوى التدريبي، يؤسفنا إبلاغك بأنك لم تتمكن من استيفاء جميع معايير التخرج المطلوبة لهذا المستوى، والتي سبق توضيحها في بداية العام التدريبي خلال الجلسة التعريفية، كما أنها مذكورة في دليل التلميذ.\nنعلم أن هذه النتيجة قد تكون غير مرضية لك، ولكننا نود التأكيد أن عدم التخرج هذا العام لا يقلل من مهاراتك وقدراتك، ونحن على ثقة بأنك قادر على تطوير مهاراتك وتحقيق المزيد من النجاح في المستقبل.\nنتمنى لك دوام التوفيق والنجاح في المستقبل 💙';
+var INFO_PART = 'ألف مبروك حصولك على شهادة المشاركة في {intake} من مبادرة {program} 💙\nنود أن نطمئنك بأن شهادة المشاركة هي شهادة تقديرية لمشاركتك في المبادرة، ونقدّر المجهود الذي بذلته خلال فترة التدريب.\nستجد في البريد الإلكتروني (Email) تفاصيل التقييم والنسب الخاصة بمستواك، لذلك يُرجى مراجعة البريد الإلكتروني جيدًا للاطلاع على جميع التفاصيل المتعلقة بنتيجتك.\nولمعرفة أي فرص متاحة لتحسين مستواك أو استكمال رحلتك في المبادرة، يُرجى متابعة البريد الإلكتروني والصفحة الرسمية للمبادرة باستمرار.\nنتمنى لك دوام التوفيق والنجاح في الفترة القادمة 💙';
+var DEFAULT_FLAGS = {
+  1: {
+    label: B('Passed the {programEn} program – {intakeEn}', 'اجتاز البرنامج الدراسي لمبادرة {program} – {intake}'),
+    infoDemi: 'ألف مبروك النجاح والتخرج من {intake} من مبادرة {program} 💙\nيمكنك تحميل شهادة النجاح من خلال الدخول إلى الملف الشخصي على منصة التلميذ.\nبالنسبة للتلاميذ بالصفين الرابع والخامس الابتدائي، سيتم إتاحة استطلاع الرأي من خلال موقع إدارة المبادرة، ويمكنك الدخول إلى الموقع واتباع الخطوات المطلوبة، مع تقديم الأوراق والمستندات اللازمة لاستكمال إجراءات استطلاع الرأي.\n' + EMAIL + '\nنتمنى لك دوام النجاح والتوفيق في المرحلة القادمة 💙',
+    infoDeci: 'ألف مبروك النجاح والتخرج من {intake} من مبادرة {program} 💙\nيمكنك تحميل شهادة النجاح من خلال الدخول إلى الملف الشخصي على منصة الطالب.\nبالنسبة لطلاب مبادرة أشبال مصر الرقمية، سيتم إتاحة استطلاع الرأي من خلال موقع إدارة المبادرة، ويمكنك الدخول إلى الموقع واتباع الخطوات المطلوبة، مع تقديم الأوراق والمستندات اللازمة لاستكمال إجراءات استطلاع الرأي.\n' + EMAIL + '\nنتمنى لك دوام النجاح والتوفيق في المرحلة القادمة 💙',
+    qs: [
+      { q: B('What steps are required to complete the survey for continuing in the next program?', 'ما الخطوات المطلوبة لإتمام استطلاع الرأي الخاص بالاستمرار في البرنامج القادم؟'), a: B('', 'لإتمام استطلاع الرأي الخاص بالاستمرار في البرنامج القادم:\n1- ادخل إلى موقع إدارة المبادرة.\n2- اتبع الخطوات المطلوبة على الموقع.\n3- قدّم الأوراق والمستندات اللازمة لاستكمال إجراءات استطلاع الرأي.\n' + EMAIL) },
+      { q: B('What is the time window for taking the survey and completing all its requirements?', 'ما الفترة الزمنية المتاحة لإجراء استطلاع الرأي واستكمال جميع متطلباته؟'), a: B('', GAP('الفترة الزمنية المتاحة لاستطلاع الرأي') + '\n' + EMAIL) },
+      { q: B('Which documents are required during the survey?', 'ما المستندات المطلوبة أثناء إجراء استطلاع الرأي؟'), a: B('', GAP('قائمة المستندات المطلوبة') + '\nيتم تقديم الأوراق والمستندات اللازمة من خلال موقع إدارة المبادرة أثناء إجراء استطلاع الرأي.') },
+      { q: B('How can I change my documents if I uploaded incorrect or non-matching papers?', 'كيف يمكنني تعديل المستندات في حالة رفع أوراق غير صحيحة أو غير مطابقة للمطلوب؟'), a: B('', GAP('خطوات تعديل المستندات')) },
+      { q: B('How can I make sure I completed all the survey steps and submitted the required documents correctly?', 'كيف يمكنني التأكد من إتمام جميع خطوات استطلاع الرأي وتقديم المستندات المطلوبة بشكل صحيح؟'), a: B('', GAP('طريقة التأكد من إتمام استطلاع الرأي') + '\n' + EMAIL) }
+    ]
+  },
+  2: {
+    label: B('Passed the {programEn} program – {intakeEn}, not eligible to continue', 'اجتاز البرنامج الدراسي لمبادرة {program} – {intake}، وغير مؤهل للاستمرار في البرنامج القادم'),
+    infoDemi: 'ألف مبروك النجاح والتخرج من {intake} من مبادرة {program} 💙\nيمكنك تحميل شهادة النجاح من خلال الدخول إلى الملف الشخصي على منصة التلميذ.\nبالنسبة لتلاميذ الصف السادس الابتدائي، يُرجى متابعة الصفحة الرسمية للمبادرة للاطلاع على آخر التحديثات والإجراءات المتعلقة باستطلاع الرأي.\n' + EMAIL + '\nنتمنى لك دوام النجاح والتوفيق في المرحلة القادمة 💙',
+    infoDeci: 'ألف مبروك النجاح والتخرج من {intake} من مبادرة {program} 💙\nيمكنك تحميل شهادة النجاح من خلال الدخول إلى الملف الشخصي على منصة الطالب.\n' + GAP('سبب عدم الأهلية للاستمرار لطلاب أشبال') + '\n' + EMAIL + '\nنتمنى لك دوام النجاح والتوفيق في المرحلة القادمة 💙',
+    qs: [
+      { q: B('What should I do if I got a pass certificate but I am not eligible to continue in the next program?', 'ماذا أفعل في حالة حصولي على شهادة نجاح، ولكنني غير مؤهل للاستمرار في البرنامج القادم؟'), a: B('', 'ألف مبروك النجاح 💙\nيمكنك تحميل شهادة النجاح من خلال الدخول إلى الملف الشخصي على المنصة.\nيُرجى متابعة الصفحة الرسمية للمبادرة والبريد الإلكتروني (Email) باستمرار للاطلاع على آخر التحديثات والإجراءات.') },
+      { q: B('How do I get the level completion certificate?', 'كيفية الحصول على شهادة إتمام المستوى الدراسي؟'), a: B('', '1. من القائمة، اختر «الملف الشخصي».\n2. ستجد الشهادة في الأسفل ضمن قسم «الشهادات».') },
+      clone(Q_CONT)
+    ]
+  },
+  3: {
+    label: B('Did not meet graduation criteria, will get a participation certificate – {programEn}, {intakeEn}', 'لم يستوفِ معايير التخرج، وسوف يحصل على شهادة مشاركة للبرنامج الدراسي لمبادرة {program} – {intake}'),
+    infoDemi: INFO_PART, infoDeci: INFO_PART,
+    qs: [
+      { q: B('What is the difference between a participation certificate and a pass certificate, and which criteria decide the certificate type?', 'ما الفرق بين شهادة المشاركة وشهادة النجاح، وما المعايير التي تحدد نوع الشهادة المستحقة؟'), a: B('', 'شهادة المشاركة هي شهادة تقديرية لمشاركتك في المبادرة، أما شهادة النجاح فتُمنح عند استيفاء جميع معايير التخرج المطلوبة للمستوى التدريبي.\nمعايير التخرج تم توضيحها في بداية العام التدريبي خلال الجلسة التعريفية، كما أنها مذكورة في دليل التلميذ (من القائمة ← المصادر).\n' + GAP('معايير استحقاق شهادة المشاركة')) },
+      { q: B('Why can’t I continue in the next program even though I got a participation certificate?', 'لماذا لا أستطيع الاستمرار في البرنامج القادم على الرغم من حصولي على شهادة مشاركة؟'), a: B('', GAP('الرد') + '\nستجد في البريد الإلكتروني (Email) تفاصيل التقييم والنسب الخاصة بمستواك.') },
+      clone(Q_CONT),
+      { q: B('When does applying for the next program start, and what are the steps?', 'متى يبدأ التقديم للاستمرار في البرنامج القادم، وما الإجراءات المطلوبة للتقديم؟'), a: B('', 'لم يتم الإعلان حتى الآن عن موعد محدد لفتح باب التقديم للدفعة الجديدة من مبادرتي براعم مصر الرقمية وأشبال مصر الرقمية للعام الدراسي 2026/2027.\nوفي حالة تحديد موعد رسمي لبدء التقديم، سيتم الإعلان عنه من خلال الصفحات الرسمية للمبادرتين، لذلك يُرجى متابعتها باستمرار للاطلاع على آخر التحديثات 💙') }
+    ]
+  },
+  4: {
+    label: B('Did not meet graduation or participation certificate criteria – {programEn}, {intakeEn}', 'لم يستوفِ معايير التخرج أو متطلبات شهادة المشاركة للبرنامج الدراسي لمبادرة {program} – {intake}'),
+    infoDemi: INFO_FAIL, infoDeci: INFO_FAIL,
+    qs: [
+      { q: B('What can I do if I did not meet the criteria for a pass certificate?', 'ما الإجراءات التي يمكنني اتخاذها في حالة عدم استيفاء معايير النجاح المطلوبة للحصول على شهادة نجاح؟'), a: B('', 'يمكنك مراجعة البريد الإلكتروني (Email) للاطلاع على نتائجك في جميع معايير التدريب المطلوبة للتخرج.\nتنويه: يمكنك التقديم مرة أخرى في المبادرة بعد مرور عام كامل، بشرط استيفاء شروط التسجيل عند فتح باب التقديم للدفعة الجديدة.') },
+      { q: B('How can I see my criteria evaluation results and why I did not meet the pass criteria?', 'كيف يمكنني الاطلاع على نتائج تقييم المعايير الخاصة بي ومعرفة أسباب عدم استيفائي لمعايير النجاح؟'), a: B('', 'يمكنك مراجعة البريد الإلكتروني (Email) للاطلاع على نتائجك في جميع معايير التدريب المطلوبة للتخرج.\nمعايير التخرج موضحة في دليل التلميذ (من القائمة ← المصادر).') },
+      { q: B('Can I join the next program again if I did not meet the pass criteria in the current one?', 'هل يمكنني إعادة المشاركة في البرنامج القادم في حالة عدم استيفاء معايير النجاح في البرنامج الحالي؟'), a: B('', 'يمكنك التقديم مرة أخرى في المبادرة بعد مرور عام كامل، بشرط استيفاء شروط التسجيل عند فتح باب التقديم للدفعة الجديدة.\nسيتم الإعلان عن موعد التقديم من خلال الصفحات الرسمية للمبادرة.') }
+    ]
+  }
+};
+var DEFAULT_CFG = { on: true, topic: 'Report a Problem', botTopics: ['Report a Problem'], offerAt: 2, formAt: 3, idle: 30 };
+var STUDENT_TOPICS = [{ en: 'Report a Problem', ar: 'الإبلاغ عن مشكلة / استفسار' }];
+
+var DEFAULT_GENERAL = [
+  { q: B('How do I log in to the learning platform?', 'طريقة الدخول إلى منصة التعلم'), a: B('', '1- قم بالدخول إلى منصة المبادرة من خلال الرابط التالي:\n{platformUrl}\n2- أدخل البريد الإلكتروني الخاص بالطالب (وليس البريد الإلكتروني الخاص بولي الأمر).\n3- أدخل كلمة المرور الخاصة بالحساب.\n4- اضغط على زر تسجيل الدخول.') },
+  { q: B('What should I do if I forgot my password?', 'ماذا أفعل في حالة نسيان كلمة المرور؟'), a: B('', '1- ادخل إلى المنصة من خلال الرابط: {platformUrl}\n2- اضغط على «نسيت كلمة المرور».\n3- أدخل البريد الإلكتروني المسجل لدى المبادرة (بريد الطالب، وليس بريد ولي الأمر).\n4- تأكد من كتابة جميع الحروف بحروف صغيرة (small).\n5- سيصلك رابط على البريد الإلكتروني، اضغط عليه لتغيير كلمة المرور. يجب أن تكون كلمة المرور الجديدة بالشكل التالي: Ss@123456') },
+  { q: B('What should I do if I can\u2019t join the virtual session?', 'ماذا أفعل في حالة مواجهة مشكلة في الدخول إلى الجلسة الافتراضية؟'), a: B('', '1- من القائمة، اضغط على الجلسات الافتراضية.\n2- ستظهر الجلسة الافتراضية المقررة لهذا اليوم (في حالة وجود جلسة).\n3- اضغط على «انضم الآن» في بداية وقت الجلسة.\nفي حالة استمرار المشكلة أثناء وقت الجلسة:\n4- قم بعمل Refresh للمتصفح أو جرّب متصفحًا آخر.\n5- تأكد من ضبط ساعة الجهاز حسب التوقيت الصيفي أو الشتوي.') },
+  { q: B('How do I contact my tutor?', 'كيفية التواصل مع المدرب'), a: B('', '1- من القائمة اختر «مجتمع التلاميذ».\n2- اضغط على القنوات لاختيار طريقة التواصل مع المدرب.\n3- اكتب سؤالك.\nملحوظة: سيتم الرد في أقرب وقت.') },
+  { q: B('Can I withdraw from the initiative at any time?', 'هل مسموح بالانسحاب من المبادرة في أي وقت؟'), a: B('', '1- يُسمح بالانسحاب فقط خلال الأسبوع الأول من التدريب، وذلك من خلال تقديم طلب لإدارة المبادرة على {mail}، ويتم دراسته والرد بالقبول أو الرفض.\n2- في حالة الانسحاب في أي وقت أثناء تنفيذ البرنامج، يتم سداد تكلفة التدريب التي قضاها الطالب في المبادرة طبقًا للإقرار الموقع من ولي الأمر عند التسجيل.') }
+];
+
+var STUDENTS = [
+  { id: 'DEMI3S-S-100245', first: 'ليلى', last: 'محمود', org: 'demi3', grade: 'الصف الرابع', flag: 1 },
+  { id: 'DEMI3S-S-100318', first: 'مريم', last: 'حسن', org: 'demi3', grade: 'الصف السادس', flag: 2 },
+  { id: 'DEMISU-S-200512', first: 'عمر', last: 'خالد', org: 'demiS', grade: 'الصف الخامس', flag: 3 },
+  { id: 'DECI4S-S-300077', first: 'يوسف', last: 'علي', org: 'deci', grade: 'الصف الأول الإعدادي', flag: 1 },
+  { id: 'DECI4S-S-300190', first: 'نور', last: 'سامي', org: 'deci', grade: 'الصف الثاني الإعدادي', flag: 3 },
+  { id: 'DECISU-S-400631', first: 'سلمى', last: 'أحمد', org: 'deciS', grade: 'الصف الثاني الإعدادي', flag: 4 },
+  { id: 'DECI4S-S-300455', first: 'آدم', last: 'محمد', org: 'deci', grade: 'الصف الأول الإعدادي', flag: 0 }
+];
+var SUBS = ['مشكلة أو استفسار متعلق بالجلسة الجارية الآن', 'مشكلة أو استفسار غير مرتبط بالجلسة الجارية الآن'];
+var SHARED_IDS = ['start', 'end_solved', 'no_counter', 'inquiry_list', 'offer_cs', 'forced_cs', 'cs_form', 'end_ticket'];
+
+function fill(t, ctx) {
+  return String(t || '').replace(/\{platformUrl\}/g, ctx.platformUrl || '').replace(/\{mail\}/g, ctx.mail || '').replace(/\{program\}/g, ctx.program).replace(/\{intake\}/g, ctx.intake).replace(/\{programEn\}/g, ctx.programEn || '').replace(/\{intakeEn\}/g, ctx.intakeEn || '').replace(/\{Student First Name\}/g, ctx.first || '');
+}
+function hasGap(t) { return /\[[^\]]+\]/.test(String(t || '')); }
+function oneLine(t, n) { t = String(t || '').replace(/\s+/g, ' ').trim(); return t.length > n ? t.slice(0, n - 1) + '…' : t; }
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.timers = [];
+    this.thread = null;
+    this.threadRef = (el) => { this.thread = el; };
+    this.state = this.initialState();
+  }
+
+  initialState() {
+    var cfg = {}; ORG_ORDER.forEach((k) => { cfg[k] = clone(DEFAULT_CFG); });
+    return {
+      view: 'student', admTab: 'flow', adminOrg: 'deci', stepsOpen: true, seenRecords: false, usedPreview: false, sawForm: false,
+      sid: 'DECI4S-S-300077', students: clone(STUDENTS),
+      orgCfg: cfg, cfgDraft: clone(cfg), savedNote: '',
+      msgs: clone(DEFAULT_MSGS), flags: clone(DEFAULT_FLAGS),
+      undoStack: [], dirty: false, version: 1, versions: [{ n: 1, at: '18/11/2026 9:09 PM' }], moreOpen: false,
+      general: clone(DEFAULT_GENERAL), edSec: 'flag1', edProg: 'Demi', openQ: null, probOpen: false,
+      convos: [], tickets: this.seedTickets(),
+      active: null, nextConvo: 1001, nextTicket: 456812, clock: 13 * 60 + 5,
+      boxDraft: '', boxErr: false, boxFiles: [], boxFileErr: false, tkDraft: '', form: this.emptyForm(), recSel: null
+    };
+  }
+
+  emptyForm() { return { type: '', sub: '', details: '', file: '', openType: false, openSub: false, err: false }; }
+  seedTickets() {
+    var t = (id, sid, date, sub, details) => ({ id: id, sid: sid, date: arNum(date), sub: sub, details: details, status: 'Completed', convo: null, msgs: [{ who: 'agent', text: 'تم استلام طلبك بنجاح، وسيتم الرد عليك في أقرب وقت ممكن' }] });
+    return [
+      t(456797, 'DECI4S-S-300077', '8 سبتمبر 2026', SUBS[1], 'هو لازم اعمل المشروع النهائي ولا عادي'),
+      t(455120, 'DEMI3S-S-100245', '6 سبتمبر 2026', SUBS[1], 'مش لاقية الشهادة في البروفايل'),
+      t(451874, 'DEMISU-S-200512', '20 يوليو 2026', SUBS[0], 'الجلسة مش بتفتح')
+    ];
+  }
+
+  componentWillUnmount() { this.timers.forEach(clearTimeout); }
+  componentDidUpdate(pp, ps) {
+    var a = ps.convos.filter((c) => ps.active && c.id === ps.active.id)[0];
+    var b = this.state.convos.filter((c) => this.state.active && c.id === this.state.active.id)[0];
+    if (this.thread && b && (!a || a.id !== b.id || a.msgs.length !== b.msgs.length || a.typing !== b.typing || a.mode !== b.mode)) this.thread.scrollTop = this.thread.scrollHeight;
+  }
+  later(fn, ms) { var t = setTimeout(fn, ms); this.timers.push(t); }
+  time() { var m = this.state.clock, h = Math.floor(m / 60) % 24; return arNum(String(h).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0')); }
+  tick() { this.setState((p) => ({ clock: p.clock + 1 })); }
+  T(k) { return this.state.msgs[k].ar; }
+
+  student(sid) { return this.state.students.filter((x) => x.id === (sid || this.state.sid))[0]; }
+  ctxFor(st) { var o = ORGS[st.org], demi = o.program === 'Demi'; return { program: o.name, intake: o.intake, programEn: o.nameEn, intakeEn: o.intakeEn, first: st.first, platformUrl: demi ? 'https://demi.ischooltech.com/login' : 'https://deci.ischooltech.com/login', mail: demi ? 'info@demi.gov.eg' : 'info@deci.gov.eg' }; }
+
+  /* ---------- conversation engine ---------- */
+  updC(id, patch) { this.setState((p) => ({ convos: p.convos.map((c) => c.id === id ? Object.assign({}, c, typeof patch === 'function' ? patch(c) : patch) : c) })); }
+  me(id, text) { this.tick(); this.updC(id, (c) => ({ msgs: c.msgs.concat([{ who: 'me', text: text, time: this.time() }]) })); }
+  bot(id, build, ms) {
+    this.updC(id, { typing: true });
+    this.later(() => this.updC(id, (c) => { var r = build(c); return Object.assign({ typing: false, msgs: c.msgs.concat(r.msgs.map((m) => Object.assign({ who: 'bot', time: this.time() }, m))) }, r.set || {}); }), ms || 700);
+  }
+
+  newRequest() { this.setState({ active: { kind: 'form' }, form: this.emptyForm() }); }
+  botFor(org, topicEn) { var c = this.state.orgCfg[org]; return c.on && c.botTopics.indexOf(topicEn) >= 0; }
+  pickTopic(t) {
+    var st = this.student();
+    if (this.botFor(st.org, t.en)) { this.startBot(t); return; }
+    this.setState((p) => ({ form: Object.assign({}, p.form, { type: t.ar, openType: false, openSub: true }), sawForm: p.sawForm || !p.orgCfg[st.org].on || p.orgCfg[st.org].botTopics.indexOf(t.en) < 0 }));
+  }
+  startBot(topic) {
+    var st = this.student();
+    topic = topic || STUDENT_TOPICS[0];
+    var id = this.state.nextTicket, ctx = this.ctxFor(st), F = st.flag ? this.state.flags[st.flag] : null;
+    var cv = { id: id, sid: st.id, org: st.org, flag: st.flag, topic: topic, date: arNum('19 نوفمبر 2026'), status: 'active', no: 0, shown: [], mode: 'none', typing: false, inquiry: '', msgs: [] };
+    this.setState((p) => ({ convos: [cv].concat(p.convos), nextTicket: p.nextTicket + 1, active: { kind: 'convo', id: id }, boxDraft: '', boxErr: false }), () => {
+      this.updC(id, { msgs: [{ who: 'sys', text: 'تم تحويلك لمساعد iSchool لموضوع «' + topic.ar + '» · تم التعرف على حسابك تلقائيًا', tone: 'info' }] });
+      if (F) {
+        this.bot(id, () => ({ msgs: [{ text: fill(this.T('greeting'), ctx) }] }), 500);
+        this.later(() => this.bot(id, () => ({ msgs: [{ title: fill(F.label.ar, ctx), text: fill(ORGS[st.org].program === 'Demi' ? F.infoDemi : F.infoDeci, ctx) }], set: { mode: 'menu' } }), 700), 700);
+      } else {
+        this.bot(id, () => ({ msgs: [{ text: fill(this.T('greeting'), ctx) }], set: { mode: 'menu' } }), 500);
+      }
+    });
+  }
+  inqFor(c) {
+    var out = [], fq = c.flag ? this.state.flags[c.flag].qs : [], gq = this.state.general;
+    fq.forEach((q, i) => out.push({ key: 'f' + i, q: q, group: 'flag' }));
+    gq.forEach((q, i) => out.push({ key: 'g' + i, q: q, group: 'general' }));
+    return out;
+  }
+  qByKey(c, key) { var i = +key.slice(1); return key[0] === 'g' ? this.state.general[i] : (c.flag ? this.state.flags[c.flag].qs[i] : null); }
+  answer(c, key, intro) {
+    var ctx = this.ctxFor(this.student(c.sid)), q = this.qByKey(c, key);
+    return { title: fill(q.q.ar, ctx), text: (intro ? intro + '\n\n' : '') + fill(q.a.ar, ctx) };
+  }
+  pickQ(id, key) {
+    var c = this.state.convos.filter((x) => x.id === id)[0], q = this.qByKey(c, key);
+    if (!q) return;
+    this.me(id, q.q.ar);
+    this.bot(id, (x) => ({ msgs: [this.answer(x, key)], set: { mode: 'confirm', shown: x.shown.indexOf(key) >= 0 ? x.shown : x.shown.concat([key]) } }));
+  }
+  nextResponse(id) {
+    this.bot(id, () => ({ msgs: [{ text: this.T('nextIntro') }], set: { mode: 'menu' } }));
+  }
+  yes(id) {
+    this.me(id, this.T('yes'));
+    this.bot(id, () => ({ msgs: [{ text: this.T('closing') }, { who: 'sys', text: 'تم إنهاء المحادثة · Completed', tone: 'good' }], set: { mode: 'done', status: 'completed' } }));
+  }
+  no(id) {
+    var c = this.state.convos.filter((x) => x.id === id)[0], cfg = this.state.orgCfg[c.org], n = c.no + 1;
+    this.me(id, this.T('no'));
+    this.updC(id, { no: n });
+    if (n >= cfg.formAt) { this.setState({ boxDraft: '', boxErr: false }); return this.bot(id, () => ({ msgs: [{ text: this.T('forced') }], set: { mode: 'box' } })); }
+    if (n === cfg.offerAt) return this.bot(id, () => ({ msgs: [{ text: this.T('offer') }], set: { mode: 'offer' } }));
+    return this.nextResponse(id);
+  }
+  offerYes(id) { this.me(id, this.T('offerYes')); this.setState({ boxDraft: '', boxErr: false }); this.bot(id, () => ({ msgs: [{ text: this.T('boxPrompt') }], set: { mode: 'box' } })); }
+  offerNo(id) { this.me(id, this.T('offerNo')); this.nextResponse(id); }
+  submitBox(id) {
+    var text = this.state.boxDraft.trim(), files = this.state.boxFiles;
+    if (!text) { this.setState({ boxErr: true }); return; }
+    this.me(id, text + (files.length ? '\n📎 ' + files.join('، ') : ''));
+    this.setState({ boxDraft: '', boxErr: false, boxFiles: [], boxFileErr: false });
+    this.updC(id, { inquiry: text, files: files, mode: 'none' });
+    this.bot(id, () => ({ msgs: [{ text: this.T('submitted') }, { who: 'sys', text: 'تم تحويل الطلب لفريق خدمة العملاء · Pending · في انتظار رد الفريق', tone: 'warn' }], set: { mode: 'follow', status: 'escalated' } }));
+  }
+  submitForm() {
+    var f = this.state.form;
+    if (!f.details.trim()) { this.setState({ form: Object.assign({}, f, { err: true }) }); return; }
+    var tid = this.state.nextTicket;
+    var ticket = { id: tid, sid: this.state.sid, date: arNum('19 نوفمبر 2026'), sub: f.sub, details: f.details.trim() + (f.file ? '\n📎 ' + f.file : ''), status: 'Pending', convo: null, msgs: [{ who: 'agent', text: 'تم استلام طلبك بنجاح، وسيتم الرد عليك في أقرب وقت ممكن' }] };
+    this.setState((p) => ({ tickets: [ticket].concat(p.tickets), nextTicket: p.nextTicket + 1, active: { kind: 'ticket', id: tid }, form: this.emptyForm() }));
+  }
+
+  /* ---------- admin editing ---------- */
+  snap() { this.setState((p) => ({ undoStack: p.undoStack.concat([JSON.stringify({ msgs: p.msgs, flags: p.flags, general: p.general })]).slice(-40) })); }
+  edit(fn) { this.setState((p) => Object.assign(fn(p), { dirty: true })); }
+  setMsg(k, lang, v) { this.edit((p) => { var m = clone(p.msgs); m[k][lang] = v; return { msgs: m }; }); }
+  setFlagF(n, path, v) { this.edit((p) => { var fl = clone(p.flags); var o = fl[n]; for (var i = 0; i < path.length - 1; i++) o = o[path[i]]; o[path[path.length - 1]] = v; return { flags: fl }; }); }
+
+  problems() {
+    var s = this.state, out = [];
+    var SEC = { greeting: ['greeting', 'menuPrompt'], confirm: ['confirmQ', 'yes', 'no'], escalation: ['nextIntro', 'offer', 'offerYes', 'offerNo', 'boxPrompt', 'forced', 'submitted'], closing: ['closing'] };
+    Object.keys(SEC).forEach((sec) => SEC[sec].forEach((k) => { var m = s.msgs[k]; if (!m.en.trim() || !m.ar.trim()) out.push({ sec: sec, key: null, text: sec + ': a message needs English and Arabic' }); }));
+    var checkList = (sec, list, prefix) => list.forEach((q, i) => {
+      if (!q.q.en.trim() || !q.q.ar.trim()) out.push({ sec: sec, key: prefix + i, text: prefix + (i + 1) + ': inquiry needs English and Arabic' });
+      if (!q.a.ar.trim() || hasGap(q.a.ar)) out.push({ sec: sec, key: prefix + i, text: prefix + (i + 1) + ': answer not provided yet' });
+    });
+    [1, 2, 3, 4].forEach((n) => {
+      var F = s.flags[n];
+      if (!F.label.en.trim() || !F.label.ar.trim()) out.push({ sec: 'flag' + n, key: null, text: 'Flag ' + n + ': status title needs English and Arabic' });
+      if (hasGap(F.infoDemi) || hasGap(F.infoDeci) || !F.infoDemi.trim() || !F.infoDeci.trim()) out.push({ sec: 'flag' + n, key: 'status', text: 'Flag ' + n + ': status message not complete' });
+      checkList('flag' + n, F.qs, 'F' + n + '.');
+    });
+    checkList('general', s.general, 'G.');
+    return out;
+  }
+
+  renderVals() {
+    var s = this.state;
+    var st = this.student(), org = ORGS[st.org], ctx = this.ctxFor(st);
+    var isStudent = s.view === 'student';
+
+    /* ================= student ================= */
+    var stat = { active: ['جاري الرد', '#e3f1fb', '#0461d6'], completed: ['Completed', '#e9f9ee', '#0b7a2e'], escalated: ['Pending', '#fff4dc', '#8a5300'], Pending: ['Pending', '#fff4dc', '#8a5300'], Completed: ['Completed', '#e9f9ee', '#0b7a2e'] };
+    var items = [];
+    s.convos.filter((c) => c.sid === st.id).forEach((c) => {
+      var x = stat[c.status], on = s.active && s.active.kind === 'convo' && s.active.id === c.id;
+      items.push({ title: (c.topic || STUDENT_TOPICS[0]).ar, ref: '#' + c.id, date: c.date, sLabel: x[0], sBg: x[1], sFg: x[2], current: on ? 'true' : 'false', border: on ? '#bcd8fb' : 'transparent', bg: on ? '#f3f8ff' : '#ffffff', open: () => this.setState({ active: { kind: 'convo', id: c.id }, tkDraft: '' }), order: c.id });
+    });
+    s.tickets.filter((t) => t.sid === st.id).forEach((t) => {
+      var x = stat[t.status], on = s.active && s.active.kind === 'ticket' && s.active.id === t.id;
+      items.push({ title: 'الإبلاغ عن مشكلة / استفسار', ref: '#' + t.id, date: t.date, sLabel: x[0], sBg: x[1], sFg: x[2], current: on ? 'true' : 'false', border: on ? '#bcd8fb' : 'transparent', bg: on ? '#f3f8ff' : '#ffffff', open: () => this.setState({ active: { kind: 'ticket', id: t.id }, tkDraft: '' }), order: t.id });
+    });
+    items.sort((a, b) => b.order - a.order);
+    var act = s.active;
+    var c = act && act.kind === 'convo' ? s.convos.filter((x) => x.id === act.id && x.sid === st.id)[0] : null;
+    var t = act && act.kind === 'ticket' ? s.tickets.filter((x) => x.id === act.id && x.sid === st.id)[0] : null;
+    var isForm = !!(act && act.kind === 'form');
+    var tones = { info: ['#e3f1fb', '#0461d6'], warn: ['#fff4dc', '#8a5300'], good: ['#e9f9ee', '#0b7a2e'] };
+    var cv = { msgs: [], questions: [], others: [] };
+    if (c) {
+      var cx = stat[c.status], inq = this.inqFor(c), hasF = inq.some((x) => x.group === 'flag'), hasG = inq.some((x) => x.group === 'general'), menuList = [], mode = c.typing ? 'none' : c.mode, cctx = this.ctxFor(this.student(c.sid));
+      inq.forEach((x, i) => {
+        if (hasF && hasG && (i === 0 || inq[i - 1].group !== x.group)) menuList.push({ isHeader: true, isItem: false, label: x.group === 'flag' ? 'استفسارات خاصة بحالتك' : 'استفسارات عامة' });
+        menuList.push({ isHeader: false, isItem: true, label: fill(x.q.q.ar, cctx), pick: () => this.pickQ(c.id, x.key) });
+      });
+      cv = {
+        ref: '#' + c.id, title: (c.topic || STUDENT_TOPICS[0]).ar, handlerLine: c.status === 'escalated' ? 'في انتظار رد فريق خدمة العملاء' : 'يتم الرد بواسطة مساعد iSchool', sendFollow: () => this.sendFollow(c.id), sLabel: cx[0], sBg: cx[1], sFg: cx[2], typing: c.typing,
+        msgs: c.msgs.map((m) => { var tn = tones[m.tone || 'info']; return Object.assign({}, m, { isBot: m.who === 'bot', isMe: m.who === 'me', isSys: m.who === 'sys', hasTitle: !!m.title, bg: tn[0], fg: tn[1] }); }),
+        showControls: mode !== 'none' && mode !== 'follow', isFollow: mode === 'follow', isMenu: mode === 'menu', isConfirm: mode === 'confirm', isOffer: mode === 'offer', isBox: mode === 'box', isDone: mode === 'done',
+        menuPrompt: this.T('menuPrompt'), confirmQ: this.T('confirmQ'), yesLabel: this.T('yes'), noLabel: this.T('no'), offerYesLabel: this.T('offerYes'), offerNoLabel: this.T('offerNo'),
+        questions: menuList,
+        others: inq.filter((x) => c.shown.indexOf(x.key) < 0).map((x) => ({ label: fill(x.q.q.ar, cctx), pick: () => this.pickQ(c.id, x.key) })),
+        yes: () => this.yes(c.id), no: () => this.no(c.id), offerYes: () => this.offerYes(c.id), offerNo: () => this.offerNo(c.id), submitBox: () => this.submitBox(c.id),
+        doneText: 'تم إنهاء المحادثة بنجاح.'
+      };
+      cv.hasOthers = cv.others.length > 0;
+    }
+    var tk = { msgs: [], history: [] };
+    if (t) {
+      var tx = stat[t.status], hc = t.convo ? s.convos.filter((x) => x.id === t.convo)[0] : null, who = { bot: 'المساعد', me: 'الطالب', sys: 'النظام' };
+      tk = { id: t.id, sub: t.sub, details: t.details, status: tx[0], sBg: tx[1], sFg: tx[2], msgs: t.msgs.map((m) => ({ text: m.text, isMe: m.who === 'me', isAgent: m.who === 'agent' })),
+        hasHistory: !!hc, history: hc ? hc.msgs.map((m) => ({ who: who[m.who], text: (m.title ? m.title + '\n' : '') + m.text })) : [], historyCount: hc ? arNum(hc.msgs.length) : '' };
+    }
+    var infoRows = [];
+    if (c) infoRows = [{ k: 'رقم الطلب', v: '#' + c.id }, { k: 'تاريخ الإنشاء', v: c.date }, { k: 'الحالة', v: stat[c.status][0] }, { k: 'التصنيف', v: (c.topic || STUDENT_TOPICS[0]).ar }, { k: 'يتعامل مع الطلب', v: c.status === 'escalated' ? 'فريق خدمة العملاء' : 'مساعد iSchool (رد آلي)' }];
+    if (t) infoRows = [{ k: 'رقم الطلب', v: '#' + t.id }, { k: 'تاريخ الإنشاء', v: t.date }, { k: 'الحالة', v: t.status }, { k: 'يتعامل مع الطلب', v: 'فريق خدمة العملاء' }, { k: 'التصنيف', v: t.sub }];
+    var stCfg = s.orgCfg[st.org];
+    var sysRows = [
+      { k: 'Student ID', v: st.id }, { k: 'Organization', v: org.label }, { k: 'Flag', v: st.flag ? 'Flag ' + st.flag + ' · ' + FLAG_META[st.flag].en : 'No flag · general inquiries only' },
+      { k: 'المساعد', v: stCfg.on ? 'مفعّل' : 'معطّل · نظام التذاكر مباشرة' },
+      { k: 'مواضيع المساعد', v: stCfg.on && stCfg.botTopics.length ? stCfg.botTopics.join('، ') : '—' },
+      { k: 'عدد «لا»', v: c ? arNum(c.no) + ' (العرض عند ' + arNum(stCfg.offerAt) + '، الإجباري عند ' + arNum(stCfg.formAt) + ')' : '—' }
+    ];
+    var f = s.form, setForm = (patch) => this.setState((p) => ({ form: Object.assign({}, p.form, patch) }));
+    var form = { openType: f.openType, openSub: f.openSub, hasType: !!f.type, hasSub: !!f.sub, details: f.details, err: f.err, typeText: f.type || 'اختر', typeColor: f.type ? '#1f2a56' : '#8fa6b3', subText: f.sub || 'اختر', subColor: f.sub ? '#1f2a56' : '#8fa6b3', fileText: f.file ? '📎 ' + f.file : 'اختر ملف، أو قم بالسحب والإسقاط', submitBg: f.details.trim() ? '#046ded' : '#a9cdf0' };
+
+    /* ================= admin ================= */
+    var ao = s.adminOrg, aorg = ORGS[ao], actx = { program: aorg.name, intake: aorg.intake, programEn: aorg.nameEn, intakeEn: aorg.intakeEn, first: 'يوسف' };
+    var TABS = [['student', 'Student'], ['teacher', 'Teacher'], ['admin', 'Admin'], ['flow', 'Support bot flow'], ['settings', 'Support bot settings'], ['flags', 'Graduation flags', 1], ['records', 'Bot conversations', 1]];
+    var admTabs = TABS.map((x) => ({ label: x[1], isNew: !!x[2], current: s.admTab === x[0] ? 'page' : 'false', bg: s.admTab === x[0] ? '#eef5ff' : 'transparent', fg: s.admTab === x[0] ? '#046ded' : '#1f2a56', pick: () => this.setState({ admTab: x[0], moreOpen: false, seenRecords: s.seenRecords || (x[0] === 'records' && s.convos.some((cc) => cc.status === 'escalated')) }) }));
+    var NAV = [['Dashboard'], ['Operations', 1], ['Content', 1], ['Users', 1], ['Reports', 1], ['Sessions', 1], ['Meetings'], ['Groups', 1], ['Community', 1], ['Finance', 1], ['General Support', 2], ['Leave Session Tickets', 3], ['Support Response', 3], ['Support Topics', 4], ['Support', 3], ['Support Dashboard', 3], ['CSAT Dashboard', 3], ['Surveys', 3], ['FAQs', 3], ['HR', 1], ['Tutor Support', 1]];
+    var sideNav = NAV.map((n) => ({ label: n[0], chev: n[1] === 1 ? '⌄' : n[1] === 2 ? '⌃' : '', weight: n[1] === 2 || n[1] === 4 ? 600 : 400, bg: n[1] === 4 ? '#eef5ff' : 'transparent', fg: n[1] === 4 ? '#046ded' : '#1f2a56', indent: n[1] >= 3 ? '14px' : '0', line: n[1] >= 3 ? '2px solid ' + (n[1] === 4 ? '#046ded' : '#e6ecf2') : '0' }));
+
+    var probs = this.problems();
+    var topicOpts = TOPICS.map((x) => ({ v: x, l: x }));
+    var M = s.msgs, cfgA = s.orgCfg[ao];
+    var sec = s.edSec;
+    var secWarn = {}; probs.forEach((p) => { secWarn[p.sec] = (secWarn[p.sec] || 0) + 1; });
+    var navBtn = (id, label, extra) => Object.assign({ label: label, current: sec === id ? 'page' : 'false', bg: sec === id ? '#eef5ff' : 'transparent', fg: sec === id ? '#046ded' : '#1f2a56', warn: !!secWarn[id], warnN: secWarn[id] || 0, pick: () => this.setState({ edSec: id, openQ: null }) }, extra || {});
+    var secMsgs = [navBtn('greeting', 'Greeting & inquiry list'), navBtn('confirm', 'Answer check'), navBtn('escalation', '"No" & Customer Service'), navBtn('closing', 'Closing')];
+    var secInq = [navBtn('general', 'General', { sub: 'All students', count: s.general.length })].concat([1, 2, 3, 4].map((k) => navBtn('flag' + k, 'Flag ' + k, { sub: FLAG_META[k].short, count: s.flags[k].qs.length })));
+    var STEP = (id, kicker, title) => ({ isStep: true, isArrow: false, kicker: kicker, title: title, current: sec === id ? 'step' : 'false', border: sec === id ? '#046ded' : '#d5e0ec', bg: sec === id ? '#eef5ff' : '#ffffff', pick: () => this.setState({ edSec: id, openQ: null }) });
+    var AR = { isStep: false, isArrow: true };
+    var flowMap = [STEP('greeting', '1 · Start', 'Student picks a bot topic → greeting'), AR, STEP('flag1', '2 · Status', 'Status message for the student’s flag'), AR, STEP('general', '3 · Inquiry list', 'Flag inquiries + general inquiries'), AR, STEP('confirm', '4 · Answer', 'Answer + "' + M.confirmQ.en + '"'), AR, STEP('closing', '5a · Yes', 'Closing · Completed'), AR, STEP('escalation', '5b · No', 'List again → CS offer (' + cfgA.offerAt + ') → form (' + cfgA.formAt + ') → Pending')];
+
+    var G = (label, k, hint, rows) => ({ label: label, hint: hint || '', en: M[k].en, ar: M[k].ar, rows: rows || 2, arBorder: M[k].ar.trim() ? '#c9daf0' : '#e8a3a3', setEn: (e) => this.setMsg(k, 'en', e.target.value), setAr: (e) => this.setMsg(k, 'ar', e.target.value) });
+    var ed = { title: '', help: '', groups: [], isFlag: false, isInq: false, items: [], showThresholds: false };
+    var mkItems = (list, setList, prefix) => list.map((q, i) => {
+      var key = prefix + i, open = s.openQ === key, miss = !q.a.ar.trim() || hasGap(q.a.ar);
+      var upd = (path, v) => setList((arr) => { var o = arr[i]; o[path[0]][path[1]] = v; });
+      return { n: i + 1, title: q.q.ar || q.q.en || 'New inquiry', open: open, openStr: open ? 'true' : 'false', caret: open ? 'Close ▴' : 'Edit ▾', missing: miss, border: open ? '#046ded' : miss ? '#f6dca5' : '#e6ecf2', aBorder: miss ? '#e8a3a3' : '#c9daf0',
+        first: i === 0, last: i === list.length - 1, qEn: q.q.en, qAr: q.q.ar, aEn: q.a.en, aAr: q.a.ar,
+        toggle: () => this.setState({ openQ: open ? null : key }),
+        setQEn: (e) => upd(['q', 'en'], e.target.value), setQAr: (e) => upd(['q', 'ar'], e.target.value), setAEn: (e) => upd(['a', 'en'], e.target.value), setAAr: (e) => upd(['a', 'ar'], e.target.value),
+        up: () => { this.snap(); setList((arr) => { var t = arr[i - 1]; arr[i - 1] = arr[i]; arr[i] = t; }); this.setState({ openQ: null }); },
+        down: () => { this.snap(); setList((arr) => { var t = arr[i + 1]; arr[i + 1] = arr[i]; arr[i] = t; }); this.setState({ openQ: null }); },
+        remove: () => { this.snap(); setList((arr) => { arr.splice(i, 1); }); this.setState({ openQ: null }); } };
+    });
+    var fm = /^flag([1-4])$/.exec(sec);
+    if (sec === 'greeting') ed = Object.assign(ed, { title: 'Greeting & inquiry list', help: 'The first messages after a student picks a bot topic. {Student First Name} comes from the student profile.', groups: [G('Greeting', 'greeting', '', 3), G('Above the inquiry list', 'menuPrompt')] });
+    if (sec === 'confirm') ed = Object.assign(ed, { title: 'Answer check', help: 'Shown after every answer, with two buttons.', groups: [G('Question', 'confirmQ'), G('Yes button', 'yes', '→ Closing, request Completed'), G('No button', 'no', '→ "No" & Customer Service')] });
+    if (sec === 'escalation') ed = Object.assign(ed, { title: '"No" & Customer Service', help: 'The bot counts "No" answers in each request. Other "No" answers show the inquiry list again.', showThresholds: true,
+      thresholds: aorg.label + ': the Customer Service offer appears at the ' + cfgA.offerAt + (cfgA.offerAt === 2 ? 'nd' : 'th') + ' "No", and the inquiry form is required at the ' + cfgA.formAt + (cfgA.formAt === 3 ? 'rd' : 'th') + '. After submitting, the same request becomes Pending.',
+      groups: [G('Before the list again', 'nextIntro', 'other "No" answers'), G('Customer Service offer', 'offer', '"No" #' + cfgA.offerAt), G('Offer · Yes button', 'offerYes'), G('Offer · No button', 'offerNo', '→ inquiry list again'), G('Before the inquiry box', 'boxPrompt'), G('Inquiry required', 'forced', '"No" #' + cfgA.formAt, 3), G('After submit', 'submitted', 'request becomes Pending', 3)] });
+    if (sec === 'closing') ed = Object.assign(ed, { title: 'Closing', help: 'After "Yes", the request is Completed and the full history is saved.', groups: [G('Closing message', 'closing', '', 3)] });
+    if (sec === 'general') ed = Object.assign(ed, { title: 'General inquiries · all students', help: 'Shown to every student who reaches the bot, under the inquiries for their flag. Students with no flag see only these.', isInq: true, inqTitle: s.general.length + ' general inquiries',
+      items: mkItems(s.general, (fn) => this.edit((p) => { var g = clone(p.general); fn(g); return { general: g }; }), 'g'),
+      add: () => { this.snap(); var k = 'g' + s.general.length; this.edit((p) => ({ general: p.general.concat([{ q: B('New inquiry', 'استفسار جديد'), a: B('', '') }]), openQ: k })); } });
+    if (fm) {
+      var fn = +fm[1], F = s.flags[fn], infoKey = s.edProg === 'Demi' ? 'infoDemi' : 'infoDeci';
+      ed = Object.assign(ed, { title: 'Flag ' + fn + ' · ' + FLAG_META[fn].en, help: 'Only students with this flag see this status message and these inquiries. General inquiries are added under them.', isFlag: true, isInq: true,
+        labelEn: F.label.en, labelAr: F.label.ar, setLabelEn: (e) => this.setFlagF(fn, ['label', 'en'], e.target.value), setLabelAr: (e) => this.setFlagF(fn, ['label', 'ar'], e.target.value),
+        progTabs: ['Demi', 'Deci'].map((x) => ({ label: x === 'Demi' ? 'براعم · Demi message' : 'أشبال · Deci message', on: s.edProg === x ? 'true' : 'false', bg: s.edProg === x ? '#1f2a56' : '#ffffff', fg: s.edProg === x ? '#ffffff' : '#1f2a56', border: s.edProg === x ? '#1f2a56' : '#d5e0ec', pick: () => this.setState({ edProg: x }) })),
+        infoLabel: 'Message · ' + s.edProg + ' students (Arabic)', info: F[infoKey], infoBorder: hasGap(F[infoKey]) ? '#e8a3a3' : '#c9daf0', setInfo: (e) => this.setFlagF(fn, [infoKey], e.target.value),
+        inqTitle: F.qs.length + ' inquiries for this flag',
+        items: mkItems(F.qs, (f2) => this.edit((p) => { var fl = clone(p.flags); f2(fl[fn].qs); return { flags: fl }; }), 'f'),
+        add: () => { this.snap(); var k = 'f' + F.qs.length; this.edit((p) => { var fl = clone(p.flags); fl[fn].qs.push({ q: B('New inquiry', 'استفسار جديد'), a: B('', '') }); return { flags: fl, openQ: k }; }); } });
+    }
+    ed.empty = ed.isInq && ed.items.length === 0;
+
+    /* preview */
+    var pvFlag = fm ? +fm[1] : 0;
+    var pvStudent = s.students.filter((x) => x.org === ao && x.flag === pvFlag)[0] || s.students.filter((x) => x.org === ao)[0];
+    var pctx = { program: aorg.name, intake: aorg.intake, programEn: aorg.nameEn, intakeEn: aorg.intakeEn, first: pvStudent ? pvStudent.first : 'يوسف' };
+    var pvList = [], fq = pvFlag ? s.flags[pvFlag].qs : [];
+    if (fq.length && s.general.length) pvList.push({ isHeader: true, isItem: false, label: 'استفسارات خاصة بحالتك' });
+    fq.forEach((q, i) => pvList.push({ isHeader: false, isItem: true, label: fill(q.q.ar, pctx), border: sec === 'flag' + pvFlag && s.openQ === 'f' + i ? '#046ded' : '#bcd8fb' }));
+    if (fq.length && s.general.length) pvList.push({ isHeader: true, isItem: false, label: 'استفسارات عامة' });
+    s.general.forEach((q, i) => pvList.push({ isHeader: false, isItem: true, label: fill(q.q.ar, pctx), border: sec === 'general' && s.openQ === 'g' + i ? '#046ded' : '#bcd8fb' }));
+    var pv = { who: pvFlag ? 'Flag ' + pvFlag : 'No flag', org: aorg.label, greeting: fill(M.greeting.ar, pctx), hasStatus: !!pvFlag,
+      statusTitle: pvFlag ? fill(s.flags[pvFlag].label.ar, pctx) : '', statusText: pvFlag ? fill(aorg.program === 'Demi' ? s.flags[pvFlag].infoDemi : s.flags[pvFlag].infoDeci, pctx) : '',
+      menuPrompt: M.menuPrompt.ar, list: pvList };
+    var problems = probs.map((p) => ({ text: p.text, pick: () => this.setState({ edSec: p.sec, openQ: p.key && p.key !== 'status' ? (p.key[0] === 'G' ? 'g' : 'f') + (+p.key.split('.')[1]) : null }) }));
+
+    /* settings */
+    var d = s.cfgDraft[ao];
+    var setD = (k, v) => this.setState((p) => { var dc = clone(p.cfgDraft); dc[ao][k] = v; return { cfgDraft: dc, savedNote: '' }; });
+    var setErr = d.formAt <= d.offerAt;
+    var set = {
+      on: d.on, onText: d.on ? 'The bot is the primary support channel for ' + aorg.label + '.' : 'Students in ' + aorg.label + ' skip the bot and use the existing ticket form.', onFg: d.on ? '#0b7a2e' : '#5b7280',
+      topic: d.topic, offerAt: d.offerAt, formAt: d.formAt, idle: d.idle, err: setErr, savedNote: s.savedNote,
+      botTopics: TOPICS.map((x) => ({ label: x, on: d.botTopics.indexOf(x) >= 0, student: STUDENT_TOPICS.some((t) => t.en === x), toggle: () => setD('botTopics', d.botTopics.indexOf(x) >= 0 ? d.botTopics.filter((y) => y !== x) : d.botTopics.concat([x])) })),
+      toggleOn: () => setD('on', !d.on), onTopic: (e) => setD('topic', e.target.value), onOffer: (e) => setD('offerAt', Math.max(1, +e.target.value || 1)), onForm: (e) => setD('formAt', Math.max(1, +e.target.value || 1)), onIdle: (e) => setD('idle', Math.max(1, +e.target.value || 1)),
+      save: () => { if (setErr) return; this.setState((p) => { var oc = clone(p.orgCfg); oc[ao] = clone(p.cfgDraft[ao]); return { orgCfg: oc, savedNote: '✓ Saved for ' + aorg.label }; }); }
+    };
+    var orgSummary = ORG_ORDER.map((k) => ({ label: ORGS[k].label, state: s.orgCfg[k].on ? '● Bot on' : '○ Bot off · ticket form', fg: s.orgCfg[k].on ? '#0b7a2e' : '#5b7280', border: k === ao ? '#046ded' : '#e6ecf2', pick: () => this.setState({ adminOrg: k, savedNote: '' }) }));
+
+    /* flags */
+    var orgStudents = s.students.filter((x) => x.org === ao);
+    var flagLegend = [1, 2, 3, 4, 0].map((k) => ({ code: 'Flag ' + k, en: FLAG_META[k].en, bg: FLAG_META[k].bg, fg: FLAG_META[k].fg, count: orgStudents.filter((x) => x.flag === k).length + ' students' }));
+    var flagRows = orgStudents.map((x) => ({ id: x.id, name: x.first + ' ' + x.last, grade: x.grade, flag: String(x.flag),
+      setFlag: (e) => { var v = +e.target.value; this.setState((p) => ({ students: p.students.map((y) => y.id === x.id ? Object.assign({}, y, { flag: v }) : y) })); },
+      preview: () => this.setState({ view: 'student', sid: x.id, active: null }, () => this.startBot()) }));
+
+    /* records */
+    var orgConvos = s.convos.filter((x) => x.org === ao);
+    var recRows = orgConvos.map((cc) => { var x = stat[cc.status], stu = this.student(cc.sid); return { ref: '#' + cc.id, student: stu.id, flag: cc.flag ? 'Flag ' + cc.flag : 'No flag', no: cc.no, sLabel: cc.status === 'escalated' ? 'Pending' : cc.status === 'completed' ? 'Completed' : 'Bot replying', sBg: x[1], sFg: x[2], ticket: cc.status === 'escalated' ? 'Customer Service Team' : 'iSchool bot', bg: s.recSel === cc.id ? '#f3f8ff' : '#ffffff', open: () => this.setState({ recSel: cc.id }) }; });
+    var rc = orgConvos.filter((x) => x.id === s.recSel)[0] || orgConvos[0];
+    var rt = rc && rc.status === 'escalated' ? rc : null;
+    var whoL = { bot: 'المساعد', me: 'الطالب', sys: 'النظام' };
+
+
+    /* demo steps */
+    var anyConvo = s.convos.length > 0, anyNo2 = s.convos.some((x) => x.no >= 2), anyEsc = s.convos.find((x) => x.status === 'escalated');
+    var anyOff = ORG_ORDER.some((k) => !s.orgCfg[k].on);
+    var firstFlag1 = s.students.filter((x) => x.flag === 1)[0] || s.students[0];
+    var STEPS = [
+      { title: 'إضافة طلب دعم واختيار الموضوع', where: 'واجهة الطالب', hint: 'اختر «الإبلاغ عن مشكلة / استفسار»: الموضوع ده مفعّل للمساعد، فيتحوّل الطالب له.', done: anyConvo, goLabel: 'ابدأ', go: () => this.setState({ view: 'student', sid: firstFlag1.id, active: null }, () => this.newRequest()) },
+      { title: 'اختر استفسار واضغط «لا» مرتين', where: 'واجهة الطالب', hint: 'الأولى: القائمة تظهر تاني. الثانية: عرض التواصل مع خدمة العملاء.', done: anyNo2, goLabel: 'للمحادثة', go: () => this.setState({ view: 'student' }) },
+      { title: 'اكتب الاستفسار وأرسله', where: 'واجهة الطالب', hint: 'نفس الطلب يتحوّل Pending في انتظار رد الفريق، بعد الإرسال فقط.', done: !!anyEsc, goLabel: 'للمحادثة', go: () => this.setState({ view: 'student' }) },
+      { title: 'شوف الطلب عند الفريق', where: 'الأدمن · Bot conversations', hint: 'الطلب Pending ومعاه سجل المحادثة كامل.', done: s.seenRecords, goLabel: 'افتح', go: () => this.setState({ view: 'admin', admTab: 'records', adminOrg: anyEsc ? anyEsc.org : s.adminOrg, recSel: anyEsc ? anyEsc.id : null, seenRecords: !!anyEsc }) },
+      { title: 'عدّل رد في الـ Flow واعمل Preview', where: 'الأدمن · Support bot flow', hint: 'اختار Flag، عدّل رد، ثم Preview.', done: s.usedPreview, goLabel: 'افتح', go: () => this.setState({ view: 'admin', admTab: 'flow' }) },
+      { title: 'اقفل المساعد أو الموضوع وجرّب', where: 'الأدمن · Support bot settings', hint: 'نفس الموضوع يكمل في نموذج التذاكر الحالي بدون المساعد.', done: s.sawForm, goLabel: 'افتح', go: () => this.setState({ view: 'admin', admTab: 'settings' }) }
+    ];
+    if (this.props.studentOnly) STEPS = STEPS.slice(0, 3);
+    var doneCount = STEPS.filter((x) => x.done).length;
+    var demoSteps = STEPS.map((x, i) => ({ title: x.title, where: x.where, hint: x.hint, goLabel: x.goLabel, go: x.go, mark: x.done ? '✓' : arNum(i + 1),
+      bg: x.done ? 'rgba(88,185,122,.18)' : 'rgba(255,255,255,.06)', border: x.done ? 'rgba(88,185,122,.6)' : 'rgba(255,255,255,.15)', dotBg: x.done ? '#58b97a' : '#ffffff', dotFg: x.done ? '#ffffff' : '#1f2a56' }));
+    var canPublish = s.dirty && probs.length === 0;
+    var studentAudience = { student: 'Student', teacher: 'Teacher', admin: 'Admin' }[s.admTab] || 'Student';
+
+    return {
+      /* shared */
+      isStudent: isStudent, isAdmin: !isStudent, isStudentStr: isStudent ? 'true' : 'false', isAdminStr: isStudent ? 'false' : 'true',
+      stuTabBg: isStudent ? '#ffffff' : 'transparent', stuTabFg: isStudent ? '#1f2a56' : '#ffffff', admTabBg: isStudent ? 'transparent' : '#ffffff', admTabFg: isStudent ? '#ffffff' : '#1f2a56',
+      demoSteps: demoSteps, demoProgress: arNum(doneCount) + ' من ' + arNum(STEPS.length) + ' خطوات', stepsOpen: s.stepsOpen, stepsOpenStr: s.stepsOpen ? 'true' : 'false', stepsToggleLabel: s.stepsOpen ? 'إخفاء الخطوات' : 'خطوات العرض',
+      toggleSteps: () => this.setState({ stepsOpen: !s.stepsOpen }), resetDemo: () => { this.timers.forEach(clearTimeout); this.timers = []; this.setState(this.initialState()); },
+      goStudent: () => this.setState({ view: 'student' }), goAdmin: () => this.setState({ view: 'admin' }),
+      headerSub: 'مبادرة ' + org.name,
+      me: { name: st.first + ' ' + st.last, sub: st.id, initial: st.first[0] },
+      /* student */
+      sid: s.sid, studentOptions: s.students.map((x) => ({ id: x.id, label: x.first + ' ' + x.last + ' · ' + ORGS[x.org].label + ' · ' + (x.flag ? 'Flag ' + x.flag : 'No flag') + (s.orgCfg[x.org].on ? '' : ' · المساعد معطّل') })),
+      onPickStudent: (e) => this.setState({ sid: e.target.value, active: null }),
+      newRequest: () => this.newRequest(), items: items, noItems: items.length === 0,
+      isConvo: !!c, isTicket: !!t, isForm: isForm, isEmpty: !c && !t && !isForm,
+      cv: cv, tk: tk, threadRef: this.threadRef,
+      boxDraft: s.boxDraft, boxErr: s.boxErr, onBox: (e) => this.setState({ boxDraft: e.target.value, boxErr: false }),
+      boxFiles: s.boxFiles.map((n, i) => ({ name: n, remove: () => this.setState((p) => ({ boxFiles: p.boxFiles.filter((x, j) => j !== i), boxFileErr: false })) })),
+      hasBoxFiles: s.boxFiles.length > 0, boxFileErr: s.boxFileErr,
+      onBoxFiles: (e) => { var list = Array.prototype.slice.call((e.target.files || [])).map((x) => x.name); e.target.value = ''; this.setState((p) => { var all = p.boxFiles.concat(list); return { boxFiles: all.slice(0, 5), boxFileErr: all.length > 5 }; }); },
+      tkDraft: s.tkDraft, onTkDraft: (e) => this.setState({ tkDraft: e.target.value }), tkSendOpacity: s.tkDraft.trim() ? 1 : 0.45,
+      sendTk: () => { var v = s.tkDraft.trim(); if (!v || !t) return; this.setState((p) => ({ tickets: p.tickets.map((y) => y.id === t.id ? Object.assign({}, y, { msgs: y.msgs.concat([{ who: 'me', text: v }]) }) : y), tkDraft: '' })); },
+      hasInfo: infoRows.length > 0, infoRows: infoRows, sysRows: sysRows, form: form,
+      toggleType: () => setForm({ openType: !f.openType, openSub: false }), typeOptions: STUDENT_TOPICS.map((t) => ({ label: t.ar, pick: () => this.pickTopic(t) })),
+      toggleSub: () => setForm({ openSub: !f.openSub, openType: false }), subOptions: SUBS.map((x) => ({ label: x, pick: () => setForm({ sub: x, openSub: false }) })),
+      onDetails: (e) => setForm({ details: e.target.value, err: false }), onFile: (e) => { var fl = e.target.files && e.target.files[0]; setForm({ file: fl ? fl.name : '' }); },
+      submitForm: () => this.submitForm(),
+      /* admin chrome */
+      adminOrg: ao, orgOptions: ORG_ORDER.map((k) => ({ v: k, l: ORGS[k].label })), onAdminOrg: (e) => this.setState({ adminOrg: e.target.value, savedNote: '', recSel: null }),
+      sideNav: sideNav, admTabs: admTabs, orgLabel: aorg.label,
+      tabTopics: ['student', 'teacher', 'admin'].indexOf(s.admTab) >= 0, tabFlow: s.admTab === 'flow', tabSettings: s.admTab === 'settings', tabFlags: s.admTab === 'flags', tabRecords: s.admTab === 'records',
+      topicsAudience: studentAudience, topicRows: TOPICS.map((x, i) => ({ l: x, tag: i === 0 ? 'Bot tickets open here' : '' })),
+      /* flow */
+      draftTitle: s.dirty ? 'Draft · unpublished changes to version ' + s.version : 'Version ' + s.version + ' · published',
+      lastSaved: 'Last saved 19/11/2026 12:05 PM',
+      saveNote: s.dirty ? 'All changes saved to the draft.' : 'No unpublished changes.',
+      undo: () => { var u = s.undoStack; if (!u.length) return; var last = JSON.parse(u[u.length - 1]); this.setState({ msgs: last.msgs, flags: last.flags, general: last.general || s.general, undoStack: u.slice(0, -1), dirty: true }); },
+      undoDisabled: s.undoStack.length === 0, undoOpacity: s.undoStack.length ? 1 : 0.45,
+      snap: () => this.snap(),
+      preview: () => { var pick = pvStudent; if (!pick) return; this.setState({ view: 'student', sid: pick.id, active: null, usedPreview: s.dirty || s.usedPreview }, () => this.startBot()); },
+      moreOpen: s.moreOpen, moreOpenStr: s.moreOpen ? 'true' : 'false', toggleMore: () => this.setState({ moreOpen: !s.moreOpen }),
+      resetFlow: () => { this.snap(); this.setState({ msgs: clone(DEFAULT_MSGS), flags: clone(DEFAULT_FLAGS), general: clone(DEFAULT_GENERAL), dirty: true, moreOpen: false, openQ: null }); },
+      publish: () => { if (!canPublish) return; this.setState((p) => ({ version: p.version + 1, versions: [{ n: p.version + 1, at: '19/11/2026 12:06 PM' }].concat(p.versions), dirty: false })); },
+      publishDisabled: !canPublish, publishBg: canPublish ? '#046ded' : '#a9cdf0', publishTitle: probs.length ? 'Fix the problems first' : (s.dirty ? 'Publish the draft' : 'Nothing to publish'),
+      flowMap: flowMap, secMsgs: secMsgs, secInq: secInq, ed: ed, pv: pv, confirmAr: M.confirmQ.ar,
+      goSettings: () => this.setState({ admTab: 'settings' }),
+      noProblems: probs.length === 0, hasProblems: probs.length > 0, problemsTitle: probs.length + ' item' + (probs.length > 1 ? 's' : '') + ' need content', problems: problems,
+      probOpen: s.probOpen, probOpenStr: s.probOpen ? 'true' : 'false', probCaret: s.probOpen ? '▴' : '▾', toggleProblems: () => this.setState({ probOpen: !s.probOpen }),
+      versions: s.versions.map((v, i) => ({ n: v.n, at: v.at, state: i === 0 ? (s.dirty ? 'Live · draft has changes' : 'Live') : 'Previous', fg: i === 0 ? '#0b7a2e' : '#5b7280' })),
+      /* settings / flags / records */
+      set: set, topicOptions: topicOpts, orgSummary: orgSummary,
+      flagLegend: flagLegend, flagRows: flagRows, noFlagRows: flagRows.length === 0,
+      recRows: recRows, noRecords: recRows.length === 0, recTitle: rc ? 'Request #' + rc.id + ' · full history' : 'Select a conversation',
+      recHasTicket: !!rt, recTicket: rt ? { ref: '#' + rt.id, topic: (rt.topic || STUDENT_TOPICS[0]).ar, details: 'Student inquiry: ' + rt.inquiry + (rt.files && rt.files.length ? ' · 📎 ' + rt.files.length + ' image(s): ' + rt.files.join(', ') : '') } : { ref: '', topic: '', details: '' },
+      recHistory: rc ? rc.msgs.map((m) => ({ who: whoL[m.who], text: (m.title ? m.title + '\n' : '') + m.text })) : []
+    };
+  }
+}
+
+</script>
+<script>
+mountDC(Component, document.getElementById('app'), document.getElementById('tpl'), { studentOnly: true });
+</script>
+</body>
+</html>
